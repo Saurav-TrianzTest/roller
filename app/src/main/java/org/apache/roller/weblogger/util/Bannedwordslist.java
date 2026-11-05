@@ -149,7 +149,7 @@ public final class Bannedwordslist {
                 // save the new bannedwordslist
                 try (InputStream instream = connection.getInputStream()) {
                     String uploadDir = WebloggerConfig.getProperty("uploads.dir");
-                    String path = uploadDir + File.separator + BANNEDWORDSLIST_FILE;
+                    String path = java.nio.file.Paths.get(uploadDir, BANNEDWORDSLIST_FILE).toString();
                     
                     mLogger.debug("writing updated MT bannedwordslist to "+path);
                     
@@ -186,8 +186,9 @@ public final class Bannedwordslist {
         try {
             String path = bannedwordslistFilePath;
             if (path == null) {
-                String uploadDir = WebloggerConfig.getProperty("uploads.dir");
-                path = uploadDir + File.separator + BANNEDWORDSLIST_FILE;
+                String uploadDir = System.getenv().getOrDefault("UPLOADS_DIR",
+                        WebloggerConfig.getProperty("uploads.dir"));
+                path = java.nio.file.Paths.get(uploadDir, BANNEDWORDSLIST_FILE).toString();
             }
             File bannedwordslistFile = new File(path);
             

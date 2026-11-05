@@ -53,7 +53,8 @@ public final class IPBanList {
 
 
     static {
-        instance = new IPBanList(() -> WebloggerConfig.getProperty("ipbanlist.file"));
+        instance = new IPBanList(() -> System.getenv().getOrDefault("IPBANLIST_FILE",
+                WebloggerConfig.getProperty("ipbanlist.file")));
     }
 
 

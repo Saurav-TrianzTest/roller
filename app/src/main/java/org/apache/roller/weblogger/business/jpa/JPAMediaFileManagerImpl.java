@@ -733,8 +733,7 @@ public class JPAMediaFileManagerImpl implements MediaFileManager {
             if (uploadsDir.exists() && uploadsDir.isDirectory()) {
                 Properties props = new Properties();
                 try {
-                    props.load(new FileInputStream(uploadsDirName
-                            + File.separator + MIGRATION_STATUS_FILENAME));
+                    props.load(new FileInputStream(java.nio.file.Paths.get(uploadsDirName, MIGRATION_STATUS_FILENAME).toFile()));
 
                 } catch (IOException ex) {
                     return true;
@@ -754,7 +753,6 @@ public class JPAMediaFileManagerImpl implements MediaFileManager {
     public List<String> upgradeFileStorage() {
         List<String> msgs = new ArrayList<>();
         String oldDirName = WebloggerConfig.getProperty("uploads.dir");
-        String FS = File.separator;
 
         if (oldDirName != null) {
             try {
@@ -813,8 +811,7 @@ public class JPAMediaFileManagerImpl implements MediaFileManager {
 
                 Properties props = new Properties();
                 props.setProperty("complete", "true");
-                props.store(new FileOutputStream(oldDirName + File.separator
-                        + MIGRATION_STATUS_FILENAME), "Migration is complete!");
+                props.store(new FileOutputStream(java.nio.file.Paths.get(oldDirName, MIGRATION_STATUS_FILENAME).toFile()), "Migration is complete!");
 
             } catch (Exception ioex) {
                 log.error("ERROR upgrading", ioex);

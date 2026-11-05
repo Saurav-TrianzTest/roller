@@ -378,7 +378,7 @@ public class ThemeManagerImpl implements ThemeManager {
 		// first, get a list of the themes available
 		File themesdir = new File(this.themeDir);
 		FilenameFilter filter = (File dir, String name) -> {
-            File file = new File(dir.getAbsolutePath() + File.separator + name);
+            File file = new File(java.nio.file.Paths.get(dir.getAbsolutePath(), name).toString());
             return file.isDirectory() && !file.getName().startsWith(".");
         };
 		String[] themenames = themesdir.list(filter);
@@ -392,7 +392,7 @@ public class ThemeManagerImpl implements ThemeManager {
             // now go through each theme and load it into a Theme object
             for (String themeName : themenames) {
                 try {
-                    SharedTheme theme = new SharedThemeFromDir(this.themeDir + File.separator + themeName);
+                    SharedTheme theme = new SharedThemeFromDir(java.nio.file.Paths.get(this.themeDir, themeName).toString());
                     themeMap.put(theme.getId(), theme);
                     log.info("Loaded theme '" + themeName + "'");
                 } catch (Exception unexpected) {
@@ -415,8 +415,7 @@ public class ThemeManagerImpl implements ThemeManager {
 
 		try {
 
-            SharedTheme theme = new SharedThemeFromDir(this.themeDir + File.separator
-					+ reloadTheme);
+            SharedTheme theme = new SharedThemeFromDir(java.nio.file.Paths.get(this.themeDir, reloadTheme).toString());
 
             Theme loadedTheme = themes.get(theme.getId());
 

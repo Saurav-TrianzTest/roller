@@ -33,42 +33,41 @@ import java.util.List;
  * webappDir/WEB-INF/classes, webappDir/WEB-INF/lib/*jar and jarsDir/*.jar.
  */
 public class StandaloneWebappClassLoader extends URLClassLoader {
-    public static String FS = File.separator;
-    
+
     /** Use calling class's parent classloader */
     public StandaloneWebappClassLoader(String webappDir, String jarsDir) throws Exception {
         super(buildURLsArray(webappDir, jarsDir));
     }
-    
+
     /** Use a specific parent classloader, or null for no parent */
     public StandaloneWebappClassLoader(String webappDir, String jarsDir, ClassLoader cl) throws Exception {
         super(buildURLsArray(webappDir, jarsDir), cl);
     }
-    
+
     private static URL[] buildURLsArray(String webappDir, String jarsDir) throws Exception {
         // Create collection of URLs needed for classloader
         List<URL> urlList = new ArrayList<>();
 
         // Add WEB-INF/lib jars
-        String libPath = webappDir + FS + "WEB-INF" + FS + "lib";
+        String libPath = java.nio.file.Paths.get(webappDir, "WEB-INF", "lib").toString();
         addURLs(libPath, urlList);
-        
+
         // Added WEB-INF/classes
-        String classesPath = webappDir + FS + "WEB-INF" + FS + "classes" + FS;
+        String classesPath = java.nio.file.Paths.get(webappDir, "WEB-INF", "classes").toString();
         urlList.add(new URL("file://" + classesPath));
-        
+
         // Add additional jars
         addURLs(jarsDir, urlList);
-                
-        return urlList.toArray(URL[]::new);  
+
+        return urlList.toArray(URL[]::new);
     }
-    
+
     private static void addURLs(String dirPath, List<URL> urlList) throws Exception {
         File libDir = new File(dirPath);
         String[] libJarNames = libDir.list((File dir, String pathname) -> pathname.endsWith(".jar") );
-        
+
         for (int i=0; i<libJarNames.length; i++) {
-            String url = "file://" + dirPath + FS + libJarNames[i];
+            String url = "file://" + java.nio.file.Paths.get(dirPath, libJarNames[i]).toString();
             urlList.add(new URL(url));
         }
     }

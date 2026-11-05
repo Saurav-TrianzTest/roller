@@ -125,9 +125,9 @@ public class RollerContext extends ContextLoaderListener
             return;
         }
         if (!ctxPath.endsWith(File.separator)) {
-            ctxPath += File.separator + "resources";
+            ctxPath = java.nio.file.Paths.get(ctxPath, "resources").toString();
         } else {
-            ctxPath += "resources";
+            ctxPath = java.nio.file.Paths.get(ctxPath, "resources").toString();
         }
 
         // try setting the uploads path to <context>/resources

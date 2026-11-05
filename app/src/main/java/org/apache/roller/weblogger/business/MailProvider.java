@@ -70,17 +70,22 @@ public class MailProvider {
         }
         
         // init and connect now so we fail early
-        if (type == ConfigurationType.JNDI_NAME) {            
-            if (jndiName != null && !jndiName.startsWith("java:")) {
-                jndiName = "java:comp/env/" + jndiName;
+        if (type == ConfigurationType.JNDI_NAME) {
+            // JNDI is not available in containers; use env vars directly
+            mailHostname = System.getenv().getOrDefault("MAIL_HOSTNAME", mailHostname);
+            mailUsername = System.getenv().getOrDefault("MAIL_USERNAME", mailUsername);
+            mailPassword = System.getenv().getOrDefault("MAIL_PASSWORD", mailPassword);
+            String portString = System.getenv("MAIL_PORT");
+            if (portString != null) {
+                try {
+                    mailPort = Integer.parseInt(portString);
+                } catch (Exception e) {
+                    LOG.warn("mail server port not a valid integer, ignoring");
+                }
             }
-            try {
-                Context ctx = new InitialContext();
-                session = (Session) ctx.lookup(jndiName);
-            } catch (NamingException ex) {
-                throw new StartupException("ERROR looking up mail-session with JNDI name: " + jndiName);
-            }
-        } else {
+            type = ConfigurationType.MAIL_PROPERTIES;
+        }
+        if (type == ConfigurationType.MAIL_PROPERTIES) {
             Properties props = new Properties();
             props.setProperty("mail.smtp.host", mailHostname);
             if (mailUsername != null && mailPassword != null) {

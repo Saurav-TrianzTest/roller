@@ -58,15 +58,16 @@ public class FileContentManagerImpl implements FileContentManager {
         // Note: System property expansion is now handled by WebloggerConfig.
 
         if (inStorageDir == null || inStorageDir.isBlank()) {
-            inStorageDir = System.getProperty("user.home") + File.separator
-                    + "roller_data" + File.separator + "mediafiles";
+            String homeDir = System.getenv().getOrDefault("ROLLER_DATA_DIR",
+                    System.getProperty("user.home") + File.separator + "roller_data");
+            inStorageDir = java.nio.file.Paths.get(homeDir, "mediafiles").toString();
         }
 
         if (!inStorageDir.endsWith(File.separator)) {
             inStorageDir += File.separator;
         }
 
-        this.storageDir = inStorageDir.replace('/', File.separatorChar);
+        this.storageDir = inStorageDir;
 
     }
 

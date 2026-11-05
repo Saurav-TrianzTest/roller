@@ -182,8 +182,7 @@ public class SharedThemeFromDir extends SharedTheme {
         try {
             // lookup theme descriptor and parse it
             ThemeMetadataParser parser = new ThemeMetadataParser();
-            InputStream is = new FileInputStream(this.themeDir + File.separator
-                    + "theme.xml");
+            InputStream is = new FileInputStream(java.nio.file.Paths.get(this.themeDir, "theme.xml").toFile());
             themeMetadata = parser.unmarshall(is);
         } catch (Exception ex) {
             throw new ThemeInitializationException(
@@ -205,7 +204,7 @@ public class SharedThemeFromDir extends SharedTheme {
         setEnabled(true);
 
         // load resource representing preview image
-        File previewFile = new File(this.themeDir + File.separator + themeMetadata.getPreviewImage());
+        File previewFile = new File(java.nio.file.Paths.get(this.themeDir, themeMetadata.getPreviewImage()).toString());
         if (!previewFile.exists() || !previewFile.canRead()) {
             log.warn("Couldn't read theme [" + this.getName()
                     + "] preview image file ["
@@ -252,8 +251,7 @@ public class SharedThemeFromDir extends SharedTheme {
             // construct File object from path
             // we are getting the file path from standard as the default and
             // load it to initially.
-            File templateFile = new File(this.themeDir + File.separator
-                    + standardTemplateCode.getContentsFile());
+            File templateFile = new File(java.nio.file.Paths.get(this.themeDir, standardTemplateCode.getContentsFile()).toString());
 
             // read stylesheet contents
             String contents = loadTemplateFile(templateFile);
@@ -302,8 +300,7 @@ public class SharedThemeFromDir extends SharedTheme {
         // go through static resources and add them to the theme
         for (String resourcePath : themeMetadata.getResources()) {
             // construct ThemeResource object from resource
-            File resourceFile = new File(this.themeDir + File.separator
-                    + resourcePath);
+            File resourceFile = new File(java.nio.file.Paths.get(this.themeDir, resourcePath).toString());
 
             // Continue reading theme even if problem encountered with one file
             if (!resourceFile.exists() || !resourceFile.canRead()) {
@@ -352,8 +349,7 @@ public class SharedThemeFromDir extends SharedTheme {
             }
 
             // construct File object from path
-            File templateFile = new File(this.themeDir + File.separator
-                    + standardTemplateCode.getContentsFile());
+            File templateFile = new File(java.nio.file.Paths.get(this.themeDir, standardTemplateCode.getContentsFile()).toString());
 
             String contents = loadTemplateFile(templateFile);
             if (contents == null) {
@@ -448,8 +444,7 @@ public class SharedThemeFromDir extends SharedTheme {
         SharedThemeTemplateRendition templateRendition = new SharedThemeTemplateRendition();
 
         // construct File object from path
-        File templateFile = new File(this.themeDir + File.separator
-                + templateCodeMetadata.getContentsFile());
+        File templateFile = new File(java.nio.file.Paths.get(this.themeDir, templateCodeMetadata.getContentsFile()).toString());
 
         // read stylesheet contents
         String contents = loadTemplateFile(templateFile);

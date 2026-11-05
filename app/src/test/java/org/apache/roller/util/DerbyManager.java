@@ -43,10 +43,11 @@ public class DerbyManager {
                 System.out.println("Starting Derby");
                 System.out.println("==============");
 
+                String derbyHost = System.getenv().getOrDefault("DERBY_HOST", "localhost");
                 System.setProperty("derby.system.home", databaseDir);
 
                 System.setProperty("derby.drda.portNumber", ""+port);
-                System.setProperty("derby.drda.host", "localhost");
+                System.setProperty("derby.drda.host", derbyHost);
                 System.setProperty("derby.drda.maxThreads","10");
                 //System.setProperty("derby.drda.logConnections","true");
                 NetworkServerControl server = new NetworkServerControl();
@@ -56,17 +57,18 @@ public class DerbyManager {
                 System.out.println("Runtime Info: " + server.getRuntimeInfo());
 
                 Class.forName("org.apache.derby.jdbc.ClientDriver");
+                String derbyHost = System.getenv().getOrDefault("DERBY_HOST", "localhost");
                 Connection conn = DriverManager.getConnection(
-                    "jdbc:derby://localhost:" + port + "/rollerdb;create=true","APP", "APP");
+                    "jdbc:derby://" + derbyHost + ":" + port + "/rollerdb;create=true","APP", "APP");
 
                 // create roller tables
                 SQLScriptRunner runner1 = new SQLScriptRunner(
-                    databaseScriptsDir + File.separator + "droptables.sql");
+                    java.nio.file.Paths.get(databaseScriptsDir, "droptables.sql").toString());
                 runner1.runScript(conn, false);
                 runner1.runScript(conn, false); // not sure why this is necessary
 
                 SQLScriptRunner runner = new SQLScriptRunner(
-                    databaseScriptsDir + File.separator + "derby" + File.separator + "createdb.sql");
+                    java.nio.file.Paths.get(databaseScriptsDir, "derby", "createdb.sql").toString());
                 try {
                     runner.runScript(conn, true);
                 } catch (Exception ignored) {
@@ -85,13 +87,13 @@ public class DerbyManager {
     public void stopDerby() throws Exception {
         try {
                 Class.forName("org.apache.derby.jdbc.ClientDriver");
-                String driverURL = "jdbc:derby://localhost:" + port + "/rollerdb";
+                String derbyHost = System.getenv().getOrDefault("DERBY_HOST", "localhost");
+                String driverURL = "jdbc:derby://" + derbyHost + ":" + port + "/rollerdb";
                 Connection conn = DriverManager.getConnection(driverURL,"APP", "APP");
 
                 // drop Roller tables
                 SQLScriptRunner runner = new SQLScriptRunner(
-                    databaseScriptsDir
-                        + File.separator + "droptables.sql");
+                    java.nio.file.Paths.get(databaseScriptsDir, "droptables.sql").toString());
                 runner.runScript(conn, false);
 
                 System.out.println("==============");
@@ -106,7 +108,7 @@ public class DerbyManager {
 
                 // Network Derby
                 System.setProperty("derby.drda.portNumber", ""+port);
-                System.setProperty("derby.drda.host", "localhost");
+                System.setProperty("derby.drda.host", derbyHost);
                 System.setProperty("derby.drda.maxThreads","10");
                 //System.setProperty("derby.drda.logConnections","true");
                 NetworkServerControl server = new NetworkServerControl();

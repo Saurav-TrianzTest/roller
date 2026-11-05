@@ -501,7 +501,7 @@ public class MediaCollection {
         if (pathInfo.length > 2) {
             for (int i = 2; i < pathInfo.length; i++) {
                 if (path != null && path.length() > 0) {
-                    path = path + File.separator + pathInfo[i];
+                    path = java.nio.file.Paths.get(path, pathInfo[i]).toString();
                 }
                 else {
                     path = pathInfo[i];

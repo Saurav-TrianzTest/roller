@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: roller
+  namespace: roller
+  labels:
+    app: roller
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: roller
+  template:
+    metadata:
+      labels:
+        app: roller
+    spec:
+      containers:
+        - name: roller
+          image: "{{IMAGE_URI}}"
+          ports:
+            - containerPort: 8080
+          env:
+            - name: JAVA_OPTS
+              value: "-Xmx512m -Xms256m -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+            - name: TZ
+              value: "UTC"
+            - name: LANG
+              value: "C.UTF-8"
+            - name: LC_ALL
+              value: "C.UTF-8"
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Dfile.encoding=UTF-8"
+            - name: STORAGE_ROOT
+              value: "/usr/local/roller/data"
+            - name: DATABASE_JDBC_DRIVERCLASS
+              value: "org.postgresql.Driver"
+            - name: DATABASE_JDBC_CONNECTIONURL
+              value: "{{DATABASE_JDBC_CONNECTIONURL}}"
+            - name: DATABASE_JDBC_USERNAME
+              value: "{{DATABASE_JDBC_USERNAME}}"
+            - name: DATABASE_JDBC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: roller-secrets
+                  key: database-jdbc-password
+            - name: DATABASE_HOST
+              value: "{{DATABASE_HOST}}"
+            - name: AUTHENTICATION_METHOD
+              value: "{{AUTHENTICATION_METHOD}}"
+            - name: MAIL_HOSTNAME
+              value: "{{MAIL_HOSTNAME}}"
+            - name: MAIL_USERNAME
+              value: "{{MAIL_USERNAME}}"
+            - name: MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: roller-secrets
+                  key: mail-password
+            - name: MAIL_PORT
+              value: "{{MAIL_PORT}}"
+            - name: LDAP_HOST
+              value: "{{LDAP_HOST}}"
+            - name: LDAP_PORT
+              value: "{{LDAP_PORT}}"
+            - name: LDAP_DC
+              value: "{{LDAP_DC}}"
+            - name: LDAP_OU
+              value: "{{LDAP_OU}}"
+            - name: LDAP_SECURITY_LEVEL
+              value: "{{LDAP_SECURITY_LEVEL}}"
+            - name: IPBANLIST_FILE
+              value: "{{IPBANLIST_FILE}}"
+            - name: UPLOADS_DIR
+              value: "{{UPLOADS_DIR}}"
+            - name: ROLLER_VERSION_PROPS
+              value: "{{ROLLER_VERSION_PROPS}}"
+            - name: DB_SCRIPTS_DIR
+              value: "{{DB_SCRIPTS_DIR}}"
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          volumeMounts:
+            - name: roller-data
+              mountPath: /usr/local/roller/data
+            - name: roller-logs
+              mountPath: /opt/tomcat/logs
+      volumes:
+        - name: roller-data
+          emptyDir: {}
+        - name: roller-logs
+          emptyDir: {}

@@ -108,13 +108,13 @@ public class LuceneIndexManager implements IndexManager {
         // we also need to know what our index directory is
         // Note: system property expansion is now handled by WebloggerConfig
         String searchIndexDir = WebloggerConfig.getProperty("search.index.dir");
-        this.indexDir = searchIndexDir.replace('/', File.separatorChar);
+        this.indexDir = searchIndexDir.replace('/', java.io.File.separatorChar);
 
         // a little debugging
         logger.info("search enabled: " + this.searchEnabled);
         logger.info("index dir: " + this.indexDir);
 
-        String test = indexDir + File.separator + ".index-inconsistent";
+        String test = java.nio.file.Paths.get(indexDir, ".index-inconsistent").toString();
         indexConsistencyMarker = new File(test);
     }
 

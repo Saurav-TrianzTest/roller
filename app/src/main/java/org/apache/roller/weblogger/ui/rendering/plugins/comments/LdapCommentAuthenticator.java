@@ -99,11 +99,16 @@ public class LdapCommentAuthenticator implements CommentAuthenticator {
 		boolean validUser = false;
 		LdapContext context = null;
 
-		String ldapDc = WebloggerConfig.getProperty("comment.authenticator.ldap.dc");
-		String ldapOu = WebloggerConfig.getProperty("comment.authenticator.ldap.ou");
-		String ldapPort = WebloggerConfig.getProperty("comment.authenticator.ldap.port");
-		String ldapHost = WebloggerConfig.getProperty("comment.authenticator.ldap.host");
-		String ldapSecurityLevel = WebloggerConfig.getProperty("comment.authenticator.ldap.securityLevel");
+		String ldapDc = System.getenv().getOrDefault("LDAP_DC",
+				WebloggerConfig.getProperty("comment.authenticator.ldap.dc"));
+		String ldapOu = System.getenv().getOrDefault("LDAP_OU",
+				WebloggerConfig.getProperty("comment.authenticator.ldap.ou"));
+		String ldapPort = System.getenv().getOrDefault("LDAP_PORT",
+				WebloggerConfig.getProperty("comment.authenticator.ldap.port"));
+		String ldapHost = System.getenv().getOrDefault("LDAP_HOST",
+				WebloggerConfig.getProperty("comment.authenticator.ldap.host"));
+		String ldapSecurityLevel = System.getenv().getOrDefault("LDAP_SECURITY_LEVEL",
+				WebloggerConfig.getProperty("comment.authenticator.ldap.securityLevel"));
 		
 		boolean rollerPropertiesValid = validateRollerProperties(ldapDc, ldapOu, ldapPort, ldapHost);
 		

@@ -40,8 +40,8 @@ public class BannedwordslistTest  {
     @BeforeEach
     public void setUp() throws Exception {
         bannedwordslist = Bannedwordslist.getBannedwordslist();
-        String FS = File.separator;
-        String bannedwordslistName = System.getProperty("project.build.directory") + FS + "classes" + "bannedwordslist.txt";
+        String bannedwordslistName = java.nio.file.Paths.get(
+                System.getProperty("project.build.directory"), "classes", "bannedwordslist.txt").toString();
         log.info("Processing Banned-words list file: " + bannedwordslistName);
         bannedwordslist.loadBannedwordslistFromFile(bannedwordslistName);
     }

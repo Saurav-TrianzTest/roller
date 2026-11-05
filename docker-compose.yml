@@ -1,4 +1,3 @@
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  The ASF licenses this file to You
 # under the Apache License, Version 2.0 (the "License"); you may not
@@ -15,69 +14,41 @@
 # copyright in this work, please see the NOTICE file in the top level
 # directory of this distribution.
 
-
-# Example Docker Compose setup for running Roller, PostgreSQL, and Keycloak locally
-
-
 services:
+  roller:
+    image: roller:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - JAVA_OPTS=-Xmx512m -Xms256m -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
+      - TZ=UTC
+      - LANG=C.UTF-8
+      - LC_ALL=C.UTF-8
+      - JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8
+      - STORAGE_ROOT=/usr/local/roller/data
+      - DATABASE_JDBC_DRIVERCLASS=${DATABASE_JDBC_DRIVERCLASS:-org.postgresql.Driver}
+      - DATABASE_JDBC_CONNECTIONURL=${DATABASE_JDBC_CONNECTIONURL:?set DATABASE_JDBC_CONNECTIONURL}
+      - DATABASE_JDBC_USERNAME=${DATABASE_JDBC_USERNAME:?set DATABASE_JDBC_USERNAME}
+      - DATABASE_JDBC_PASSWORD=${DATABASE_JDBC_PASSWORD:?set DATABASE_JDBC_PASSWORD}
+      - AUTHENTICATION_METHOD=${AUTHENTICATION_METHOD:-db}
+      - MAIL_HOSTNAME=${MAIL_HOSTNAME}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_PORT=${MAIL_PORT}
+      - LDAP_HOST=${LDAP_HOST}
+      - LDAP_PORT=${LDAP_PORT}
+      - LDAP_DC=${LDAP_DC}
+      - LDAP_OU=${LDAP_OU}
+      - LDAP_SECURITY_LEVEL=${LDAP_SECURITY_LEVEL}
+      - IPBANLIST_FILE=${IPBANLIST_FILE}
+      - UPLOADS_DIR=${UPLOADS_DIR}
+    volumes:
+      - roller-data:/usr/local/roller/data
+      - roller-logs:/opt/tomcat/logs
 
-   postgresql:
-      image: "postgres:16"
-      ports:
-         - "5432:5432"
-      volumes:
-         - type: bind
-           # PostgreSQL 16 cannot start on a data directory initialized by the
-           # PostgreSQL 10 image this file used before; a new directory avoids
-           # clobbering old data (pg_dump from the old container to migrate it)
-           source: ./docker/postgresql-16-data
-           target: /var/lib/postgresql/data
-      environment:
-         - POSTGRES_DB=rollerdb
-         - POSTGRES_USER=scott
-         - POSTGRES_PASSWORD=tiger
-
-   keycloak:
-      image: "quay.io/keycloak/keycloak:26.7.1"
-      command: "start-dev --import-realm"
-      volumes:
-         - ./docker/realm-config:/opt/keycloak/data/import
-         - ./docker/realm-config/keycloak-health-check.sh:/opt/keycloak/health-check.sh
-      environment:
-         - KC_DB=dev-file
-         - KC_BOOTSTRAP_ADMIN_USERNAME=admin
-         - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
-         - KC_HTTP_PORT=9080
-         - KC_HTTPS_PORT=9443
-         - KC_HEALTH_ENABLED=true
-         - KC_HTTP_MANAGEMENT_PORT=9990
-      ports:
-         - "127.0.0.1:9080:9080"
-         - "127.0.0.1:9443:9443"
-      healthcheck:
-         test: "bash /opt/keycloak/health-check.sh"
-         interval: 5s
-         timeout: 5s
-         retries: 50
-         start_period: 10s
-
-   apache-roller:
-      build: .
-      ports:
-         - "8080:8080"
-      volumes:
-         - type: bind
-           source: ./docker/roller-data
-           target: /var/lib/roller/data
-      environment:
-         # override with AUTHENTICATION_METHOD=db-oidc to offer form login too
-         - AUTHENTICATION_METHOD=${AUTHENTICATION_METHOD:-oidc}
-         # Roller discovers Keycloak's endpoints at this URL and then redirects
-         # the browser to them, so the host must resolve both in this container
-         # and on your machine. Add "127.0.0.1 keycloak" to your hosts file.
-         - OIDC_ISSUER_URI=http://keycloak:9080/realms/roller
-         - OIDC_CLIENT_ID=web_app
-         - OIDC_CLIENT_SECRET=web_app
-      depends_on:
-         keycloak:
-            condition: service_healthy
+volumes:
+  roller-data:
+  roller-logs:

@@ -101,7 +101,7 @@ public class ISO8601DateParser {
         
         SimpleDateFormat df = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ssz" );
         
-        TimeZone tz = TimeZone.getTimeZone( "UTC" );
+        TimeZone tz = TimeZone.getTimeZone( System.getenv().getOrDefault("APP_TIMEZONE", "UTC") );
         
         df.setTimeZone( tz );
 

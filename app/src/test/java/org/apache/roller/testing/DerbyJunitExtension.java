@@ -36,7 +36,10 @@ public class DerbyJunitExtension implements BeforeAllCallback, AfterAllCallback 
     private static Log log = LogFactory.getLog(DerbyJunitExtension.class);
 
     private static DerbyStartStopper derbyStartStopper =
-        new DerbyStartStopper("target/derby-system", "target/dbscripts", "4224");
+        new DerbyStartStopper(
+            System.getenv().getOrDefault("DERBY_SYSTEM_HOME", "target/derby-system"),
+            System.getenv().getOrDefault("DB_SCRIPTS_DIR", "target/dbscripts"),
+            System.getenv().getOrDefault("DERBY_PORT", "4224"));
 
     @Override
     public void beforeAll(ExtensionContext extensionContext) throws Exception {
@@ -72,9 +75,10 @@ class DerbyStartStopper {
         System.out.println("Starting Derby");
         System.out.println("==============");
 
+        String derbyHost = System.getenv().getOrDefault("DERBY_HOST", "localhost");
         System.setProperty("derby.system.home", databaseDir);
         System.setProperty("derby.drda.portNumber", port);
-        System.setProperty("derby.drda.host", "localhost");
+        System.setProperty("derby.drda.host", derbyHost);
         System.setProperty("derby.drda.maxThreads", "10");
         //System.setProperty("derby.drda.logConnections","true");
 
@@ -88,19 +92,17 @@ class DerbyStartStopper {
         System.out.println("System Info:  " + server.getSysinfo());
 
         Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
-        Connection conn = DriverManager.getConnection("jdbc:derby:rollerdb;create=true", "APP", "APP");
+        String derbyDbName = System.getenv().getOrDefault("DERBY_DB_NAME", "rollerdb");
+        Connection conn = DriverManager.getConnection("jdbc:derby:" + derbyDbName + ";create=true", "APP", "APP");
 
         // create roller tables
 
         SQLScriptRunner runner1 = new SQLScriptRunner(
-            databaseScriptsDir
-                + File.separator + "droptables.sql");
+            java.nio.file.Paths.get(databaseScriptsDir, "droptables.sql").toString());
         runner1.runScript(conn, false);
 
         SQLScriptRunner runner = new SQLScriptRunner(
-            databaseScriptsDir
-                + File.separator + "derby"
-                + File.separator + "createdb.sql");
+            java.nio.file.Paths.get(databaseScriptsDir, "derby", "createdb.sql").toString());
         try {
             runner.runScript(conn, true);
         } catch (Exception ignored) {
@@ -113,14 +115,15 @@ class DerbyStartStopper {
 
     public void stop() throws Exception {
 
-        String driverURL = "jdbc:derby://localhost:" + port + "/rollerdb";
+        String derbyHost = System.getenv().getOrDefault("DERBY_HOST", "localhost");
+        String driverURL = "jdbc:derby://" + derbyHost + ":" + port + "/rollerdb";
 
         Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
         Connection conn = DriverManager.getConnection(driverURL,"APP", "APP");
 
         // drop Roller tables
         SQLScriptRunner runner = new SQLScriptRunner(
-            databaseScriptsDir + File.separator + "droptables.sql");
+            java.nio.file.Paths.get(databaseScriptsDir, "droptables.sql").toString());
         runner.runScript(conn, false);
 
         System.out.println("==============");
@@ -135,8 +138,9 @@ class DerbyStartStopper {
         System.setProperty("derby.system.home", databaseDir);
 
         // Network Derby
+        String derbyHost = System.getenv().getOrDefault("DERBY_HOST", "localhost");
         System.setProperty("derby.drda.portNumber", port);
-        System.setProperty("derby.drda.host", "localhost");
+        System.setProperty("derby.drda.host", derbyHost);
         System.setProperty("derby.drda.maxThreads", "10");
         //System.setProperty("derby.drda.logConnections","true");
         NetworkServerControl server = new NetworkServerControl();

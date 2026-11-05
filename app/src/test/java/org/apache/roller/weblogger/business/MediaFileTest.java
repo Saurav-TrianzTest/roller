@@ -324,8 +324,7 @@ public class MediaFileTest  {
         TestUtils.teardownUser(testUser.getUserName());
 
         String uploadsDirName = WebloggerConfig.getProperty("uploads.dir");
-        File flag = new File(uploadsDirName + File.separator
-                + "migration-status.properties");
+        File flag = new File(java.nio.file.Paths.get(uploadsDirName, "migration-status.properties").toString());
         flag.delete();
         
         TestUtils.endSession(true);
@@ -1190,8 +1189,9 @@ public class MediaFileTest  {
         } finally {
 
             File statusFile = new File(
-                    WebloggerConfig.getProperty("uploads.dir") + File.separator
-                            + JPAMediaFileManagerImpl.MIGRATION_STATUS_FILENAME);
+                    java.nio.file.Paths.get(
+                            WebloggerConfig.getProperty("uploads.dir"),
+                            JPAMediaFileManagerImpl.MIGRATION_STATUS_FILENAME).toString());
             statusFile.delete();
 
             // reset dir max to old value

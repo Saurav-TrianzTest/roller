@@ -419,7 +419,7 @@ public class Weblog implements Serializable {
      */
     public TimeZone getTimeZoneInstance() {
         if (getTimeZone() == null) {
-            this.setTimeZone( TimeZone.getDefault().getID() );
+            this.setTimeZone( System.getenv().getOrDefault("APP_TIMEZONE", TimeZone.getDefault().getID()) );
         }
         return TimeZone.getTimeZone(getTimeZone());
     }

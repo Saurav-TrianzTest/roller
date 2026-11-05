@@ -57,10 +57,19 @@ public class DatabaseInstaller {
         scripts = scriptProvider;
 
         Properties props = new Properties();
-        try {
-            props.load(getClass().getResourceAsStream("/roller-version.properties"));
-        } catch (IOException e) {
-            log.error("roller-version.properties not found", e);
+        String versionPropsPath = System.getenv("ROLLER_VERSION_PROPS");
+        if (versionPropsPath != null && !versionPropsPath.isEmpty()) {
+            try {
+                props.load(new java.io.FileInputStream(versionPropsPath));
+            } catch (IOException e) {
+                log.error("roller-version.properties not found at " + versionPropsPath, e);
+            }
+        } else {
+            try {
+                props.load(getClass().getResourceAsStream("/roller-version.properties"));
+            } catch (IOException e) {
+                log.error("roller-version.properties not found", e);
+            }
         }
 
         version = props.getProperty("ro.version", "UNKNOWN");

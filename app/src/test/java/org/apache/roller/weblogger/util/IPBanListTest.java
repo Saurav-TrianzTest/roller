@@ -48,13 +48,15 @@ class IPBanListTest {
         ipBanList = new IPBanList(() -> ipBanListPath.toAbsolutePath().toString());
     }
 
+    private static final String TEST_IP = System.getenv().getOrDefault("TEST_IP", "10.0.0.1");
+
     @Test
     @DisplayName("addBanned() adds the given IP address to the file")
     void addBannedAddsToFile() {
-        ipBanList.addBannedIp("10.0.0.1");
+        ipBanList.addBannedIp(TEST_IP);
 
         List<String> ipBanList = readIpBanList();
-        assertTrue(ipBanList.contains("10.0.0.1"));
+        assertTrue(ipBanList.contains(TEST_IP));
         assertEquals(1, ipBanList.size());
     }
 
@@ -69,17 +71,17 @@ class IPBanListTest {
     @Test
     @DisplayName("isBanned() returns true if the given IP address is banned")
     void isBanned() {
-        ipBanList.addBannedIp("10.0.0.1");
+        ipBanList.addBannedIp(TEST_IP);
         try { // work around for intermittently failing test
             Thread.sleep(500);
         } catch (InterruptedException ignored) {}
-        assertTrue(ipBanList.isBanned("10.0.0.1"));
+        assertTrue(ipBanList.isBanned(TEST_IP));
     }
 
     @Test
     @DisplayName("isBanned() returns false if the given IP address it not banned")
     void isBanned2() {
-        assertFalse(ipBanList.isBanned("10.0.0.1"));
+        assertFalse(ipBanList.isBanned(TEST_IP));
     }
 
     @Test
@@ -92,11 +94,11 @@ class IPBanListTest {
     @Test
     @DisplayName("isBanned() reads the file if needed")
     void isBanned4() {
-        writeIpBanList("10.0.0.1");
+        writeIpBanList(TEST_IP);
         try { // work around for intermittently failing test
             Thread.sleep(500);
         } catch (InterruptedException ignored) {}
-        assertTrue(ipBanList.isBanned("10.0.0.1"));
+        assertTrue(ipBanList.isBanned(TEST_IP));
     }
 
     private void writeIpBanList(String ipAddress) {

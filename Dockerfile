@@ -1,4 +1,3 @@
-
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  The ASF licenses this file to You
 # under the Apache License, Version 2.0 (the "License"); you may not
@@ -15,65 +14,66 @@
 # copyright in this work, please see the NOTICE file in the top level
 # directory of this distribution.
 
+# STAGE 1 - BUILD
+FROM maven:3.9.4-eclipse-temurin-17 AS builder
 
-# Example Dockerfile for containerizing Roller
+WORKDIR /workspace
 
+# Copy pom.xml first and download dependencies
+COPY pom.xml .
+COPY app/pom.xml app/pom.xml
+COPY db-utils/pom.xml db-utils/pom.xml
 
-# STAGE 1 - BUILD ------------------------------------------------
+RUN mvn -B dependency:go-offline -pl app,db-utils -am
 
-FROM maven:3-eclipse-temurin-17 AS builder
+# Copy source
+COPY app/src app/src
+COPY db-utils/src db-utils/src
 
-COPY . /project
-WORKDIR /project
-RUN mvn -Duser.home=/builder/home -DskipTests=true -B clean install
+# Build the project
+RUN mvn -B clean package -DskipTests -pl app,db-utils -am
 
+# Download and extract Tomcat
+RUN curl -L -o /tmp/tomcat.tar.gz https://archive.apache.org/dist/tomcat/tomcat-10/tomcat-10.1.40/bin/apache-tomcat-10.1.40.tar.gz && \
+    tar xzf /tmp/tomcat.tar.gz -C /tmp && \
+    rm /tmp/tomcat.tar.gz
 
-# STAGE 2 - PACKAGE ------------------------------------------------
+# STAGE 2 - RUNTIME
+FROM eclipse-temurin:17-jdk
 
-FROM tomcat:11.0-jdk17-temurin
+# Tomcat environment
+ENV CATALINA_HOME=/opt/tomcat
+ENV CATALINA_BASE=/opt/tomcat
+ENV CATALINA_TMPDIR=/tmp
+ENV JAVA_OPTS="-Xmx512m -Xms256m -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+ENV TZ=UTC
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+ENV JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF-8"
 
-# Remove existing Tomcat webapps
+# Copy Tomcat from builder stage
+COPY --from=builder /tmp/apache-tomcat-10.1.40 /opt/tomcat
 
-RUN rm -rf /usr/local/tomcat/webapps/*
+# Clean Tomcat webapps
+RUN rm -rf /opt/tomcat/webapps/*
 
-# Add Roller configuration to environment
+# Create non-root user
+RUN groupadd -r roller && useradd -r -g roller roller
 
-ARG STORAGE_ROOT=/usr/local/tomcat/data
-ARG DATABASE_JDBC_DRIVERCLASS=org.postgresql.Driver
-ARG DATABASE_JDBC_CONNECTIONURL=jdbc:postgresql://postgresql/rollerdb
-ARG DATABASE_JDBC_USERNAME=scott
-ARG DATABASE_JDBC_PASSWORD=tiger
-ARG DATABASE_HOST=postgresql:5432
+# Copy the WAR file
+COPY --from=builder /workspace/app/target/roller.war /opt/tomcat/webapps/ROOT.war
 
-ENV STORAGE_ROOT ${STORAGE_ROOT}
-ENV DATABASE_JDBC_DRIVERCLASS ${DATABASE_JDBC_DRIVERCLASS}
-ENV DATABASE_JDBC_CONNECTIONURL ${DATABASE_JDBC_CONNECTIONURL}
-ENV DATABASE_JDBC_USERNAME ${DATABASE_JDBC_USERNAME}
-ENV DATABASE_JDBC_PASSWORD ${DATABASE_JDBC_PASSWORD}
-ENV DATABASE_HOST ${DATABASE_HOST}
+# Create data directories
+RUN mkdir -p /usr/local/roller/data/mediafiles \
+    /usr/local/roller/data/searchindex \
+    /opt/tomcat/logs && \
+    chown -R roller:roller /opt/tomcat /usr/local/roller
 
-# install Roller WAR as ROOT.war, create data dirs
+# Expose the default Tomcat port
+EXPOSE 8080
 
-WORKDIR /usr/local/roller
-COPY --from=builder /project/app/target/roller.war /usr/local/tomcat/webapps/ROOT.war
-RUN mkdir -p data/mediafiles data/searchindex
+# Switch to non-root user
+USER roller
 
-# download PostgreSQL and MySQL drivers plus Mail and Activation JARs
-
-WORKDIR /usr/local/tomcat/lib
-RUN apt-get update && apt-get install -y wget
-RUN wget -O postgresql.jar https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.13/postgresql-42.7.13.jar
-RUN wget https://repo1.maven.org/maven2/org/eclipse/angus/angus-mail/2.0.5/angus-mail-2.0.5.jar
-RUN wget https://repo1.maven.org/maven2/jakarta/mail/jakarta.mail-api/2.1.5/jakarta.mail-api-2.1.5.jar
-RUN wget https://repo1.maven.org/maven2/jakarta/activation/jakarta.activation-api/2.1.4/jakarta.activation-api-2.1.4.jar
-RUN wget https://repo1.maven.org/maven2/org/eclipse/angus/angus-activation/2.0.3/angus-activation-2.0.3.jar
-
-# Add Roller entry-point and go!
-
-COPY docker/entry-point.sh /usr/local/tomcat/bin
-COPY docker/wait-for-it.sh /usr/local/tomcat/bin
-RUN chgrp -R 0 /usr/local/tomcat
-RUN chmod -R g+rw /usr/local/tomcat
-
-WORKDIR /usr/local/tomcat
-CMD [ "/usr/local/tomcat/bin/entry-point.sh" ]
+# Entry point
+ENTRYPOINT ["/opt/tomcat/bin/catalina.sh", "run"]
