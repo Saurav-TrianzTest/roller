@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.rendering.servlets;
 
+import java.time.Instant;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -114,7 +116,7 @@ public class FeedServlet extends HttpServlet {
         }
 
         // determine the lastModified date for this content
-        long lastModified = System.currentTimeMillis();
+        long lastModified = Instant.now().toEpochMilli();
         if (isSiteWide) {
             lastModified = siteWideCache.getLastModified().getTime();
         } else if (weblog.getLastModified() != null) {

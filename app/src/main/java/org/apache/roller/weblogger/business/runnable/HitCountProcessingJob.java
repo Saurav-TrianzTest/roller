@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.business.runnable;
 
+import java.time.Instant;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +80,7 @@ public class HitCountProcessingJob implements Job {
 
         // iterate over the tallied hits and store them in the db
         try {
-            long startTime = System.currentTimeMillis();
+            long startTime = Instant.now().toEpochMilli();
             
             Weblog weblog;
             for (Map.Entry<String, Long> entry : hitsTally.entrySet()) {
@@ -93,7 +95,7 @@ public class HitCountProcessingJob implements Job {
             // flush the results to the db
             WebloggerFactory.getWeblogger().flush();
             
-            long endTime = System.currentTimeMillis();
+            long endTime = Instant.now().toEpochMilli();
             
             log.debug("Completed: "+ (endTime-startTime)/ RollerConstants.SEC_IN_MS + " secs");
             

@@ -18,6 +18,8 @@
 
 package org.apache.roller.planet.business.jpa;
 
+import java.time.Instant;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -305,7 +307,7 @@ public class JPAPlanetManagerImpl extends AbstractManagerImpl implements PlanetM
         
         List<SubscriptionEntry> ret;
         try {
-            long startTime = System.currentTimeMillis();
+            long startTime = Instant.now().toEpochMilli();
             
             StringBuilder sb = new StringBuilder();
             List<Object> params = new ArrayList<>();
@@ -339,7 +341,7 @@ public class JPAPlanetManagerImpl extends AbstractManagerImpl implements PlanetM
             
             ret = query.getResultList();
             
-            long endTime = System.currentTimeMillis();
+            long endTime = Instant.now().toEpochMilli();
             
             log.debug("Generated aggregation of " + ret.size() + " in " +
                     ((endTime-startTime) / RollerConstants.SEC_IN_MS) + " seconds");

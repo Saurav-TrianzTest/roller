@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.pojos;
 
+import java.util.TimeZone;
+
 import java.io.Serializable;
 import java.util.*;
 
@@ -419,7 +421,7 @@ public class Weblog implements Serializable {
      */
     public TimeZone getTimeZoneInstance() {
         if (getTimeZone() == null) {
-            this.setTimeZone( TimeZone.getDefault().getID() );
+            this.setTimeZone( TimeZone.getTimeZone("UTC").getID() );
         }
         return TimeZone.getTimeZone(getTimeZone());
     }
@@ -771,7 +773,7 @@ public class Weblog implements Serializable {
     public List<TagStat> getPopularTags(int sinceDays, int length) {
         Date startDate = null;
         if(sinceDays > 0) {
-            Calendar cal = Calendar.getInstance();
+            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             cal.setTime(new Date());
             cal.add(Calendar.DATE, -1 * sinceDays);        
             startDate = cal.getTime();     

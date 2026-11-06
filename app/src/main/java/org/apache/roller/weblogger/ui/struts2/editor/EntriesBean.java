@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.struts2.editor;
 
+import java.util.TimeZone;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -58,7 +60,7 @@ public class EntriesBean {
         if(!StringUtils.isEmpty(getStartDateString())) {
             try {
                 DateFormat df = new SimpleDateFormat("MM/dd/yy");
-                return df.parse(getStartDateString());
+                df.setTimeZone(TimeZone.getTimeZone("UTC"));
             } catch(Exception e) { }
         }
         return null;
@@ -68,6 +70,7 @@ public class EntriesBean {
         if(!StringUtils.isEmpty(getEndDateString())) {
             try {
                 DateFormat df = new SimpleDateFormat("MM/dd/yy");
+                df.setTimeZone(TimeZone.getTimeZone("UTC"));
                 return df.parse(getEndDateString());
             } catch(Exception e) { }
         }

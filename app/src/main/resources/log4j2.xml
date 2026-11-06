@@ -81,6 +81,14 @@ limitations under the License.
         <Logger name="com.rometools"           level="info"  additivity="false"> <AppenderRef ref="asyncRoller"/> </Logger>
         <Logger name="org.webjars"             level="info"  additivity="false"> <AppenderRef ref="asyncRoller"/> </Logger>
 
+        <!-- Safe logging: prevent AWS SDK wire data and secrets from being logged -->
+        <Logger name="software.amazon.awssdk" level="warn" additivity="false"> <AppenderRef ref="asyncRoller"/> </Logger>
+        <Logger name="software.amazon.awssdk.request" level="warn" additivity="false"> <AppenderRef ref="asyncRoller"/> </Logger>
+        <Logger name="org.apache.http.wire" level="warn" additivity="false"> <AppenderRef ref="asyncRoller"/> </Logger>
+        <Logger name="org.apache.http.headers" level="warn" additivity="false"> <AppenderRef ref="asyncRoller"/> </Logger>
+        <!-- HikariCP at INFO, never DEBUG -->
+        <Logger name="com.zaxxer.hikari" level="info" additivity="false"> <AppenderRef ref="asyncRoller"/> </Logger>
+
         <!-- server.log catches everything that hasn't been logged yet-->
         <Root level="info">
         <!--<AppenderRef ref="server"/> -->

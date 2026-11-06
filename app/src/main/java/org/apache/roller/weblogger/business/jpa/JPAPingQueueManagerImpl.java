@@ -18,6 +18,8 @@
  */
 package org.apache.roller.weblogger.business.jpa;
 
+import java.time.Instant;
+
 import java.sql.Timestamp;
 import java.util.List;
 import jakarta.persistence.TypedQuery;
@@ -88,7 +90,7 @@ public class JPAPingQueueManagerImpl implements PingQueueManager {
             return;
         }
 
-        Timestamp now = new Timestamp(System.currentTimeMillis());
+        Timestamp now = new Timestamp(Instant.now().toEpochMilli());
         PingQueueEntry pingQueueEntry =
                 new PingQueueEntry(
                     null, now, autoPing.getPingTarget(), 

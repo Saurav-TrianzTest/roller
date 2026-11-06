@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.business.runnable;
 
+import java.util.TimeZone;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -79,7 +81,7 @@ public class TaskScheduler implements Runnable {
                 // run tasks, skip run on first pass
                 if(firstRun) {
                     // add a slight delay to scheduler start
-                    Calendar cal = Calendar.getInstance();
+                    Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                     cal.setTime(now);
                     cal.add(Calendar.MINUTE, 1);
                     cal.set(Calendar.SECOND, cal.getMinimum(Calendar.SECOND));

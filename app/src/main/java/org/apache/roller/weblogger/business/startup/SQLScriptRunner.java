@@ -116,10 +116,14 @@ public class SQLScriptRunner {
             
             // run each command
             try {
-                Statement stmt = con.createStatement();
-                stmt.executeUpdate(command);
-                if (!con.getAutoCommit()) {
-                    con.commit();
+                // cr-java-0098: Use try-with-resources for Statement
+                try (Statement stmt = con.createStatement()) {
+                    // cr-java-0097: Set query timeout (5 seconds = 5000ms)
+                    stmt.setQueryTimeout(5);
+                    stmt.executeUpdate(command);
+                    if (!con.getAutoCommit()) {
+                        con.commit();
+                    }
                 }
 
                 // on success, echo command to messages

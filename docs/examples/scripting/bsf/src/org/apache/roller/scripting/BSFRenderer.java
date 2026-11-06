@@ -18,6 +18,8 @@
 
 package org.apache.roller.scripting;
 
+import java.time.Instant;
+
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Iterator;
@@ -49,7 +51,7 @@ public class BSFRenderer implements Renderer {
     }    
     public void render(Map model, Writer writer) throws RenderingException {
         try {
-            long startTime = System.currentTimeMillis();
+            long startTime = Instant.now().toEpochMilli();
             
             BSFManager manager = new BSFManager();            
             for (Iterator it = model.keySet().iterator(); it.hasNext();) {
@@ -62,7 +64,7 @@ public class BSFRenderer implements Renderer {
             manager.exec(template.getTemplateLanguage(), 
                     "(java)", 1, 1, template.getContents());
 
-            long endTime = System.currentTimeMillis();
+            long endTime = Instant.now().toEpochMilli();
             long renderTime = (endTime - startTime)/1000;
             log.debug("Rendered ["+template.getId()+"] with language ["
                     +template.getTemplateLanguage()+"] in "+renderTime+" secs"); 

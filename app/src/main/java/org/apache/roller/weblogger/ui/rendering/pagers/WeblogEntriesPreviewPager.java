@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.rendering.pagers;
 
+import java.time.Instant;
+
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -75,7 +77,7 @@ public class WeblogEntriesPreviewPager extends WeblogEntriesPermalinkPager {
 
                     // set the pubtime to the current time if it is unset
                     if(tmpEntry.getPubTime() == null) {
-                        tmpEntry.setPubTime(new Timestamp(System.currentTimeMillis()));
+                        tmpEntry.setPubTime(new Timestamp(Instant.now().toEpochMilli()));
                     }
 
                     // store the entry in the collection

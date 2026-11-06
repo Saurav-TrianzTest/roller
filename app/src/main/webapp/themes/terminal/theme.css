@@ -56,10 +56,10 @@ body {
   margin: 0;
   padding: 0;
   font-family: "Fira Code", Monaco, Consolas, "Ubuntu Mono", monospace;
-  font-size: var(--font-size);
-  line-height: var(--line-height);
-  background-color: var(--background);
-  color: var(--foreground);
+  font-size: var(--font-size, 14px);
+  line-height: var(--line-height, 1.5);
+  background-color: var(--background, #ffffff);
+  color: var(--foreground, #24292e);
   text-rendering: optimizelegibility;
   -webkit-font-smoothing: antialiased;
   -webkit-overflow-scrolling: touch;
@@ -67,24 +67,24 @@ body {
 }
 
 h1 {
-  font-size: calc(var(--font-size) * 1.45);
+  font-size: calc(var(--font-size, 14px) * 1.45);
   letter-spacing: 0;
 }
 
 h2 {
-  font-size: calc(var(--font-size) * 1.35);
+  font-size: calc(var(--font-size, 14px) * 1.35);
   letter-spacing: 0;
 }
 
 h3 {
-  font-size: calc(var(--font-size) * 1.15);
+  font-size: calc(var(--font-size, 14px) * 1.15);
   letter-spacing: 0;
 }
 
 h4,
 h5,
 h6 {
-  font-size: calc(var(--font-size) * 1);
+  font-size: calc(var(--font-size, 14px) * 1);
   letter-spacing: 0;
 }
 
@@ -105,7 +105,7 @@ table {
 }
 
 a {
-  color: var(--accent);
+  color: var(--accent, #007acc);
 }
 
 button {
@@ -115,10 +115,10 @@ button {
   text-decoration: none;
   text-align: center;
   background: transparent;
-  color: var(--accent);
+  color: var(--accent, #007acc);
   padding: 5px 18px;
-  border: 4px solid var(--accent);
-  border-radius: var(--radius);
+  border: 4px solid var(--accent, #007acc);
+  border-radius: var(--radius, 4px);
   transition: background 0.15s linear;
   appearance: none;
   cursor: pointer;
@@ -126,19 +126,19 @@ button {
 }
 
 button:hover {
-  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  background: color-mix(in srgb, var(--accent, #007acc) 15%, transparent);
 }
 
 button:focus-visible,
 a:focus-visible {
-  outline: 1px solid var(--accent);
+  outline: 1px solid var(--accent, #007acc);
   outline-offset: 2px;
 }
 
 fieldset {
   display: inline-block;
-  border: 2px solid var(--foreground);
-  border-radius: calc(var(--radius) * 1.6);
+  border: 2px solid var(--foreground, #24292e);
+  border-radius: calc(var(--radius, 4px) * 1.6);
   padding: 10px;
 }
 
@@ -151,7 +151,7 @@ fieldset select,
 fieldset textarea,
 fieldset label,
 fieldset button {
-  margin-top: calc(var(--line-height) * 0.5);
+  margin-top: calc(var(--line-height, 1.5) * 0.5);
   width: 100%;
 }
 
@@ -167,9 +167,9 @@ input,
 textarea,
 select {
   background: transparent;
-  color: var(--foreground);
-  border: 1px solid var(--foreground);
-  border-radius: var(--radius);
+  color: var(--foreground, #24292e);
+  border: 1px solid var(--foreground, #24292e);
+  border-radius: var(--radius, 4px);
   padding: 10px;
   font: inherit;
   appearance: none;
@@ -185,8 +185,8 @@ textarea:focus-visible,
 textarea:active,
 select:focus-visible,
 select:active {
-  border-color: var(--accent);
-  outline: 1px solid var(--accent);
+  border-color: var(--accent, #007acc);
+  outline: 1px solid var(--accent, #007acc);
   outline-offset: 2px;
 }
 
@@ -200,9 +200,9 @@ select {
   background-image: linear-gradient(
     45deg,
     transparent 50%,
-    var(--foreground) 50%
+    var(--foreground, #24292e) 50%
   ),
-    linear-gradient(135deg, var(--foreground) 50%, transparent 50%);
+    linear-gradient(135deg, var(--foreground, #24292e) 50%, transparent 50%);
   background-position: calc(100% - 20px), calc(100% - 1em);
   background-size:
     5px 5px,
@@ -212,24 +212,24 @@ select {
 }
 
 select option {
-  background: var(--background);
+  background: var(--background, #ffffff);
 }
 
 input[type="checkbox"] {
   vertical-align: middle;
   padding: 10px;
-  box-shadow: inset 0 0 0 3px var(--background);
+  box-shadow: inset 0 0 0 3px var(--background, #ffffff);
 }
 
 input[type="checkbox"]:checked {
-  background: var(--accent);
+  background: var(--accent, #007acc);
 }
 
 img {
   display: block;
   max-width: 100%;
-  border: 8px solid var(--accent);
-  border-radius: var(--radius);
+  border: 8px solid var(--accent, #007acc);
+  border-radius: var(--radius, 4px);
   padding: 8px;
   overflow: hidden;
 }
@@ -270,14 +270,14 @@ figure video {
 }
 
 figure figcaption {
-  background: var(--accent);
-  color: var(--background);
+  background: var(--accent, #007acc);
+  color: var(--background, #ffffff);
   text-align: center;
-  font-size: var(--font-size);
+  font-size: var(--font-size, 14px);
   font-weight: normal;
   margin-top: -8px;
   padding: 0 8px;
-  border-radius: 0 0 var(--radius) var(--radius);
+  border-radius: 0 0 var(--radius, 4px) var(--radius, 4px);
 }
 
 figure figcaption p:first-child {
@@ -298,7 +298,7 @@ ol ol {
 }
 
 li::marker {
-  color: var(--accent);
+  color: var(--accent, #007acc);
 }
 
 ul li,
@@ -315,18 +315,18 @@ kbd {
     "Ubuntu Mono",
     monospace !important;
   font-feature-settings: normal;
-  background: color-mix(in srgb, var(--foreground) 5%, transparent);
-  border: 1px solid var(--code-border);
+  background: color-mix(in srgb, var(--foreground, #24292e) 5%, transparent);
+  border: 1px solid var(--code-border, #dee2e6);
   padding: 1px 6px;
   margin: 0 2px;
-  font-size: calc(var(--font-size) * 0.95);
+  font-size: calc(var(--font-size, 14px) * 0.95);
 }
 
 kbd {
-  border-top: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
-  border-left: 1px solid var(--accent);
-  border-right: 1px solid var(--accent);
-  border-bottom: 4px solid var(--accent);
+  border-top: 1px solid color-mix(in srgb, var(--accent, #007acc) 25%, transparent);
+  border-left: 1px solid var(--accent, #007acc);
+  border-right: 1px solid var(--accent, #007acc);
+  border-bottom: 4px solid var(--accent, #007acc);
   border-radius: 4px;
 }
 
@@ -338,13 +338,13 @@ code code {
 
 pre {
   tab-size: 4;
-  background: color-mix(in srgb, var(--foreground) 5%, transparent) !important;
-  color: var(--foreground);
+  background: color-mix(in srgb, var(--foreground, #24292e) 5%, transparent) !important;
+  color: var(--foreground, #24292e);
   padding: 20px 10px;
-  font-size: calc(var(--font-size) * 0.95) !important;
+  font-size: calc(var(--font-size, 14px) * 0.95) !important;
   overflow: auto;
-  border-radius: var(--radius);
-  border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  border-radius: var(--radius, 4px);
+  border: 1px solid color-mix(in srgb, var(--foreground, #24292e) 10%, transparent);
 }
 
 pre code {
@@ -361,7 +361,7 @@ sup {
 abbr {
   position: relative;
   text-decoration-style: wavy;
-  text-decoration-color: var(--accent);
+  text-decoration-color: var(--accent, #007acc);
   cursor: help;
 }
 
@@ -374,14 +374,14 @@ sup {
 }
 
 mark {
-  background: color-mix(in srgb, var(--accent) 45%, transparent);
-  color: var(--foreground);
+  background: color-mix(in srgb, var(--accent, #007acc) 45%, transparent);
+  color: var(--foreground, #24292e);
 }
 
 blockquote {
   position: relative;
-  border-top: 1px solid var(--accent);
-  border-bottom: 1px solid var(--accent);
+  border-top: 1px solid var(--accent, #007acc);
+  border-bottom: 1px solid var(--accent, #007acc);
   margin: 0;
   padding: 25px;
 }
@@ -391,7 +391,7 @@ blockquote::before {
   display: block;
   position: absolute;
   left: 0;
-  color: var(--accent);
+  color: var(--accent, #007acc);
 }
 
 blockquote p:first-child {
@@ -410,13 +410,13 @@ table {
 table,
 th,
 td {
-  border: 2px solid var(--foreground);
+  border: 2px solid var(--foreground, #24292e);
   padding: 10px;
 }
 
 th {
   border-style: solid;
-  color: var(--foreground);
+  color: var(--foreground, #24292e);
   text-align: left;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -425,7 +425,7 @@ th {
 hr {
   width: 100%;
   border: none;
-  background: var(--accent);
+  background: var(--accent, #007acc);
   height: 2px;
 }
 
@@ -452,15 +452,15 @@ hr {
 
 blockquote.twitter-tweet {
   position: relative;
-  background: var(--background);
+  background: var(--background, #ffffff);
   font: inherit;
   color: inherit;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--accent, #007acc);
   padding-top: 60px;
 }
 
 blockquote.twitter-tweet a {
-  color: var(--accent);
+  color: var(--accent, #007acc);
   text-decoration: underline;
 }
 
@@ -469,7 +469,7 @@ blockquote.twitter-tweet::before {
   position: absolute;
   top: 20px;
   left: 20px;
-  color: var(--accent);
+  color: var(--accent, #007acc);
   font-weight: bold;
 }
 
@@ -479,7 +479,7 @@ blockquote.twitter-tweet::before {
   padding: 40px;
   max-width: 864px;
   min-height: 100vh;
-  border-right: 1px solid color-mix(in srgb, var(--accent) 10%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--accent, #007acc) 10%, transparent);
 }
 
 .container.full, .container.center {
@@ -529,7 +529,7 @@ blockquote.twitter-tweet::before {
 }
 
 iframe[src*="youtube.com"] {
-  border: 8px solid var(--accent) !important;
+  border: 8px solid var(--accent, #007acc) !important;
   padding: 8px !important;
 }
 
@@ -574,7 +574,7 @@ iframe[src*="youtube.com"] {
 
 .header__logo::after {
   content: "";
-  background: repeating-linear-gradient(90deg, var(--accent), var(--accent) 2px, transparent 0, transparent 10px);
+  background: repeating-linear-gradient(90deg, var(--accent, #007acc), var(--accent, #007acc) 2px, transparent 0, transparent 10px);
   display: block;
   width: 100%;
   right: 10px;
@@ -590,8 +590,8 @@ iframe[src*="youtube.com"] {
   display: flex;
   align-items: center;
   text-decoration: none;
-  background: var(--accent);
-  color: var(--background);
+  background: var(--accent, #007acc);
+  color: var(--background, #ffffff);
   font-weight: bold;
   padding: 5px 10px;
 }
@@ -645,7 +645,7 @@ iframe[src*="youtube.com"] {
 
 .menu__trigger {
   margin-right: 0 !important;
-  color: var(--accent);
+  color: var(--accent, #007acc);
   user-select: none;
   cursor: pointer;
 }
@@ -654,10 +654,10 @@ iframe[src*="youtube.com"] {
   display: none;
   flex-direction: column;
   position: absolute;
-  background: var(--background);
-  box-shadow: 0 10px var(--background), -10px 10px var(--background), 10px 10px var(--background);
-  color: var(--accent);
-  border: 2px solid var(--accent);
+  background: var(--background, #ffffff);
+  box-shadow: 0 10px var(--background, #ffffff), -10px 10px var(--background, #ffffff), 10px 10px var(--background, #ffffff);
+  color: var(--accent, #007acc);
+  border: 2px solid var(--accent, #007acc);
   margin: 0;
   padding: 10px;
   top: 10px;
@@ -684,7 +684,7 @@ iframe[src*="youtube.com"] {
 }
 
 .menu--mobile .menu__trigger {
-  color: var(--accent);
+  color: var(--accent, #007acc);
   border: 2px solid;
   margin-left: 10px;
   height: 100%;
@@ -704,7 +704,7 @@ iframe[src*="youtube.com"] {
 }
 
 .menu--language-selector .menu__trigger {
-  color: var(--accent);
+  color: var(--accent, #007acc);
   border: 2px solid;
   margin-left: 5px;
   height: 100%;
@@ -807,7 +807,7 @@ iframe[src*="youtube.com"] {
 }
 
 .framed {
-  border: 1px solid var(--accent);
+  border: 1px solid var(--accent, #007acc);
   padding: 20px;
 }
 
@@ -830,13 +830,13 @@ iframe[src*="youtube.com"] {
 }
 
 .post:not(:last-of-type) {
-  border-bottom: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--foreground, #24292e) 10%, transparent);
 }
 
 .post-meta {
   font-size: inherit;
   margin-bottom: 10px;
-  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+  color: color-mix(in srgb, var(--foreground, #24292e) 65%, transparent);
 }
 
 .post-meta > *:not(:first-child)::before {
@@ -847,11 +847,11 @@ iframe[src*="youtube.com"] {
 
 .post-title {
   position: relative;
-  color: var(--accent);
+  color: var(--accent, #007acc);
   margin-top: 0 !important;
   margin-bottom: 15px !important;
   padding-bottom: 15px;
-  border-bottom: 3px dotted var(--accent);
+  border-bottom: 3px dotted var(--accent, #007acc);
   text-decoration: none !important;
 }
 
@@ -861,7 +861,7 @@ iframe[src*="youtube.com"] {
   bottom: 2px;
   display: block;
   width: 100%;
-  border-bottom: 3px dotted var(--accent);
+  border-bottom: 3px dotted var(--accent, #007acc);
 }
 
 .post-title a {
@@ -872,7 +872,7 @@ iframe[src*="youtube.com"] {
   display: block;
   margin-bottom: 20px;
   font-size: inherit;
-  color: var(--accent);
+  color: var(--accent, #007acc);
 }
 
 .table-of-contents {
@@ -895,7 +895,7 @@ iframe[src*="youtube.com"] {
   content: "-";
   position: absolute;
   left: -20px;
-  color: var(--accent);
+  color: var(--accent, #007acc);
 }
 
 .post--regulation h1 {
@@ -914,7 +914,7 @@ iframe[src*="youtube.com"] {
 
 .hanchor {
   position: absolute;
-  color: var(--accent);
+  color: var(--accent, #007acc);
   text-decoration: none;
   margin-left: 10px;
   visibility: hidden;
@@ -930,11 +930,11 @@ h6:hover .hanchor {
 }
 
 .footnotes {
-  color: color-mix(in srgb, var(--foreground) 50%, transparent);
+  color: color-mix(in srgb, var(--foreground, #24292e) 50%, transparent);
 }
 
 .footnotes hr {
-  background: color-mix(in srgb, var(--foreground) 50%, transparent);
+  background: color-mix(in srgb, var(--foreground, #24292e) 50%, transparent);
 }
 
 @media (max-width: 684px) {
@@ -961,9 +961,9 @@ h6:hover .hanchor {
   text-align: center;
   margin: 0 auto;
   padding: 5px 10px;
-  background: var(--background);
-  color: color-mix(in srgb, var(--foreground) 30%, transparent);
-  font-size: calc(var(--font-size) * 0.8);
+  background: var(--background, #ffffff);
+  color: color-mix(in srgb, var(--foreground, #24292e) 30%, transparent);
+  font-size: calc(var(--font-size, 14px) * 0.8);
   text-transform: uppercase;
   text-decoration: none;
   letter-spacing: 0.1em;
@@ -1077,13 +1077,13 @@ button.link,
 .button.link,
 a.button.link {
   background: none;
-  font-size: var(--font-size);
+  font-size: var(--font-size, 14px);
 }
 
 button.small,
 .button.small,
 a.button.small {
-  font-size: calc(var(--font-size) * 0.8);
+  font-size: calc(var(--font-size, 14px) * 0.8);
 }
 
 button.wide,
@@ -1095,7 +1095,7 @@ a.button.wide {
 
 a.button.inline {
   background: none;
-  color: var(--accent);
+  color: var(--accent, #007acc);
   padding: initial;
   margin: initial;
   border: initial;
@@ -1131,20 +1131,20 @@ a.read-more:active {
 }
 
 .terms ul li a {
-  color: var(--accent);
+  color: var(--accent, #007acc);
 }
 
 .terms ul li:not(:empty)::before {
   content: "-";
   position: absolute;
   left: -20px;
-  color: var(--accent);
+  color: var(--accent, #007acc);
 }
 
 /* ---- code.css ---- */
 
 :root {
-  --code-border: color-mix(in srgb, var(--foreground) 10%, transparent);
+  --code-border: color-mix(in srgb, var(--foreground, #24292e) 10%, transparent);
 }
 
 pre:not(.chroma) {
@@ -1154,16 +1154,16 @@ pre:not(.chroma) {
 pre.chroma {
   margin: 0;
   padding: 10px 0;
-  color: var(--foreground);
+  color: var(--foreground, #24292e);
 }
 
 pre code {
-  color: var(--foreground);
+  color: var(--foreground, #24292e);
   border: none;
 }
 
 code {
-  color: var(--accent);
+  color: var(--accent, #007acc);
   text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
   -moz-text-size-adjust: 100%;
@@ -1173,7 +1173,7 @@ code {
 .highlight {
   position: relative;
   margin: 20px 0;
-  border: 1px solid var(--code-border);
+  border: 1px solid var(--code-border, #dee2e6);
 }
 
 .highlight pre {
@@ -1184,11 +1184,11 @@ code {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: color-mix(in srgb, var(--foreground) 5%, transparent);
-  border-bottom: 1px solid var(--code-border);
-  color: var(--comment);
+  background: color-mix(in srgb, var(--foreground, #24292e) 5%, transparent);
+  border-bottom: 1px solid var(--code-border, #dee2e6);
+  color: var(--comment, #6a9955);
   text-transform:uppercase;
-  font-size: calc(var(--font-size) * 0.8);
+  font-size: calc(var(--font-size, 14px) * 0.8);
   padding: 6px 10px;
   line-height: 1;
 }
@@ -1203,7 +1203,7 @@ code {
   text-align: center;
   font-size: 13px;
   font-weight: 500;
-  border: 1px solid color-mix(in srgb, var(--accent) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent, #007acc) 15%, transparent);
   appearance: none;
   cursor: pointer;
   outline: none;
@@ -1211,7 +1211,7 @@ code {
 
 .code-title .copy-button {
   z-index: 1;
-  background: color-mix(in srgb, var(--foreground) 5%, var(--background));
+  background: color-mix(in srgb, var(--foreground, #24292e) 5%, var(--background, #ffffff));
 }
 
 .code-title:hover .copy-button {
@@ -1219,14 +1219,14 @@ code {
 }
 
 .code-title .copy-button:hover {
-  background: color-mix(in srgb, var(--accent) 10%, var(--background));
+  background: color-mix(in srgb, var(--accent, #007acc) 10%, var(--background, #ffffff));
 }
 
 .collapsable-code {
   position: relative;
   width: 100%;
   margin: 20px 0;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--accent, #007acc);
 
   .highlight {
     margin: 0;
@@ -1237,30 +1237,30 @@ code {
   display: inline-flex;
   align-items: center;
   flex: 1;
-  color: var(--accent);
+  color: var(--accent, #007acc);
   padding: 3px 10px;
-  font-size: calc(var(--font-size) * 0.9);
+  font-size: calc(var(--font-size, 14px) * 0.9);
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
 }
 
 .collapsable-code__language {
-  color: var(--accent);
-  border: 1px solid var(--accent);
+  color: var(--accent, #007acc);
+  border: 1px solid var(--accent, #007acc);
   border-bottom: none;
   text-transform: uppercase;
   padding: 3px 10px;
 }
 
 .collapsable-code summary {
-  color: var(--accent);
+  color: var(--accent, #007acc);
   padding: 0 10px;
   cursor: pointer;
 }
 
 .collapsable-code summary:hover {
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  background: color-mix(in srgb, var(--accent, #007acc) 10%, transparent);
 }
 
 .collapsable-code pre {
@@ -1336,7 +1336,7 @@ code {
 }
 
 .post-list-empty {
-  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+  color: color-mix(in srgb, var(--foreground, #24292e) 65%, transparent);
 }
 .post-meta a {
   color: inherit;
@@ -1359,7 +1359,7 @@ code {
 }
 .comments-head {
   margin: 25px 0;
-  color: var(--accent);
+  color: var(--accent, #007acc);
   font-weight: bold;
 }
 .comments-head::before {
@@ -1371,18 +1371,18 @@ code {
 .comment {
   margin-bottom: 20px;
   padding: 10px 20px;
-  border-left: 2px solid var(--accent);
+  border-left: 2px solid var(--accent, #007acc);
 }
 .comment-details {
   margin: 10px 0 0;
-  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+  color: color-mix(in srgb, var(--foreground, #24292e) 65%, transparent);
 }
 .comment .entrypermalink {
   margin-left: 5px;
   text-decoration: none;
 }
 .comments-form {
-  border: 1px solid var(--accent);
+  border: 1px solid var(--accent, #007acc);
   padding: 0 20px 20px;
 }
 .comments-form li {
@@ -1400,10 +1400,10 @@ code {
   width: 100%;
 }
 .comments-form input[type="checkbox"] {
-  border-color: var(--accent);
+  border-color: var(--accent, #007acc);
 }
 .comments-form li.info {
-  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+  color: color-mix(in srgb, var(--foreground, #24292e) 65%, transparent);
 }
 .comments-form .status,
 .comments-form .error {
@@ -1423,15 +1423,15 @@ input[type="button"] {
   font: inherit;
   font-weight: bold;
   background: transparent;
-  color: var(--accent);
+  color: var(--accent, #007acc);
   padding: 5px 18px;
-  border: 4px solid var(--accent);
-  border-radius: var(--radius);
+  border: 4px solid var(--accent, #007acc);
+  border-radius: var(--radius, 4px);
   cursor: pointer;
 }
 input[type="submit"]:hover,
 input[type="button"]:hover {
-  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  background: color-mix(in srgb, var(--accent, #007acc) 15%, transparent);
 }
 
 /* Search */
@@ -1446,13 +1446,13 @@ input[type="button"]:hover {
   min-width: 0;
 }
 .search-prompt {
-  color: var(--accent);
+  color: var(--accent, #007acc);
   font-weight: bold;
 }
 
 /* Archives (Terminal's terms.html list style) */
 .archives h2 {
-  color: var(--accent);
+  color: var(--accent, #007acc);
 }
 .archive-list {
   list-style: none;

@@ -17,6 +17,8 @@
  */
 package org.apache.roller.weblogger.business;
 
+import java.util.TimeZone;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.roller.weblogger.TestUtils;
@@ -726,7 +728,7 @@ public class MediaFileTest  {
         testWeblog = TestUtils.getManagedWebsite(testWeblog);
         rootDirectory = mfMgr.getMediaFileDirectory(rootDirectory.getId());
         String[] contentTypes = { "image/gif", "image/jpeg", "image/bmp" };
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.setTime(new Timestamp(System.currentTimeMillis()));
         for (int i = 0; i < 3; i++) {
             MediaFile mediaFile = new MediaFile();

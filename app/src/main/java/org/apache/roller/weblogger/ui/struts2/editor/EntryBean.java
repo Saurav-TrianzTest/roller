@@ -379,7 +379,7 @@ public class EntryBean {
             log.debug("entry pubtime is "+entry.getPubTime());
             
             //Calendar cal = Calendar.getInstance(locale);
-            Calendar cal = Calendar.getInstance();
+            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             cal.setTime(entry.getPubTime());
             cal.setTimeZone(entry.getWebsite().getTimeZoneInstance());
             

@@ -18,6 +18,8 @@
 
 package org.apache.roller.scripting;
 
+import java.time.Instant;
+
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.text.TemplateEngine;
@@ -64,10 +66,10 @@ public class GSPRenderer implements Renderer {
         try {
             if (parseException == null) {                
 
-                long startTime = System.currentTimeMillis();
+                long startTime = Instant.now().toEpochMilli();
                 Binding binding = new GroovyRollerBinding(model, writer);
                 groovyTemplate.make(binding.getVariables()).writeTo(writer);
-                long endTime = System.currentTimeMillis();
+                long endTime = Instant.now().toEpochMilli();
                 
                 long renderTime = (endTime - startTime)/1000;
                 log.debug("Rendered ["+template.getId()+"] in "+renderTime+" secs");

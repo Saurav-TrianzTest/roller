@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.webservices.xmlrpc;
 
+import java.time.Instant;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -340,7 +342,7 @@ public class BloggerAPIHandler extends BaseAPIHandler {
         WeblogEntry entry = validateEntry(postid, user,
                 publish ? WeblogPermission.POST : null);
         try {
-            Timestamp current = new Timestamp(System.currentTimeMillis());
+            Timestamp current = new Timestamp(Instant.now().toEpochMilli());
 
             Weblogger roller = WebloggerFactory.getWeblogger();
             WeblogEntryManager weblogMgr = roller.getWeblogEntryManager();
@@ -412,7 +414,7 @@ public class BloggerAPIHandler extends BaseAPIHandler {
             Weblogger roller = WebloggerFactory.getWeblogger();
             WeblogEntryManager weblogMgr = roller.getWeblogEntryManager();
             
-            Timestamp current = new Timestamp(System.currentTimeMillis());
+            Timestamp current = new Timestamp(Instant.now().toEpochMilli());
             
             WeblogEntry entry = new WeblogEntry();
             entry.setTitle(title);

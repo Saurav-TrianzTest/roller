@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.struts2.editor;
 
+import java.time.Instant;
+
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -179,7 +181,7 @@ public final class EntryEdit extends UIAction {
             Timestamp pubTime = getBean().getPubTime(getLocale(),
                     getActionWeblog().getTimeZoneInstance());
             if (pubTime != null && pubTime.after(
-                    new Date(System.currentTimeMillis() + RollerConstants.MIN_IN_MS))) {
+                    new Timestamp(Instant.now().toEpochMilli() + RollerConstants.MIN_IN_MS))) {
                 getBean().setStatus(PubStatus.SCHEDULED.name());
                 if (entry.isPublished()) {
                     // entry went from published to scheduled, need to reduce tag aggregates

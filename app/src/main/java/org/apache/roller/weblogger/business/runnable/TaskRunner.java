@@ -17,7 +17,17 @@
 */
 package org.apache.roller.weblogger.business.runnable;
         
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 import org.apache.roller.weblogger.util.Reflection;
 import org.apache.roller.weblogger.util.StandaloneWebappClassLoader;
 
@@ -29,6 +39,15 @@ public class TaskRunner {
     public TaskRunner() {} 
     
     public static void main(String[] args) throws Exception {
+        // Register shutdown hook for graceful termination
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                org.apache.roller.weblogger.business.WebloggerFactory.getWeblogger().release();
+            } catch (Exception e) {
+                // Best-effort cleanup
+            }
+        }));
+
         if (args.length < 3) {
             System.err.println("USAGE: java -cp roller-planet.jar TaskRunner WEBAPPDIR JARSDIR CLASSNAME");
             System.err.println("WEBAPPDIR: The directory path to the web application ");
@@ -45,9 +64,9 @@ public class TaskRunner {
         System.out.println("JARSDIR   = " + jarsDir);
         System.out.println("CLASSNAME = " + taskClassName);
         
-        File webappDirFile = new File(webappDir);
-        File jarsDirFile = new File(jarsDir);
-        if (!webappDirFile.isDirectory() || !jarsDirFile.isDirectory()) {
+        boolean webappDirValid = Files.isDirectory(Paths.get(webappDir));
+        boolean jarsDirValid = Files.isDirectory(Paths.get(jarsDir));
+        if (!webappDirValid || !jarsDirValid) {
             System.err.println("ERROR: webapp.dir and jars.dir must specify existing directories");
             System.exit(-1);
         }        

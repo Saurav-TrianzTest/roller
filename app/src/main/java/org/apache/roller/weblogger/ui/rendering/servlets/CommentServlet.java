@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.rendering.servlets;
 
+import java.time.Instant;
+
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Iterator;
@@ -240,7 +242,7 @@ public class CommentServlet extends HttpServlet {
         comment.setNotify(commentRequest.isNotify());
         comment.setWeblogEntry(entry);
         comment.setRemoteHost(request.getRemoteHost());
-        comment.setPostTime(new Timestamp(System.currentTimeMillis()));
+        comment.setPostTime(new Timestamp(Instant.now().toEpochMilli()));
 
         // set comment content-type depending on if html is allowed
         if (WebloggerRuntimeConfig

@@ -19,6 +19,8 @@
 
 package org.apache.roller.weblogger.ui.core.security;
 
+import java.time.Instant;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -53,7 +55,7 @@ public final class BootstrapSecurity {
         new SecureRandom().nextBytes(raw);
         String token = Base64.getUrlEncoder().withoutPadding().encodeToString(raw);
         digest = sha256(token);
-        expires = System.currentTimeMillis() + LIFETIME_MS;
+        expires = Instant.now().toEpochMilli() + LIFETIME_MS;
         String message = box(
                 "ROLLER INITIAL SETUP REQUIRED",
                 "",
@@ -129,18 +131,18 @@ public final class BootstrapSecurity {
 
     public static boolean isValid(HttpServletRequest request) {
         Object grant = request.getSession(false) == null ? null : request.getSession(false).getAttribute(SESSION);
-        return !completed && grant instanceof Long && ((Long) grant) >= System.currentTimeMillis();
+        return !completed && grant instanceof Long && ((Long) grant) >= Instant.now().toEpochMilli();
     }
 
     public static synchronized boolean redeem(HttpServletRequest request, String token) {
-        if (completed || digest == null || token == null || System.currentTimeMillis() > expires) {
+        if (completed || digest == null || token == null || Instant.now().toEpochMilli() > expires) {
             return false;
         }
         byte[] supplied = sha256(token);
         if (!MessageDigest.isEqual(digest, supplied)) {
             return false;
         }
-        request.getSession(true).setAttribute(SESSION, System.currentTimeMillis() + LIFETIME_MS);
+        request.getSession(true).setAttribute(SESSION, Instant.now().toEpochMilli() + LIFETIME_MS);
         digest = null;
         return true;
     }

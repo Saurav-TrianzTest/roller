@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.util.cache;
 
+import java.time.Instant;
+
 import java.io.Serializable;
 
 
@@ -50,7 +52,7 @@ public class LazyExpiringCacheEntry implements Serializable {
     
     public LazyExpiringCacheEntry(Object item) {
         this.value = item;
-        this.timeCached = System.currentTimeMillis();
+        this.timeCached = Instant.now().toEpochMilli();
     }
     
     

@@ -115,8 +115,6 @@ public abstract class ThreadManagerImpl implements ThreadManager {
         if (schedulerThread == null) {
             LOG.debug("Starting scheduler thread");
             schedulerThread = new Thread(scheduler, "Roller Weblogger Task Scheduler");
-            // set thread priority between MAX and NORM so we get slightly preferential treatment
-            schedulerThread.setPriority((Thread.MAX_PRIORITY + Thread.NORM_PRIORITY)/2);
             schedulerThread.start();
         }
     }

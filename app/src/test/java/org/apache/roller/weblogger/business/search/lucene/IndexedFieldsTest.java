@@ -16,6 +16,8 @@
  */
 package org.apache.roller.weblogger.business.search.lucene;
 
+import java.time.Instant;
+
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -99,7 +101,7 @@ class IndexedFieldsTest {
         when(entry.getTitle()).thenReturn("Title");
         when(entry.getLocale()).thenReturn("en");
         when(entry.getText()).thenReturn("Text");
-        Timestamp now = new Timestamp(System.currentTimeMillis());
+        Timestamp now = new Timestamp(Instant.now().toEpochMilli());
         when(entry.getUpdateTime()).thenReturn(now);
         when(entry.getPubTime()).thenReturn(now);
         when(entry.getComments()).thenReturn(List.of(comment));

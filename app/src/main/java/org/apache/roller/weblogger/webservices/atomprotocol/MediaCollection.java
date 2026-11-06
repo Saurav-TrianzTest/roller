@@ -17,6 +17,8 @@
 
 package org.apache.roller.weblogger.webservices.atomprotocol;
 
+import java.util.TimeZone;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -38,6 +40,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 import org.apache.roller.weblogger.util.MediaTypePolicy;
 import org.apache.roller.weblogger.WebloggerException;
 import org.apache.roller.weblogger.business.FileIOException;
@@ -629,7 +640,7 @@ public class MediaCollection {
         // No title or text, so instead we'll use the item's date
         // in YYYYMMDD format to form the file name
         SimpleDateFormat sdf = new SimpleDateFormat();
-        sdf.applyPattern("yyyyMMddHHSS");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         return weblog.getHandle() + "-" + sdf.format(new Date()) + "." + ext;
     }
 

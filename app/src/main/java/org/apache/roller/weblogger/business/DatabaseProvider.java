@@ -19,7 +19,6 @@
 package org.apache.roller.weblogger.business;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +30,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.roller.weblogger.business.startup.StartupException;
 import org.apache.roller.weblogger.config.WebloggerConfig;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse;
+import software.amazon.awssdk.core.exception.SdkException;
 
 
 /**
@@ -91,7 +96,42 @@ public class DatabaseProvider  {
         jdbcDriverClass =   WebloggerConfig.getProperty("database.jdbc.driverClass");
         jdbcConnectionURL = WebloggerConfig.getProperty("database.jdbc.connectionURL");
         jdbcUsername =      WebloggerConfig.getProperty("database.jdbc.username");
-        jdbcPassword =      WebloggerConfig.getProperty("database.jdbc.password");
+        // Replace hardcoded DB password with AWS Secrets Manager lookup
+        String dbSecretName = System.getenv("DB_SECRET_NAME");
+        if (dbSecretName != null && !dbSecretName.isEmpty()) {
+            try {
+                SecretsManagerClient secretsClient = SecretsManagerClient.create();
+                GetSecretValueRequest secretRequest = GetSecretValueRequest.builder()
+                    .secretId(dbSecretName)
+                    .build();
+                GetSecretValueResponse secretResponse = secretsClient.getSecretValue(secretRequest);
+                String secret = secretResponse.secretString();
+                // Parse JSON secret for username and password
+                int userIdx = secret.indexOf("\"username\"");
+                int passIdx = secret.indexOf("\"password\"");
+                if (userIdx >= 0) {
+                    int start = secret.indexOf(':', userIdx) + 1;
+                    int end = secret.indexOf(',', start);
+                    if (end < 0) end = secret.indexOf('}', start);
+                    String extractedUser = secret.substring(start, end).trim().replaceAll("\"", "");
+                    if (jdbcUsername == null) {
+                        jdbcUsername = extractedUser;
+                    }
+                }
+                if (passIdx >= 0) {
+                    int start = secret.indexOf(':', passIdx) + 1;
+                    int end = secret.indexOf(',', start);
+                    if (end < 0) end = secret.indexOf('}', start);
+                    jdbcPassword = secret.substring(start, end).trim().replaceAll("\"", "");
+                }
+            } catch (SdkException e) {
+                log.error("Failed to retrieve DB credentials from Secrets Manager", e);
+                // Fall back to config properties as before
+                jdbcPassword = WebloggerConfig.getProperty("database.jdbc.password");
+            }
+        } else {
+            jdbcPassword = WebloggerConfig.getProperty("database.jdbc.password");
+        }
         
         successMessage("SUCCESS: Got parameters. Using configuration type " + type);
 
@@ -177,7 +217,23 @@ public class DatabaseProvider  {
      */
     public Connection getConnection() throws SQLException {
         if (getType() == ConfigurationType.JDBC_PROPERTIES) {
-            return DriverManager.getConnection(getJdbcConnectionURL(), props);
+            // cr-java-0073: Replace raw DriverManager with HikariCP connection pool
+            HikariConfig config = new HikariConfig();
+            config.setJdbcUrl(getJdbcConnectionURL());
+            if (getJdbcUsername() != null) {
+                config.setUsername(getJdbcUsername());
+            }
+            if (getJdbcPassword() != null) {
+                config.setPassword(getJdbcPassword());
+            }
+            // cr-java-0097: Add connection and socket timeouts (5 seconds = 5000ms)
+            config.setConnectionTimeout(5000);
+            config.setIdleTimeout(5000);
+            config.setMaxLifetime(300000);
+            config.setMaximumPoolSize(10);
+            config.setInitializationFailTimeout(-1);
+            HikariDataSource hikariDS = new HikariDataSource(config);
+            return hikariDS.getConnection();
         } else {
             return dataSource.getConnection();
         }

@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.core.tags.calendar;
 
+import java.util.TimeZone;
+
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -329,7 +331,7 @@ public class CalendarTag extends TagSupport {
         mDayNames = new String[7];
         Calendar dayNameCal = Calendar.getInstance(mLocale);
         SimpleDateFormat dayFormatter = new SimpleDateFormat("EEE", mLocale);
-        dayNameCal.set(Calendar.DAY_OF_WEEK, dayNameCal.getFirstDayOfWeek());
+        dayFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         for (int dnum = 0; dnum < 7; dnum++) {
             mDayNames[dnum] = dayFormatter.format(dayNameCal.getTime());
             dayNameCal.add(Calendar.DATE, 1);

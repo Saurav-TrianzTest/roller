@@ -16,6 +16,8 @@
  */
 package org.apache.roller.weblogger.business.search.lucene;
 
+import java.time.Instant;
+
 import java.sql.Timestamp;
 
 import org.apache.lucene.document.Document;
@@ -77,7 +79,7 @@ class SearchHitPagingTest {
     /** Entries id0..id19, published in the past; the one at draftIndex is a draft. */
     private static WeblogEntryManager entries(int draftIndex) throws Exception {
         WeblogEntryManager entries = mock(WeblogEntryManager.class);
-        Timestamp past = new Timestamp(System.currentTimeMillis() - 60_000);
+        Timestamp past = new Timestamp(Instant.now().toEpochMilli() - 60_000);
         for (int i = 0; i < HITS; i++) {
             WeblogEntry entry = mock(WeblogEntry.class);
             when(entry.getId()).thenReturn("id" + i);

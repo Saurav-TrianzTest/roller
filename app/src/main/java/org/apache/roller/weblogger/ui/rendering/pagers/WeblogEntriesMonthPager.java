@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.rendering.pagers;
 
+import java.util.TimeZone;
+
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -40,7 +42,6 @@ public class WeblogEntriesMonthPager extends AbstractWeblogEntriesPager {
     private static final Log log = LogFactory.getLog(WeblogEntriesMonthPager.class);
     
     private SimpleDateFormat monthFormat = new SimpleDateFormat();
-    
     private Date month;
     private Date nextMonth;
     private Date prevMonth;

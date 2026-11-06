@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.rendering.model;
 
+import java.util.TimeZone;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -524,7 +526,7 @@ public class SiteModel implements Model {
     public List<TagStat> getPopularTags(int sinceDays, int length) {
         Date startDate = null;
         if(sinceDays > 0) {
-            Calendar cal = Calendar.getInstance();
+            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             cal.setTime(new Date());
             cal.add(Calendar.DATE, -1 * sinceDays);        
             startDate = cal.getTime();     

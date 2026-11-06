@@ -23,6 +23,15 @@ package org.apache.roller.scripting;
 
 import java.io.File;
 import groovy.lang.*;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 import org.apache.roller.weblogger.util.*;
 
 /**
@@ -32,6 +41,15 @@ public class GroovyRunner {
     public GroovyRunner() {} 
     
     public static void main(String[] args) throws Exception {
+        // Register shutdown hook for graceful termination
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                org.apache.roller.weblogger.business.WebloggerFactory.getWeblogger().release();
+            } catch (Exception e) {
+                // Best-effort cleanup
+            }
+        }));
+
         if (args.length < 3) {
             System.err.println("USAGE: java -cp roller-business.jar TaskRunner WEBAPPDIR JARSDIR SCRIPTNAME");
             System.err.println("WEBAPPDIR:  The directory path to the web application ");

@@ -18,6 +18,8 @@
 
 package org.apache.roller.planet.business.updater;
 
+import java.time.Instant;
+
 import java.util.Collection;
 import java.util.Set;
 import org.apache.commons.logging.Log;
@@ -59,7 +61,7 @@ public class SingleThreadedFeedUpdater implements FeedUpdater {
         
         log.debug("updating feed: "+sub.getFeedURL());
         
-        long subStartTime = System.currentTimeMillis();
+        long subStartTime = Instant.now().toEpochMilli();
         
         Subscription updatedSub;
         try {
@@ -119,7 +121,7 @@ public class SingleThreadedFeedUpdater implements FeedUpdater {
             }
         }
         
-        long subEndTime = System.currentTimeMillis();
+        long subEndTime = Instant.now().toEpochMilli();
         log.debug("updated feed -- "+sub.getFeedURL()+" -- in " +
                 ((subEndTime-subStartTime) / RollerConstants.SEC_IN_MS) + " seconds.  " + entries +
                 " entries updated.");
@@ -136,7 +138,7 @@ public class SingleThreadedFeedUpdater implements FeedUpdater {
         
         log.debug("--- BEGIN --- Updating all subscriptions");
         
-        long startTime = System.currentTimeMillis();
+        long startTime = Instant.now().toEpochMilli();
         
         try {
             // update all subscriptions in the system
@@ -146,7 +148,7 @@ public class SingleThreadedFeedUpdater implements FeedUpdater {
             throw new UpdaterException("Error getting subscriptions list", ex);
         }
         
-        long endTime = System.currentTimeMillis();
+        long endTime = Instant.now().toEpochMilli();
         log.info("--- DONE --- Updated subscriptions in "
                 + ((endTime-startTime) / RollerConstants.SEC_IN_MS) + " seconds");
     }
@@ -166,11 +168,11 @@ public class SingleThreadedFeedUpdater implements FeedUpdater {
         
         log.debug("--- BEGIN --- Updating subscriptions in group = "+group.getHandle());
         
-        long startTime = System.currentTimeMillis();
+        long startTime = Instant.now().toEpochMilli();
         
         updateSubscriptions(group.getSubscriptions());
         
-        long endTime = System.currentTimeMillis();
+        long endTime = Instant.now().toEpochMilli();
         log.info("--- DONE --- Updated subscriptions in "
                 + ((endTime-startTime) / RollerConstants.SEC_IN_MS) + " seconds");
     }

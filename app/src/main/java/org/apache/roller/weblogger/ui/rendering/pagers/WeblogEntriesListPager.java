@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.rendering.pagers;
 
+import java.util.TimeZone;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -99,7 +101,7 @@ public class WeblogEntriesListPager extends AbstractPager<WeblogEntryWrapper> {
             
             Date startDate = null;
             if(sinceDays > 0) {
-                Calendar cal = Calendar.getInstance();
+                Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                 cal.setTime(new Date());
                 cal.add(Calendar.DATE, -1 * sinceDays);
                 startDate = cal.getTime();

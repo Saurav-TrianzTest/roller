@@ -29,6 +29,8 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 
 public class DerbyJunitExtension implements BeforeAllCallback, AfterAllCallback {
@@ -88,7 +90,19 @@ class DerbyStartStopper {
         System.out.println("System Info:  " + server.getSysinfo());
 
         Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
-        Connection conn = DriverManager.getConnection("jdbc:derby:rollerdb;create=true", "APP", "APP");
+        // cr-java-0073: Use HikariCP with timeout
+        // cr-java-0097: Add connection timeout (5 seconds = 5000ms)
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl("jdbc:derby:rollerdb;create=true");
+        config.setUsername("APP");
+        config.setPassword("APP");
+        config.setConnectionTimeout(5000);
+        config.setIdleTimeout(5000);
+        config.setMaxLifetime(300000);
+        config.setMaximumPoolSize(5);
+        config.setInitializationFailTimeout(-1);
+        HikariDataSource dataSource = new HikariDataSource(config);
+        Connection conn = dataSource.getConnection();
 
         // create roller tables
 
@@ -116,7 +130,19 @@ class DerbyStartStopper {
         String driverURL = "jdbc:derby://localhost:" + port + "/rollerdb";
 
         Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
-        Connection conn = DriverManager.getConnection(driverURL,"APP", "APP");
+        // cr-java-0073: Use HikariCP with timeout
+        // cr-java-0097: Add connection timeout (5 seconds = 5000ms)
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(driverURL);
+        config.setUsername("APP");
+        config.setPassword("APP");
+        config.setConnectionTimeout(5000);
+        config.setIdleTimeout(5000);
+        config.setMaxLifetime(300000);
+        config.setMaximumPoolSize(5);
+        config.setInitializationFailTimeout(-1);
+        HikariDataSource dataSource = new HikariDataSource(config);
+        Connection conn = dataSource.getConnection();
 
         // drop Roller tables
         SQLScriptRunner runner = new SQLScriptRunner(

@@ -17,6 +17,8 @@
  */
 package org.apache.roller.weblogger.ui.core.security;
 
+import java.time.Instant;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -138,7 +140,7 @@ public class RollerClientRegistrationRepository implements ClientRegistrationRep
             return;
         }
         Long lastFailure = failedAt.get(id);
-        if (lastFailure != null && System.currentTimeMillis() - lastFailure < RETRY_BACKOFF_MS) {
+        if (lastFailure != null && Instant.now().toEpochMilli() - lastFailure < RETRY_BACKOFF_MS) {
             return;
         }
         if (inFlight.putIfAbsent(id, Boolean.TRUE) != null) {
@@ -162,7 +164,7 @@ public class RollerClientRegistrationRepository implements ClientRegistrationRep
                 resolved.put(id, registration);
                 failedAt.remove(id);
             } else {
-                failedAt.put(id, System.currentTimeMillis());
+                failedAt.put(id, Instant.now().toEpochMilli());
             }
         } finally {
             inFlight.remove(id);

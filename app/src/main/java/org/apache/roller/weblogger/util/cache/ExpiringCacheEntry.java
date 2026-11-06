@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.util.cache;
 
+import java.time.Instant;
+
 import java.io.Serializable;
 
 
@@ -37,7 +39,7 @@ public class ExpiringCacheEntry implements Serializable {
     public ExpiringCacheEntry(Object value, long timeout) {
         this.value = value;
         this.timeout = Math.max(0, timeout);  // make sure that we don't support negative values
-        this.timeCached = System.currentTimeMillis();
+        this.timeCached = Instant.now().toEpochMilli();
     }
     
     
@@ -70,7 +72,7 @@ public class ExpiringCacheEntry implements Serializable {
      */
     public boolean hasExpired() {
         
-        long now = System.currentTimeMillis();
+        long now = Instant.now().toEpochMilli();
         
         return ((this.timeCached + this.timeout) < now);
     }

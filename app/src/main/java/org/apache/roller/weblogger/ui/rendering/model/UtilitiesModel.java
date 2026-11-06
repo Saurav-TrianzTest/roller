@@ -138,6 +138,7 @@ public class UtilitiesModel implements Model {
         }
         
         SimpleDateFormat format = new SimpleDateFormat(fmt, weblog.getLocaleInstance());
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
         if(tzOverride != null) {
             format.setTimeZone(tzOverride);
         }

@@ -48,7 +48,6 @@ public class BigWeblogCalendarModel extends WeblogCalendarModel {
     protected final SimpleDateFormat singleDayFormat =
             new SimpleDateFormat("dd");
 
-
     public BigWeblogCalendarModel(WeblogPageRequest pRequest, String cat) {
         super(pRequest, cat);
         TimeZone tz = weblog.getTimeZoneInstance();

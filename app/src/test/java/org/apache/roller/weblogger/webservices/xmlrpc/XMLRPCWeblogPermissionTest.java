@@ -16,6 +16,8 @@
  */
 package org.apache.roller.weblogger.webservices.xmlrpc;
 
+import java.time.Instant;
+
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.Collections;
@@ -436,7 +438,7 @@ public class XMLRPCWeblogPermissionTest {
         managedDraft.setUpdateTime(oldTime);
         entryManager.saveWeblogEntry(managedDraft);
 
-        long now = System.currentTimeMillis();
+        long now = Instant.now().toEpochMilli();
         for (int i = 0; i < count; i++) {
             WeblogEntry entry = new WeblogEntry();
             entry.setTitle("newer published " + i);

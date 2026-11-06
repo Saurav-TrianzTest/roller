@@ -17,6 +17,8 @@
 */
 package org.apache.roller.weblogger.business.search;
 
+import java.time.Instant;
+
 import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.List;
@@ -149,7 +151,7 @@ public class IndexManagerTest {
 
         entries.get(0).setTitle("The Tholian Web");
         entries.get(0).setStatus(WeblogEntry.PubStatus.PUBLISHED);
-        entries.get(0).setPubTime(new Timestamp(System.currentTimeMillis()));
+        entries.get(0).setPubTime(new Timestamp(Instant.now().toEpochMilli()));
         entries.get(0).setText(
             "When the Enterprise attempts to ascertain the fate of the  "
                 +"U.S.S. Defiant which vanished 3 weeks ago, the warp engines  "
@@ -159,7 +161,7 @@ public class IndexManagerTest {
 
         entries.get(1).setTitle("A Piece of the Action");
         entries.get(1).setStatus(WeblogEntry.PubStatus.PUBLISHED);
-        entries.get(1).setPubTime(new Timestamp(System.currentTimeMillis()));
+        entries.get(1).setPubTime(new Timestamp(Instant.now().toEpochMilli()));
         entries.get(1).setText(
             "The crew of the Enterprise attempts to make contact with "
                 +"the inhabitants of planet Sigma Iotia II, and Uhura puts Kirk "

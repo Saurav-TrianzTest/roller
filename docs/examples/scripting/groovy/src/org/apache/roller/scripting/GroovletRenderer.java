@@ -18,6 +18,8 @@
 
 package org.apache.roller.scripting;
 
+import java.time.Instant;
+
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import java.io.PrintWriter;
@@ -52,11 +54,11 @@ public class GroovletRenderer implements Renderer {
     
     public void render(Map model, Writer writer) throws RenderingException {
         try {
-            long startTime = System.currentTimeMillis();            
+            long startTime = Instant.now().toEpochMilli();            
             Binding binding = new GroovyRollerBinding(model, writer);
             GroovyShell shell = new GroovyShell(binding);
             shell.evaluate(template.getContents());              
-            long endTime = System.currentTimeMillis();
+            long endTime = Instant.now().toEpochMilli();
 
             long renderTime = (endTime - startTime)/1000;
             log.debug("Rendered ["+template.getId()+"] in "+renderTime+" secs"); 

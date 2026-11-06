@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.business.jpa;
 
+import java.util.TimeZone;
+
 import java.util.*;
 import java.text.SimpleDateFormat;
 import java.sql.Timestamp;
@@ -902,7 +904,7 @@ public class JPAWeblogEntryManagerImpl implements WeblogEntryManager {
 
         List<WeblogEntry> entries = getWeblogEntries(wesc);
 
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         if (wesc.getWeblog() != null) {
             cal.setTimeZone(wesc.getWeblog().getTimeZoneInstance());
         }
@@ -924,7 +926,7 @@ public class JPAWeblogEntryManagerImpl implements WeblogEntryManager {
 
         List<WeblogEntry> entries = getWeblogEntries(wesc);
 
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         SimpleDateFormat formatter = DateUtil.get8charDateFormat();
         if (wesc.getWeblog() != null) {
             TimeZone tz = wesc.getWeblog().getTimeZoneInstance();
@@ -1372,7 +1374,7 @@ public class JPAWeblogEntryManagerImpl implements WeblogEntryManager {
 
 
     public static Date getStartDateNow(int sinceDays) {
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.setTime(new Date());
         cal.add(Calendar.DATE, -1 * sinceDays);
         return cal.getTime();

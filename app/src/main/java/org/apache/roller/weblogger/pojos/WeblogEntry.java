@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.pojos;
 
+import java.util.TimeZone;
+
 import java.io.Serializable;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -680,6 +682,7 @@ public class WeblogEntry implements Serializable {
         try {
             SimpleDateFormat format = new SimpleDateFormat(pattern,
                     this.getWebsite().getLocaleInstance());
+            format.setTimeZone(TimeZone.getTimeZone("UTC"));
             
             return format.format(getPubTime());
         } catch (RuntimeException e) {
@@ -701,7 +704,7 @@ public class WeblogEntry implements Serializable {
     public String formatUpdateTime(String pattern) {
         try {
             SimpleDateFormat format = new SimpleDateFormat(pattern);
-            
+            format.setTimeZone(TimeZone.getTimeZone("UTC"));
             return format.format(getUpdateTime());
         } catch (RuntimeException e) {
             mLogger.error("Unexpected exception", e);

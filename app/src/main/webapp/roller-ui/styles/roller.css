@@ -130,7 +130,7 @@ table.mm_table_actions td {
 }
 
 .roller-pager-page {
-    color: var(--bs-secondary-color);
+    color: var(--bs-secondary-color, #6c757d);
     font-size: 0.875rem;
 }
 
@@ -315,19 +315,19 @@ body {
     align-items: center;
     gap: 0.5rem;
     padding: 0.35rem 0.5rem;
-    border-radius: var(--bs-border-radius);
+    border-radius: var(--bs-border-radius, 0.25rem);
     text-decoration: none;
-    color: var(--bs-body-color);
+    color: var(--bs-body-color, #212529);
 }
 
 .media-folder-list a:hover,
 .media-folder-list a:focus-visible {
-    background-color: var(--bs-tertiary-bg);
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
 }
 
 .media-folder-list a.active {
-    background-color: var(--bs-primary-bg-subtle);
-    color: var(--bs-primary-text-emphasis);
+    background-color: var(--bs-primary-bg-subtle, #cfe2ff);
+    color: var(--bs-primary-text-emphasis, #0a58ca);
     font-weight: 600;
 }
 
@@ -348,7 +348,7 @@ body {
 .media-count {
     font-size: 0.875rem;
     font-weight: normal;
-    color: var(--bs-secondary-color);
+    color: var(--bs-secondary-color, #6c757d);
 }
 
 /* Search: one box holding the name, its scope and the button, then Filters */
@@ -368,8 +368,8 @@ body {
 }
 
 .media-search-box .input-group-text {
-    background-color: var(--bs-body-bg);
-    color: var(--bs-secondary-color);
+    background-color: var(--bs-body-bg, #ffffff);
+    color: var(--bs-secondary-color, #6c757d);
 }
 
 .media-search-box .form-control {
@@ -381,7 +381,7 @@ body {
     flex: 0 1 auto;
     width: auto;
     max-width: 13rem;
-    background-color: var(--bs-tertiary-bg);
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
 }
 
 .media-filters-button {
@@ -396,7 +396,7 @@ body {
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 50%;
-    background-color: var(--bs-primary);
+    background-color: var(--bs-primary, #0d6efd);
 }
 
 .media-filters {
@@ -443,7 +443,7 @@ body {
     top: 0;
     z-index: 2;
     padding: 0.5rem 0;
-    background-color: var(--bs-body-bg);
+    background-color: var(--bs-body-bg, #ffffff);
 }
 
 .media-results-bar,
@@ -468,21 +468,21 @@ body {
 }
 
 .media-chip {
-    border-radius: var(--bs-border-radius-pill);
+    border-radius: var(--bs-border-radius-pill, 50rem);
     padding: 0.2rem 0.85rem;
-    border: 1px solid var(--bs-border-color);
-    color: var(--bs-body-color);
-    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    color: var(--bs-body-color, #212529);
+    background-color: var(--bs-body-bg, #ffffff);
 }
 
 .media-chip:hover {
-    background-color: var(--bs-tertiary-bg);
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
 }
 
 .btn-check:checked + .media-chip {
-    border-color: var(--bs-primary-bg-subtle);
-    background-color: var(--bs-primary-bg-subtle);
-    color: var(--bs-primary-text-emphasis);
+    border-color: var(--bs-primary-bg-subtle, #cfe2ff);
+    background-color: var(--bs-primary-bg-subtle, #cfe2ff);
+    color: var(--bs-primary-text-emphasis, #0a58ca);
     font-weight: 600;
 }
 
@@ -494,18 +494,18 @@ body {
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    color: var(--bs-secondary-color);
+    color: var(--bs-secondary-color, #6c757d);
 }
 
 .media-sort {
     width: auto;
     border-color: transparent;
     background-color: transparent;
-    color: var(--bs-body-color);
+    color: var(--bs-body-color, #212529);
 }
 
 .media-sort:hover {
-    background-color: var(--bs-tertiary-bg);
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
 }
 
 .media-view-options .btn-group {
@@ -515,12 +515,12 @@ body {
 .media-selection-bar {
     justify-content: flex-start;
     padding: 0 0.5rem;
-    border-radius: var(--bs-border-radius-lg);
-    background-color: var(--bs-primary-bg-subtle);
+    border-radius: var(--bs-border-radius-lg, 0.375rem);
+    background-color: var(--bs-primary-bg-subtle, #cfe2ff);
 }
 
 .media-selection-close {
-    color: var(--bs-body-color);
+    color: var(--bs-body-color, #212529);
 }
 
 .media-selected-count {
@@ -534,16 +534,16 @@ body {
 }
 
 .media-selection-actions .btn {
-    background-color: var(--bs-body-bg);
+    background-color: var(--bs-body-bg, #ffffff);
 }
 
 .media-selection-actions .btn-outline-danger:hover {
-    background-color: var(--bs-danger);
+    background-color: var(--bs-danger, #dc3545);
 }
 
 .media-selection-actions .btn-outline-primary:hover,
 .media-selection-actions .btn-outline-primary.show {
-    background-color: var(--bs-primary);
+    background-color: var(--bs-primary, #0d6efd);
 }
 
 .media-result-summary {
@@ -552,7 +552,7 @@ body {
     align-items: baseline;
     gap: 0.25rem 0.75rem;
     margin: 0.25rem 0 0.5rem;
-    color: var(--bs-secondary-color);
+    color: var(--bs-secondary-color, #6c757d);
 }
 
 .media-criteria {
@@ -562,9 +562,9 @@ body {
 
 .media-criteria li {
     padding: 0 0.5rem;
-    border-radius: var(--bs-border-radius-pill);
-    background-color: var(--bs-secondary-bg);
-    color: var(--bs-body-color);
+    border-radius: var(--bs-border-radius-pill, 50rem);
+    background-color: var(--bs-secondary-bg, #e9ecef);
+    color: var(--bs-body-color, #212529);
     font-size: 0.875rem;
     overflow-wrap: anywhere;
 }
@@ -598,9 +598,9 @@ body {
     overflow: hidden;
     padding: 0;
     border: 0;
-    border-radius: var(--bs-border-radius-lg);
+    border-radius: var(--bs-border-radius-lg, 0.375rem);
     /* a tinted frame keeps white and transparent images visible */
-    background-color: var(--bs-tertiary-bg);
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
     cursor: pointer;
     transition: box-shadow 0.15s ease-in-out;
 }
@@ -616,7 +616,7 @@ body {
 
 .media-card-preview .bi {
     font-size: 3rem;
-    color: var(--bs-secondary-color);
+    color: var(--bs-secondary-color, #6c757d);
 }
 
 .media-card:hover .media-card-preview {
@@ -624,8 +624,8 @@ body {
 }
 
 .media-card.selected .media-card-preview {
-    box-shadow: inset 0 0 0 3px var(--bs-primary);
-    background-color: var(--bs-primary-bg-subtle);
+    box-shadow: inset 0 0 0 3px var(--bs-primary, #0d6efd);
+    background-color: var(--bs-primary-bg-subtle, #cfe2ff);
 }
 
 .media-card.selected .media-card-preview img {
@@ -686,13 +686,13 @@ body {
     background: none;
     text-align: start;
     font-size: 0.875rem;
-    color: var(--bs-body-color);
+    color: var(--bs-body-color, #212529);
     text-decoration: none;
     cursor: pointer;
 }
 
 .media-card-name:hover {
-    color: var(--bs-link-color);
+    color: var(--bs-link-color, #0d6efd);
     text-decoration: underline;
 }
 
@@ -701,7 +701,7 @@ body {
     flex-wrap: wrap;
     gap: 0 0.5rem;
     font-size: 0.75rem;
-    color: var(--bs-secondary-color);
+    color: var(--bs-secondary-color, #6c757d);
 }
 
 .media-card-date {
@@ -711,7 +711,7 @@ body {
 .media-empty {
     text-align: center;
     padding: 3rem 1rem;
-    color: var(--bs-secondary-color);
+    color: var(--bs-secondary-color, #6c757d);
 }
 
 .media-empty .bi {
@@ -744,21 +744,21 @@ body {
     align-items: center;
     gap: 0.75rem;
     padding: 0.35rem 0.5rem;
-    border-bottom: 1px solid var(--bs-border-color);
+    border-bottom: 1px solid var(--bs-border-color, #dee2e6);
 }
 
 .media-grid.media-list .media-card:hover {
-    background-color: var(--bs-tertiary-bg);
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
 }
 
 .media-grid.media-list .media-card.selected {
-    background-color: var(--bs-primary-bg-subtle);
+    background-color: var(--bs-primary-bg-subtle, #cfe2ff);
 }
 
 .media-grid.media-list .media-list-header {
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--bs-secondary-color);
+    color: var(--bs-secondary-color, #6c757d);
 }
 
 .media-grid.media-list .media-card-body,
@@ -780,7 +780,7 @@ body {
 .media-grid.media-list .media-card-preview {
     order: 2;
     width: 3rem;
-    border-radius: var(--bs-border-radius-sm);
+    border-radius: var(--bs-border-radius-sm, 0.2rem);
     box-shadow: none;
 }
 
@@ -854,9 +854,9 @@ body {
     justify-content: center;
     min-height: 12rem;
     padding: 0.75rem;
-    border: 1px solid var(--bs-border-color);
-    border-radius: var(--bs-border-radius);
-    background-color: var(--bs-tertiary-bg);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: var(--bs-border-radius, 0.25rem);
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
 }
 
 .media-details-preview img {
@@ -867,7 +867,7 @@ body {
 
 .media-details-preview .bi {
     font-size: 5rem;
-    color: var(--bs-secondary-color);
+    color: var(--bs-secondary-color, #6c757d);
 }
 
 .media-details-name {
@@ -895,7 +895,7 @@ body {
     min-height: 1.5rem;
     margin: 0.25rem 0 0;
     font-size: 0.875rem;
-    color: var(--bs-success-text-emphasis);
+    color: var(--bs-success-text-emphasis, #198754);
 }
 
 .media-details-actions {
@@ -912,7 +912,7 @@ body {
     font-size: 1.1rem;
     margin: 2rem 0 1rem;
     padding-top: 1rem;
-    border-top: 1px solid var(--bs-border-color);
+    border-top: 1px solid var(--bs-border-color, #dee2e6);
 }
 
 /* The bootstrap theme adds no spacing to form-vertical groups */
@@ -954,9 +954,9 @@ body {
     align-items: center;
     gap: 0.5rem;
     padding: 2rem 1rem;
-    border: 2px dashed var(--bs-border-color);
-    border-radius: var(--bs-border-radius-lg);
-    background-color: var(--bs-tertiary-bg);
+    border: 2px dashed var(--bs-border-color, #dee2e6);
+    border-radius: var(--bs-border-radius-lg, 0.375rem);
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
     text-align: center;
 }
 
@@ -965,13 +965,13 @@ body {
 }
 
 .media-drop-zone.dragging {
-    border-color: var(--bs-primary);
-    background-color: var(--bs-primary-bg-subtle);
+    border-color: var(--bs-primary, #0d6efd);
+    background-color: var(--bs-primary-bg-subtle, #cfe2ff);
 }
 
 .media-drop-zone > .bi {
     font-size: 2.5rem;
-    color: var(--bs-secondary-color);
+    color: var(--bs-secondary-color, #6c757d);
 }
 
 .media-drop-zone .form-control {
@@ -995,7 +995,7 @@ body {
     align-items: center;
     gap: 0 0.75rem;
     padding: 0.5rem;
-    border-bottom: 1px solid var(--bs-border-color);
+    border-bottom: 1px solid var(--bs-border-color, #dee2e6);
 }
 
 .media-upload-preview {
@@ -1005,8 +1005,8 @@ body {
     justify-content: center;
     width: 3rem;
     height: 3rem;
-    background-color: var(--bs-tertiary-bg);
-    border-radius: var(--bs-border-radius-sm);
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
+    border-radius: var(--bs-border-radius-sm, 0.2rem);
 }
 
 .media-upload-preview img {
@@ -1017,7 +1017,7 @@ body {
 
 .media-upload-preview .bi {
     font-size: 1.5rem;
-    color: var(--bs-secondary-color);
+    color: var(--bs-secondary-color, #6c757d);
 }
 
 .media-upload-name {
@@ -1028,13 +1028,13 @@ body {
 .media-upload-size {
     grid-area: size;
     font-size: 0.875rem;
-    color: var(--bs-secondary-color);
+    color: var(--bs-secondary-color, #6c757d);
 }
 
 .media-upload-state {
     grid-area: state;
     font-size: 0.875rem;
-    color: var(--bs-secondary-color);
+    color: var(--bs-secondary-color, #6c757d);
 }
 
 .media-upload-remove {
@@ -1042,12 +1042,12 @@ body {
 }
 
 .media-upload-item[data-state="uploaded"] .media-upload-state {
-    color: var(--bs-success-text-emphasis);
+    color: var(--bs-success-text-emphasis, #198754);
 }
 
 .media-upload-item[data-state="failed"] .media-upload-state,
 .media-upload-item[data-state="unknown"] .media-upload-state {
-    color: var(--bs-danger-text-emphasis);
+    color: var(--bs-danger-text-emphasis, #dc3545);
 }
 
 .media-upload-shared summary {
@@ -1163,20 +1163,20 @@ tr.rollertable_pending {
    disabled ones so fields the user cannot change read as such. */
 .form-control[readonly],
 .form-select[disabled] {
-    background-color: var(--bs-secondary-bg);
+    background-color: var(--bs-secondary-bg, #e9ecef);
     opacity: 1;
 }
 
 /* Date fields are readonly only so the picker sets them; they are not locked */
 .form-control.date-picker[readonly] {
-    background-color: var(--bs-body-bg);
+    background-color: var(--bs-body-bg, #ffffff);
     cursor: pointer;
 }
 
 /* Field hint icons sit next to the label rather than in the text flow. */
 .s2b_tooltip {
     margin-left: .35rem;
-    color: var(--bs-secondary-color);
+    color: var(--bs-secondary-color, #6c757d);
     cursor: help;
 }
 

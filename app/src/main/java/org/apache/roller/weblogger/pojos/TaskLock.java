@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.pojos;
 
+import java.util.TimeZone;
+
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
@@ -52,7 +54,7 @@ public class TaskLock implements Serializable {
         }
         
         // calculate next run time
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.setTime(previousRun);
         cal.add(Calendar.MINUTE, interval);
         
@@ -74,7 +76,7 @@ public class TaskLock implements Serializable {
         }
         
         // calculate lease expiration time
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.setTime(leaseAcquisitionTime);
         cal.add(Calendar.MINUTE, getTimeLeased());
         

@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.struts2.editor;
 
+import java.util.TimeZone;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -97,6 +99,7 @@ public final class BookmarksImport extends UIAction implements UploadedFilesAwar
 
                     SimpleDateFormat formatter =
                             new SimpleDateFormat("yyyyMMddHHmmss");
+                    formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
                     Date now = new Date();
                     String folderName = "imported-" + formatter.format(now);
 

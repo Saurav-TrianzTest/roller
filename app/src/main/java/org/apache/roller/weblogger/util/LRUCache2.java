@@ -16,6 +16,8 @@
 * directory of this distribution.
 */
 package org.apache.roller.weblogger.util;
+
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -124,7 +126,7 @@ public class LRUCache2
         @Override
         public long getCurrentTimeInMillis()
         {
-            return System.currentTimeMillis();
+            return Instant.now().toEpochMilli();
         }
     }
 

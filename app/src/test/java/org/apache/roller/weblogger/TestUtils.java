@@ -23,6 +23,8 @@
 
 package org.apache.roller.weblogger;
 
+import java.time.Instant;
+
 import java.io.InputStream;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -837,7 +839,7 @@ public final class TestUtils {
         testEntry.setPermalink(title);
         testEntry.setTitle(title);
         testEntry
-                .setPubTime(new java.sql.Timestamp(System.currentTimeMillis()));
+                .setPubTime(new java.sql.Timestamp(Instant.now().toEpochMilli()));
         testEntry.setSubscription(testSub);
         testSub.getEntries().add(testEntry);
         mgr.saveEntry(testEntry);

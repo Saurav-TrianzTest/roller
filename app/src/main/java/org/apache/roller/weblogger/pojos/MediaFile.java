@@ -17,6 +17,8 @@
  */
 package org.apache.roller.weblogger.pojos;
 
+import java.time.Instant;
+
 import java.io.InputStream;
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -58,8 +60,8 @@ public class MediaFile implements Serializable {
     private int thumbnailWidth = -1;
     private String contentType;
     private String originalPath;
-    private Timestamp dateUploaded = new Timestamp(System.currentTimeMillis());
-    private Timestamp lastUpdated = new Timestamp(System.currentTimeMillis());
+    private Timestamp dateUploaded = new Timestamp(Instant.now().toEpochMilli());
+    private Timestamp lastUpdated = new Timestamp(Instant.now().toEpochMilli());
     private String creatorUserName;
     private Weblog weblog;
 

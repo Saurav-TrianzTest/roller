@@ -72,6 +72,8 @@ public class AkismetCommentValidator implements CommentValidator {
         try {
             URL url = new URL("http://" + apikey + ".rest.akismet.com/1.1/comment-check");
             URLConnection conn = url.openConnection();
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(5000);
             conn.setDoOutput(true);
 
             conn.setRequestProperty("User_Agent", "Roller " + WebloggerFactory.getWeblogger().getVersion()); 

@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.rendering.servlets;
 
+import java.time.Instant;
+
 import java.io.IOException;
 import java.util.HashMap;
 import jakarta.servlet.ServletConfig;
@@ -95,7 +97,7 @@ public class RSDServlet extends HttpServlet {
         }
 
         // Respond with 304 Not Modified if it is not modified.
-        long lastModified = System.currentTimeMillis();
+        long lastModified = Instant.now().toEpochMilli();
         if (weblog.getLastModified() != null) {
             lastModified = weblog.getLastModified().getTime();
         }

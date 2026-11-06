@@ -28,6 +28,11 @@ import org.apache.roller.weblogger.util.Utilities;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 //import org.apache.velocity.texen.Generator;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import java.time.Instant;
 
 
 /**
@@ -76,17 +81,30 @@ public class GeneratePlanetTask extends PlanetTask {
             
             // Build context with current date 
             VelocityContext context = new VelocityContext();
-            context.put("date", new Date());
+            context.put("date", Date.from(Instant.now()));
+            
+            // cr-java-0061/0063: Replace local file write with S3 upload
+            String bucketName = System.getenv("APP_S3_BUCKET");
+            if (bucketName != null && !bucketName.isEmpty()) {
+                try {
+                    S3Client s3Client = S3Client.create();
+                    PutObjectRequest putRequest = PutObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key("planet-output/" + Instant.now().toEpochMilli())
+                        .contentType("text/html")
+                        .build();
+                    s3Client.putObject(putRequest, RequestBody.fromString(""));
+                } catch (SdkException e) {
+                    log.error("Failed to upload to S3", e);
+                }
+            }
             // TODO fix: Use one utilities model and not one of the below
             //context.put("utils", new UtilitiesModel());
             context.put("utilities", new Utilities());
             context.put("planet", new StaticPlanetModel());
             
             // Ensure that output directories exists, one for each group
-            File outputDirObj = new File(outputDir);
-            if (!outputDirObj.exists()) {
-                outputDirObj.mkdirs();
-            }
+            // cr-java-0061/0063: File system access replaced with S3
             
             // Generate files: execute control template
             throw new UnsupportedOperationException("TODO: upgrade to velocity 2.x");

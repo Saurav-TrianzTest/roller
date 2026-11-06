@@ -18,6 +18,8 @@
 /* Created on Nov 11, 2003 */
 package org.apache.roller.weblogger.util;
 
+import java.util.TimeZone;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import java.io.BufferedReader;
@@ -40,6 +42,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 import org.apache.roller.weblogger.config.WebloggerConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.roller.util.DateUtil;
@@ -287,7 +298,8 @@ public final class Bannedwordslist {
             str = str.trim();
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                lastModified = DateUtil.parse(str, sdf);
+                sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                sdf.parse(str);
             } catch (ParseException e) {
                 mLogger.debug("ParseException reading " + str);
             }

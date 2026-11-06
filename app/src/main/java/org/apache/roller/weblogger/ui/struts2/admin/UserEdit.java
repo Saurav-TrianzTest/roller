@@ -118,7 +118,7 @@ public class UserEdit extends UIAction {
         if (isAdd()) {
             // initial user create
             getBean().setLocale(Locale.getDefault().toString());
-            getBean().setTimeZone(TimeZone.getDefault().getID());
+            getBean().setTimeZone(TimeZone.getTimeZone("UTC").getID());
         } else {
             // populate form data from user profile data
             getBean().copyFrom(user);

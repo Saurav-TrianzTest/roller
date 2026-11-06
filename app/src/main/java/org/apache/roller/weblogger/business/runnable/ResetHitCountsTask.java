@@ -152,6 +152,14 @@ public class ResetHitCountsTask extends RollerTaskWithLeasing {
      * Main method so that this task may be run from outside the webapp.
      */
     public static void main(String[] args) throws Exception {
+        // Register shutdown hook for graceful termination
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                WebloggerFactory.getWeblogger().release();
+            } catch (Exception e) {
+                // Best-effort cleanup
+            }
+        }));
         try {
             ResetHitCountsTask task = new ResetHitCountsTask();
             task.init();

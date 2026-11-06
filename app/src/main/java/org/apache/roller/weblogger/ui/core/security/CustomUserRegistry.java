@@ -71,7 +71,7 @@ public class CustomUserRegistry {
         // setting default
         ud.setId(null);
         ud.setLocale(Locale.getDefault().toString());
-        ud.setTimeZone(TimeZone.getDefault().getID());
+        ud.setTimeZone(TimeZone.getTimeZone("UTC").getID());
         ud.setDateCreated(new java.util.Date());
 
         String userName;

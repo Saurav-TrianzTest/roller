@@ -59,7 +59,7 @@ public abstract class DateUtil {
      * midnight (00m 00h 00s)
      */
     public static Date getStartOfDay(Date day) {
-        return getStartOfDay(day, Calendar.getInstance());
+        return getStartOfDay(day, Calendar.getInstance(TimeZone.getTimeZone("UTC")));
     }
     
     
@@ -87,7 +87,7 @@ public abstract class DateUtil {
      * midnight (00m 00h 00s)
      */
     public static Date getEndOfDay(Date day) {
-        return getEndOfDay(day,Calendar.getInstance());
+        return getEndOfDay(day,Calendar.getInstance(TimeZone.getTimeZone("UTC")));
     }
     
     
@@ -109,7 +109,7 @@ public abstract class DateUtil {
      * If a null day is passed in, a new Date is created.
      */
     public static Date getStartOfHour(Date day) {
-        return getStartOfHour(day, Calendar.getInstance());
+        return getStartOfHour(day, Calendar.getInstance(TimeZone.getTimeZone("UTC")));
     }
     
     
@@ -135,7 +135,7 @@ public abstract class DateUtil {
      * midnight (00m 00h 00s)
      */
     public static Date getEndOfHour(Date day) {
-        return getEndOfHour(day, Calendar.getInstance());
+        return getEndOfHour(day, Calendar.getInstance(TimeZone.getTimeZone("UTC")));
     }
     
     
@@ -157,7 +157,7 @@ public abstract class DateUtil {
      * If a null day is passed in, a new Date is created.
      */
     public static Date getStartOfMinute(Date day) {
-        return getStartOfMinute(day, Calendar.getInstance());
+        return getStartOfMinute(day, Calendar.getInstance(TimeZone.getTimeZone("UTC")));
     }
     
     
@@ -181,7 +181,7 @@ public abstract class DateUtil {
      * If a null day is passed in, a new Date is created.
      */
     public static Date getEndOfMinute(Date day) {
-        return getEndOfMinute(day, Calendar.getInstance());
+        return getEndOfMinute(day, Calendar.getInstance(TimeZone.getTimeZone("UTC")));
     }
     
     
@@ -203,7 +203,7 @@ public abstract class DateUtil {
      * midnight (00m 00h 00s)
      */
     public static Date getStartOfMonth(Date day) {
-        return getStartOfMonth(day, Calendar.getInstance());
+        return getStartOfMonth(day, Calendar.getInstance(TimeZone.getTimeZone("UTC")));
     }
     
     
@@ -232,7 +232,7 @@ public abstract class DateUtil {
      * midnight (00m 00h 00s)
      */
     public static Date getEndOfMonth(Date day) {
-        return getEndOfMonth(day, Calendar.getInstance());
+        return getEndOfMonth(day, Calendar.getInstance(TimeZone.getTimeZone("UTC")));
     }
     
     
@@ -371,46 +371,61 @@ public abstract class DateUtil {
      **/
     public static SimpleDateFormat friendlyDateFormat(boolean minimalFormat) {
         if (minimalFormat) {
-            return new SimpleDateFormat(FORMAT_DEFAULT_DATE_MINIMAL);
+            SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_DEFAULT_DATE_MINIMAL);
+            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+            return sdf;
         }
-        
-        return new SimpleDateFormat(FORMAT_DEFAULT_DATE);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_DEFAULT_DATE);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return sdf;
     }
     
     
     // returns full timestamp format
     public static SimpleDateFormat defaultTimestampFormat() {
-        return new SimpleDateFormat(FORMAT_DEFAULT_TIMESTAMP);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_DEFAULT_TIMESTAMP);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return sdf;
     }
     
     
     // convenience method returns long friendly timestamp format
     public static SimpleDateFormat friendlyTimestampFormat() {
-        return new SimpleDateFormat(FORMAT_FRIENDLY_TIMESTAMP);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_FRIENDLY_TIMESTAMP);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return sdf;
     }
     
     
     // convenience method returns minimal date format
     public static SimpleDateFormat get8charDateFormat() {
-        return new SimpleDateFormat(FORMAT_8CHARS);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_8CHARS);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return sdf;
     }
     
     
     // convenience method returns minimal date format
     public static SimpleDateFormat get6charDateFormat() {
-        return new SimpleDateFormat(FORMAT_6CHARS);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_6CHARS);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return sdf;
     }
     
     
     // convenience method returns minimal date format
     public static SimpleDateFormat getIso8601DateFormat() {
-        return new SimpleDateFormat(FORMAT_ISO_8601);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_ISO_8601);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return sdf;
     }
     
     
     // convenience method returns minimal date format
     public static SimpleDateFormat getIso8601DayDateFormat() {
-        return new SimpleDateFormat(FORMAT_ISO_8601_DAY);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_ISO_8601_DAY);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return sdf;
     }
     
     
@@ -418,7 +433,9 @@ public abstract class DateUtil {
     public static SimpleDateFormat getRfc822DateFormat() {
         // http://www.w3.org/Protocols/rfc822/Overview.html#z28
         // Using Locale.US to fix ROL-725 and ROL-628
-        return new SimpleDateFormat(FORMAT_RFC_822, Locale.US);
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_RFC_822, Locale.US);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return sdf;
     }
     
     

@@ -24,6 +24,8 @@ import java.sql.DriverManager;
 
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.roller.weblogger.business.startup.SQLScriptRunner;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 
 public class DerbyManager {
@@ -56,8 +58,19 @@ public class DerbyManager {
                 System.out.println("Runtime Info: " + server.getRuntimeInfo());
 
                 Class.forName("org.apache.derby.jdbc.ClientDriver");
-                Connection conn = DriverManager.getConnection(
-                    "jdbc:derby://localhost:" + port + "/rollerdb;create=true","APP", "APP");
+                // cr-java-0073: Replace raw JDBC with HikariCP connection pool
+                // cr-java-0097: Add connection timeout (5 seconds = 5000ms)
+                HikariConfig config = new HikariConfig();
+                config.setJdbcUrl("jdbc:derby://localhost:" + port + "/rollerdb;create=true");
+                config.setUsername("APP");
+                config.setPassword("APP");
+                config.setConnectionTimeout(5000);
+                config.setIdleTimeout(5000);
+                config.setMaxLifetime(300000);
+                config.setMaximumPoolSize(5);
+                config.setInitializationFailTimeout(-1);
+                HikariDataSource dataSource = new HikariDataSource(config);
+                Connection conn = dataSource.getConnection();
 
                 // create roller tables
                 SQLScriptRunner runner1 = new SQLScriptRunner(
@@ -86,7 +99,19 @@ public class DerbyManager {
         try {
                 Class.forName("org.apache.derby.jdbc.ClientDriver");
                 String driverURL = "jdbc:derby://localhost:" + port + "/rollerdb";
-                Connection conn = DriverManager.getConnection(driverURL,"APP", "APP");
+                // cr-java-0073: Use HikariCP with timeout
+                // cr-java-0097: Add connection timeout (5 seconds = 5000ms)
+                HikariConfig config = new HikariConfig();
+                config.setJdbcUrl(driverURL);
+                config.setUsername("APP");
+                config.setPassword("APP");
+                config.setConnectionTimeout(5000);
+                config.setIdleTimeout(5000);
+                config.setMaxLifetime(300000);
+                config.setMaximumPoolSize(5);
+                config.setInitializationFailTimeout(-1);
+                HikariDataSource dataSource = new HikariDataSource(config);
+                Connection conn = dataSource.getConnection();
 
                 // drop Roller tables
                 SQLScriptRunner runner = new SQLScriptRunner(

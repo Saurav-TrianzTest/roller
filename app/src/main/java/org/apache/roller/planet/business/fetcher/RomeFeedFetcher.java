@@ -18,6 +18,8 @@
 
 package org.apache.roller.planet.business.fetcher;
 
+import java.util.TimeZone;
+
 import com.rometools.rome.feed.module.DCModule;
 import com.rometools.rome.feed.synd.SyndCategory;
 import com.rometools.rome.feed.synd.SyndContent;
@@ -130,7 +132,7 @@ public class RomeFeedFetcher implements FeedFetcher {
         // some kludge to deal with feeds w/ no entry dates
         // we assign arbitrary dates chronologically by entry starting either
         // from the current time or the last update time of the subscription
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         if (newSub.getLastUpdated() != null) {
             cal.setTime(newSub.getLastUpdated());
         } else {

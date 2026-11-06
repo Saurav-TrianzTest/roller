@@ -17,6 +17,8 @@
  */
 package org.apache.roller.weblogger.business.jpa;
 
+import java.time.Instant;
+
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -44,6 +46,15 @@ import jakarta.persistence.TypedQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 import org.apache.roller.weblogger.WebloggerException;
 import org.apache.roller.weblogger.business.FileContentManager;
 import org.apache.roller.weblogger.business.FileIOException;
@@ -299,7 +310,7 @@ public class JPAMediaFileManagerImpl implements MediaFileManager {
     @Override
     public void updateMediaFile(Weblog weblog, MediaFile mediaFile)
             throws WebloggerException {
-        mediaFile.setLastUpdated(new Timestamp(System.currentTimeMillis()));
+        mediaFile.setLastUpdated(new Timestamp(Instant.now().toEpochMilli()));
         strategy.store(mediaFile);
 
         roller.flush();
@@ -316,7 +327,7 @@ public class JPAMediaFileManagerImpl implements MediaFileManager {
     @Override
     public void updateMediaFile(Weblog weblog, MediaFile mediaFile,
             InputStream is) throws WebloggerException {
-        mediaFile.setLastUpdated(new Timestamp(System.currentTimeMillis()));
+        mediaFile.setLastUpdated(new Timestamp(Instant.now().toEpochMilli()));
         strategy.store(mediaFile);
 
         roller.flush();

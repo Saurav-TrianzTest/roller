@@ -17,6 +17,8 @@
 
 package org.apache.roller.weblogger.webservices.atomprotocol;
 
+import java.time.Instant;
+
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -357,7 +359,7 @@ public class EntryCollection {
      */
     private void copyToRollerEntry(AtomEntry entry, WeblogEntry rollerEntry) throws WebloggerException {
 
-        Timestamp current = new Timestamp(System.currentTimeMillis());
+        Timestamp current = new Timestamp(Instant.now().toEpochMilli());
         Timestamp pubTime = current;
         Timestamp updateTime = current;
         if (entry.getPublished() != null) {

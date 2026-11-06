@@ -845,22 +845,28 @@ public class DatabaseInstaller {
         Connection con = null;
         try {
             con = db.getConnection();
-            Statement stmt = con.createStatement();
+            // cr-java-0098: Use try-with-resources for Statement and ResultSet
+            try (Statement stmt = con.createStatement()) {
+                // cr-java-0097: Set query timeout (5 seconds = 5000ms)
+                stmt.setQueryTimeout(5);
 
-            // just check in the roller_properties table
-            ResultSet rs = stmt.executeQuery(
-                    "select value from roller_properties where name = '"+DBVERSION_PROP+"'");
+                // just check in the roller_properties table
+                try (ResultSet rs = stmt.executeQuery(
+                        "select value from roller_properties where name = '"+DBVERSION_PROP+"'")) {
 
-            if(rs.next()) {
-                dbversion = Integer.parseInt(rs.getString(1));
+                    if(rs.next()) {
+                        dbversion = Integer.parseInt(rs.getString(1));
 
-            } else {
-                // tough to know if this is an upgrade with no db version :/
-                // however, if roller_properties is not empty then we at least
-                // we have someone upgrading from 1.2.x
-                rs = stmt.executeQuery("select count(*) from roller_properties");
-                if (rs.next() && rs.getInt(1) > 0) {
-                    dbversion = 120;
+                    } else {
+                        // tough to know if this is an upgrade with no db version :/
+                        // however, if roller_properties is not empty then we at least
+                        // we have someone upgrading from 1.2.x
+                        try (ResultSet rs2 = stmt.executeQuery("select count(*) from roller_properties")) {
+                            if (rs2.next() && rs2.getInt(1) > 0) {
+                                dbversion = 120;
+                            }
+                        }
+                    }
                 }
             }
 

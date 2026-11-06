@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.rendering.velocity;
 
+import java.time.Instant;
+
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Map;
@@ -113,7 +115,7 @@ public class VelocityRenderer implements Renderer {
                 return;
             }
 
-            long startTime = System.currentTimeMillis();
+            long startTime = Instant.now().toEpochMilli();
 
             // convert model to Velocity Context
             Context ctx = new VelocityContext(model);
@@ -143,7 +145,7 @@ public class VelocityRenderer implements Renderer {
                 velocityTemplate.merge(ctx, out);
             }
 
-            long endTime = System.currentTimeMillis();
+            long endTime = Instant.now().toEpochMilli();
             long renderTime = (endTime - startTime) / RollerConstants.SEC_IN_MS;
 
             log.debug("Rendered [" + renderTemplate.getId() + "] in "

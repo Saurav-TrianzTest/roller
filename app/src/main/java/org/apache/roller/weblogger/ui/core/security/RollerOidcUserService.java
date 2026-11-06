@@ -17,6 +17,8 @@
  */
 package org.apache.roller.weblogger.ui.core.security;
 
+import java.time.Instant;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -190,9 +192,9 @@ public class RollerOidcUserService implements OAuth2UserService<OidcUserRequest,
 
         user.setOpenIdUrl(oidcSubject);
         user.setPassword(UUIDGenerator.generateUUID());
-        user.setDateCreated(new Timestamp(System.currentTimeMillis()));
+        user.setDateCreated(new Timestamp(Instant.now().toEpochMilli()));
         user.setLocale(Locale.getDefault().toString());
-        user.setTimeZone(TimeZone.getDefault().getID());
+        user.setTimeZone(TimeZone.getTimeZone("UTC").getID());
         user.setEnabled(Boolean.TRUE);
 
         boolean bootstrapAdmin = umgr.getUserCount() == 0

@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.rendering.util.cache;
 
+import java.time.Instant;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,7 +106,7 @@ public class WeblogCacheWarmupJob implements Job {
         
         // we are working on the feed cache
         WeblogFeedCache feedCache = WeblogFeedCache.getInstance();
-        long start = System.currentTimeMillis();
+        long start = Instant.now().toEpochMilli();
         
         for (String weblogHandle : weblogs) {
             log.debug("doing weblog "+weblogHandle);
@@ -159,7 +161,7 @@ public class WeblogCacheWarmupJob implements Job {
             }
         }
         
-        long end = System.currentTimeMillis();
+        long end = Instant.now().toEpochMilli();
         long time = (end-start) * RollerConstants.SEC_IN_MS;
         
         log.info("Completed warmup for "+type+"/"+format+" in "+time+" secs.");
