@@ -170,13 +170,11 @@ public final class I18nMessages {
 
 		try {
 
-			Class<?> type = ResourceBundle.class;
-			Field cacheList = type.getDeclaredField("cacheList");
-
-			synchronized (cacheList) {
-				cacheList.setAccessible(true);
-				((Map<?, ?>) cacheList.get(ResourceBundle.class)).clear();
-			}
+			// Use the public API to clear the JDK ResourceBundle cache.
+			// On Java 17+ strong encapsulation (JEP 403) blocks reflection
+			// into ResourceBundle's internal cacheList field, so the public
+			// clearCache() method is used instead.
+			ResourceBundle.clearCache();
 
 			clearTomcatCache();
 

@@ -47,6 +47,8 @@ import org.apache.roller.weblogger.ui.core.plugins.UIPluginManagerImpl;
 import org.apache.roller.weblogger.ui.core.security.AutoProvision;
 import org.apache.roller.weblogger.ui.core.security.BootstrapSecurity;
 import org.apache.roller.weblogger.ui.core.security.RollerClientRegistrationRepository;
+import org.apache.roller.weblogger.ui.core.security.NoOpPasswordEncoder;
+import org.apache.roller.weblogger.ui.core.security.DigestPasswordEncoder;
 import org.apache.roller.weblogger.util.Reflection;
 import org.apache.roller.weblogger.util.cache.CacheManager;
 import org.apache.velocity.runtime.RuntimeSingleton;
@@ -307,11 +309,11 @@ public class RollerContext extends ContextLoaderListener
         if(migrateFrom == null || migrateFrom.isEmpty()) {
             log.debug("lazy pw upgrade disabled");
         } else if (migrateFrom.equals("plaintext")) {
-            encoders.put(null, org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance());
+            encoders.put(null, new NoOpPasswordEncoder());
         } else if (migrateFrom.equals("MD5")) {
-            encoders.put(null, new org.springframework.security.crypto.password.MessageDigestPasswordEncoder("MD5"));
+            encoders.put(null, new DigestPasswordEncoder("MD5"));
         } else if (migrateFrom.equals("SHA")) {
-            encoders.put(null, new org.springframework.security.crypto.password.MessageDigestPasswordEncoder("SHA-1"));
+            encoders.put(null, new DigestPasswordEncoder("SHA-1"));
         } else {
             throw new RuntimeException("passwds.encryption.lazyUpgradeFrom="+migrateFrom+" is no valid encoding to upgrade from.");
         }
@@ -327,7 +329,7 @@ public class RollerContext extends ContextLoaderListener
         encoders.put("argon2", Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8());
 
         // just for testing
-        encoders.put("noop", org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance());
+        encoders.put("noop", new NoOpPasswordEncoder());
         
         String algorithm = WebloggerConfig.getProperty("passwds.encryption.algorithm");
         

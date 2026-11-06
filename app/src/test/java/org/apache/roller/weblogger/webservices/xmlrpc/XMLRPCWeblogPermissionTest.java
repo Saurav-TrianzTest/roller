@@ -51,8 +51,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.apache.roller.weblogger.ui.core.security.NoOpPasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -460,7 +460,7 @@ public class XMLRPCWeblogPermissionTest {
         encoderField.setAccessible(true);
         oldPasswordEncoder = encoderField.get(null);
 
-        PasswordEncoder noOp = NoOpPasswordEncoder.getInstance();
+        PasswordEncoder noOp = new NoOpPasswordEncoder();
         Map<String, PasswordEncoder> encoders = new HashMap<>();
         encoders.put(null, noOp);
         encoders.put("noop", noOp);
