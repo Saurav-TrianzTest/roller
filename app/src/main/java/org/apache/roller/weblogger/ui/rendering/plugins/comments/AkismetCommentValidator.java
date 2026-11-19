@@ -23,6 +23,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ResourceBundle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,7 +79,7 @@ public class AkismetCommentValidator implements CommentValidator {
             conn.setRequestProperty("Content-type", "application/x-www-form-urlencoded;charset=utf8"); 
             conn.setRequestProperty("Content-length", Integer.toString(sb.length()));
 
-            OutputStreamWriter osr = new OutputStreamWriter(conn.getOutputStream());
+            OutputStreamWriter osr = new OutputStreamWriter(conn.getOutputStream(), StandardCharsets.UTF_8);
             osr.write(sb.toString(), 0, sb.length());
             osr.flush();
             osr.close();

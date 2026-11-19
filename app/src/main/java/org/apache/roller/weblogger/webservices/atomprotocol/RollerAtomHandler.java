@@ -19,6 +19,7 @@ package org.apache.roller.weblogger.webservices.atomprotocol;
 
 import java.util.StringTokenizer;
 import java.util.Locale;
+import java.nio.charset.StandardCharsets;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.binary.Base64;
@@ -471,7 +472,7 @@ public class RollerAtomHandler {
                     String basic = st.nextToken();
                     if (basic.equalsIgnoreCase("Basic")) {
                         String credentials = st.nextToken();
-                        String userPass = new String(Base64.decodeBase64(credentials.getBytes()));
+                        String userPass = new String(Base64.decodeBase64(credentials.getBytes()), StandardCharsets.UTF_8);
                         int p = userPass.indexOf(':');
                         if (p != -1) {
                             userID = userPass.substring(0, p);

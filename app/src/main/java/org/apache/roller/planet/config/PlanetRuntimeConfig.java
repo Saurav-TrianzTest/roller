@@ -21,6 +21,7 @@ package org.apache.roller.planet.config;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.roller.weblogger.business.PropertiesManager;
@@ -160,7 +161,7 @@ public class PlanetRuntimeConfig {
 
         try {
             StringWriter configString = new StringWriter();
-            try (InputStreamReader reader = new InputStreamReader(PlanetConfig.class.getResourceAsStream(runtimeConfig))) {
+            try (InputStreamReader reader = new InputStreamReader(PlanetConfig.class.getResourceAsStream(runtimeConfig), StandardCharsets.UTF_8)) {
                 reader.transferTo(configString);
             }
             return configString.toString();

@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -453,7 +454,7 @@ public class Utilities {
      */
     public static String streamToString(InputStream is) throws IOException {
         StringBuilder sb = new StringBuilder();
-        BufferedReader in = new BufferedReader(new InputStreamReader(is));
+        BufferedReader in = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
         String line;
         while ((line = in.readLine()) != null) {
             sb.append(line);
@@ -555,7 +556,7 @@ public class Utilities {
      * @return encypted password based on the algorithm.
      */
     public static String encodePassword(String password, String algorithm) {
-        byte[] unencodedPassword = password.getBytes();
+        byte[] unencodedPassword = password.getBytes(StandardCharsets.UTF_8);
 
         MessageDigest md;
 
@@ -602,7 +603,7 @@ public class Utilities {
      * @throws IOException
      */
     public static String encodeString(String str) throws IOException {
-        String encodedStr = new String(Base64.encodeBase64(str.getBytes()));
+        String encodedStr = new String(Base64.encodeBase64(str.getBytes(StandardCharsets.UTF_8)));
         return (encodedStr.trim());
     }
 
@@ -615,7 +616,7 @@ public class Utilities {
      * @throws IOException
      */
     public static String decodeString(String str) throws IOException {
-        String value = new String(Base64.decodeBase64(str.getBytes()));
+        String value = new String(Base64.decodeBase64(str.getBytes()), StandardCharsets.UTF_8);
         return (value);
     }
 

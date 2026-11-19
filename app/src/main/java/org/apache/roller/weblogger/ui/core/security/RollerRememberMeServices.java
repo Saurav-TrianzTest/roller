@@ -26,6 +26,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.codec.Hex;
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -75,6 +76,6 @@ public class RollerRememberMeServices extends TokenBasedRememberMeServices {
             throw new IllegalStateException("Required by Spec.", e);
         }
 
-        return new String(Hex.encode(digest.digest(data.getBytes())));
+        return new String(Hex.encode(digest.digest(data.getBytes(StandardCharsets.UTF_8))));
     }
 }

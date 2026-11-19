@@ -238,6 +238,6 @@ public final class WeblogPageCache {
             }
         }
 
-        return Utilities.toBase64(string.toString().substring(1).getBytes());
+        return Utilities.toBase64(string.toString().substring(1).getBytes(StandardCharsets.UTF_8));
     }
 }
