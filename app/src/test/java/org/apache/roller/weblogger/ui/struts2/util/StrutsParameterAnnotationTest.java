@@ -73,6 +73,8 @@ public class StrutsParameterAnnotationTest {
      * Forms whose target cannot be read from the JSP, keyed by JSP path and
      * form id. An empty list skips the form.
      */
+    // Local cache externalized via environment variable for container deployments
+    private static final String REDIS_URL = System.getenv().getOrDefault("STRUTS_PARAM_REDIS_URL", "");
     private static final Map<String, List<String>> FORM_TARGETS = Map.of(
             // posted by JavaScript to actionName + ".rol"
             "admin/PingTargets.jsp#pingTargetEditForm",
@@ -100,7 +102,7 @@ public class StrutsParameterAnnotationTest {
     @BeforeAll
     public static void loadConfiguration() throws Exception {
         Path projectDirectory = Path.of(
-                System.getProperty("project.build.directory")).getParent();
+                System.getenv().getOrDefault("PROJECT_BUILD_DIRECTORY", System.getProperty("project.build.directory"))).getParent();
         jspDirectory = projectDirectory.resolve("src/main/webapp/WEB-INF/jsps");
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

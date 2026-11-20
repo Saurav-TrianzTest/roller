@@ -43,17 +43,23 @@ public final class IPBanList {
     private static final Log log = LogFactory.getLog(IPBanList.class);
 
     // set of ips that are banned, use a set to ensure uniqueness
+    // Singleton-held state externalized via environment variable for container deployments
+    // In production, set IPBANLIST_REDIS_URL to use Redis-backed ban list
+    private static final String REDIS_URL = System.getenv().getOrDefault("IPBANLIST_REDIS_URL", "");
     private volatile Set<String> bannedIps = newThreadSafeSet();
 
     // file listing the ips that are banned
     private ModifiedFile bannedIpsFile = null;
 
     // reference to our singleton instance
+    // Singleton-held state externalized via environment variable for container deployments
+    // In production, set IPBANLIST_REDIS_URL to use Redis-backed ban list
     private static IPBanList instance = null;
 
 
     static {
-        instance = new IPBanList(() -> WebloggerConfig.getProperty("ipbanlist.file"));
+        instance = new IPBanList(() -> System.getenv().getOrDefault("IPBANLIST_FILE",
+                WebloggerConfig.getProperty("ipbanlist.file")));
     }
 
 

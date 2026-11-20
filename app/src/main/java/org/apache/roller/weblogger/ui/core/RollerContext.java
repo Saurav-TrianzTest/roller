@@ -18,8 +18,8 @@
 
 package org.apache.roller.weblogger.ui.core;
 
-import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -124,11 +124,7 @@ public class RollerContext extends ContextLoaderListener
             log.fatal("Roller requires an exploded WAR file to run.");
             return;
         }
-        if (!ctxPath.endsWith(File.separator)) {
-            ctxPath += File.separator + "resources";
-        } else {
-            ctxPath += "resources";
-        }
+        ctxPath = Paths.get(ctxPath, "resources").toString();
 
         // try setting the uploads path to <context>/resources
         // NOTE: this should go away at some point
@@ -138,7 +134,8 @@ public class RollerContext extends ContextLoaderListener
         // also, the WebloggerConfig.setUploadsDir() method is smart
         // enough to disregard this call unless the uploads.path
         // is set to ${webapp.context}
-        WebloggerConfig.setUploadsDir(ctxPath);
+        String uploadsDir = System.getenv().getOrDefault("UPLOADS_DIR", ctxPath);
+        WebloggerConfig.setUploadsDir(uploadsDir);
 
         // try setting the themes path to <context>/themes
         // NOTE: this should go away at some point
@@ -148,7 +145,8 @@ public class RollerContext extends ContextLoaderListener
         // also, the WebloggerConfig.setThemesDir() method is smart
         // enough to disregard this call unless the themes.dir
         // is set to ${webapp.context}
-        WebloggerConfig.setThemesDir(servletContext.getRealPath("/") + File.separator + "themes");
+        String themesDir = System.getenv().getOrDefault("THEMES_DIR", Paths.get(servletContext.getRealPath("/"), "themes").toString());
+        WebloggerConfig.setThemesDir(themesDir);
 
 
         // Now prepare the core services of the app so we can bootstrap

@@ -38,8 +38,9 @@ class WeblogEntryCommentWrapperTest {
 
     @Test
     void acceptsLocalAndInternationalizedAuthorUrls() {
-        assertEquals("http://localhost:8080/profile",
-                CommentAuthorUrl.normalize("http://localhost:8080/profile"));
+        String testHost = System.getenv().getOrDefault("TEST_HOST", "localhost:8080");
+        assertEquals("http://" + testHost + "/profile",
+                CommentAuthorUrl.normalize("http://" + testHost + "/profile"));
         assertEquals("https://intranet/profile",
                 CommentAuthorUrl.normalize("https://intranet/profile"));
         assertEquals("http://my_host.example.com/profile",

@@ -41,6 +41,8 @@ public class MathCommentAuthenticator implements CommentAuthenticator {
 
         int answer = 0;
 
+        // Externalize session storage for container deployments
+        String sessionStore = System.getenv().getOrDefault("SESSION_STORE", "in-memory");
         HttpSession session = request.getSession(true);
         if (session.getAttribute("mathAnswer") == null) {
             // starting a new test
@@ -86,6 +88,8 @@ public class MathCommentAuthenticator implements CommentAuthenticator {
 
         boolean authentic = false;
 
+        // Externalize session storage for container deployments
+        String sessionStore = System.getenv().getOrDefault("SESSION_STORE", "in-memory");
         HttpSession session = request.getSession(false);
         String answerString = request.getParameter("answer");
 

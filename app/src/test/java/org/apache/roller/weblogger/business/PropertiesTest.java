@@ -107,7 +107,8 @@ public class PropertiesTest  {
 
         CountDownLatch ready = new CountDownLatch(2);
         CountDownLatch start = new CountDownLatch(1);
-        ExecutorService executor = Executors.newFixedThreadPool(2);
+        ExecutorService executor = Executors.newFixedThreadPool(
+                Integer.parseInt(System.getenv().getOrDefault("TEST_THREAD_POOL_SIZE", "2")));
         try {
             Future<Boolean> first = executor.submit(() -> compareAndSetAfterSignal(
                     "site.frontpage.weblog.handle", "first", ready, start));

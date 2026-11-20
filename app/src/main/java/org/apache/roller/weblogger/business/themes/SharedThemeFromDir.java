@@ -27,6 +27,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.*;
 import org.apache.roller.weblogger.pojos.TemplateRendition.RenditionType;
 import org.apache.roller.weblogger.pojos.ThemeResource;
@@ -182,8 +183,8 @@ public class SharedThemeFromDir extends SharedTheme {
         try {
             // lookup theme descriptor and parse it
             ThemeMetadataParser parser = new ThemeMetadataParser();
-            InputStream is = new FileInputStream(this.themeDir + File.separator
-                    + "theme.xml");
+            InputStream is = new FileInputStream(Paths.get(this.themeDir,
+                    "theme.xml").toFile());
             themeMetadata = parser.unmarshall(is);
         } catch (Exception ex) {
             throw new ThemeInitializationException(
@@ -205,7 +206,7 @@ public class SharedThemeFromDir extends SharedTheme {
         setEnabled(true);
 
         // load resource representing preview image
-        File previewFile = new File(this.themeDir + File.separator + themeMetadata.getPreviewImage());
+        File previewFile = Paths.get(this.themeDir, themeMetadata.getPreviewImage()).toFile();
         if (!previewFile.exists() || !previewFile.canRead()) {
             log.warn("Couldn't read theme [" + this.getName()
                     + "] preview image file ["
@@ -252,8 +253,8 @@ public class SharedThemeFromDir extends SharedTheme {
             // construct File object from path
             // we are getting the file path from standard as the default and
             // load it to initially.
-            File templateFile = new File(this.themeDir + File.separator
-                    + standardTemplateCode.getContentsFile());
+            File templateFile = Paths.get(this.themeDir,
+                    standardTemplateCode.getContentsFile()).toFile();
 
             // read stylesheet contents
             String contents = loadTemplateFile(templateFile);
@@ -302,8 +303,8 @@ public class SharedThemeFromDir extends SharedTheme {
         // go through static resources and add them to the theme
         for (String resourcePath : themeMetadata.getResources()) {
             // construct ThemeResource object from resource
-            File resourceFile = new File(this.themeDir + File.separator
-                    + resourcePath);
+            File resourceFile = Paths.get(this.themeDir,
+                    resourcePath).toFile();
 
             // Continue reading theme even if problem encountered with one file
             if (!resourceFile.exists() || !resourceFile.canRead()) {
@@ -352,8 +353,8 @@ public class SharedThemeFromDir extends SharedTheme {
             }
 
             // construct File object from path
-            File templateFile = new File(this.themeDir + File.separator
-                    + standardTemplateCode.getContentsFile());
+            File templateFile = Paths.get(this.themeDir,
+                    standardTemplateCode.getContentsFile()).toFile();
 
             String contents = loadTemplateFile(templateFile);
             if (contents == null) {
@@ -448,8 +449,8 @@ public class SharedThemeFromDir extends SharedTheme {
         SharedThemeTemplateRendition templateRendition = new SharedThemeTemplateRendition();
 
         // construct File object from path
-        File templateFile = new File(this.themeDir + File.separator
-                + templateCodeMetadata.getContentsFile());
+        File templateFile = Paths.get(this.themeDir,
+                templateCodeMetadata.getContentsFile()).toFile();
 
         // read stylesheet contents
         String contents = loadTemplateFile(templateFile);

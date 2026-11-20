@@ -99,7 +99,13 @@ public class FileContentManagerTest  {
         }
 
         // store a file
-        InputStream is = getClass().getResourceAsStream("/bookmarks.opml");
+        String opmlPath = System.getenv("BOOKMARKS_OPML_PATH");
+        InputStream is;
+        if (opmlPath != null) {
+            is = new java.io.FileInputStream(opmlPath);
+        } else {
+            is = getClass().getResourceAsStream("/bookmarks.opml");
+        }
         fmgr.saveFileContent(testWeblog, "bookmarks-file-id", is);
 
         // make sure file was stored successfully

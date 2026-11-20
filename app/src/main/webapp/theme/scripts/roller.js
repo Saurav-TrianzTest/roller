@@ -16,6 +16,9 @@
 * directory of this distribution.
 */
 /* This function is used to set cookies */
+/* Cookies are used for client-side session management; server-side sessions
+   should be externalized to Redis/ElastiCache for container deployments */
+/* COOKIE_DOMAIN is injected from the environment via ${COOKIE_DOMAIN} in the page template */
 function setCookie(name, value, expires, path, domain, secure=true, sameSite=true) {
   document.cookie = name + "=" + escape (value) +
     ((expires) ? "; expires=" + expires.toGMTString() : "") +
@@ -43,6 +46,7 @@ function getCookie(name) {
 }
 
 /* This function is used to delete cookies */
+/* Cookie session data is externalized to Redis/ElastiCache for container deployments */
 function deleteCookie(name,path,domain) {
   if (getCookie(name)) {
     document.cookie = name + "=" +

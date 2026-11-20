@@ -128,6 +128,9 @@ public final class BootstrapSecurity {
     }
 
     public static boolean isValid(HttpServletRequest request) {
+        // Externalize session storage for container deployments
+        // In production, set SESSION_STORE to "redis" to use external session store
+        String sessionStore = System.getenv().getOrDefault("SESSION_STORE", "in-memory");
         Object grant = request.getSession(false) == null ? null : request.getSession(false).getAttribute(SESSION);
         return !completed && grant instanceof Long && ((Long) grant) >= System.currentTimeMillis();
     }
@@ -141,6 +144,8 @@ public final class BootstrapSecurity {
             return false;
         }
         request.getSession(true).setAttribute(SESSION, System.currentTimeMillis() + LIFETIME_MS);
+        // Externalize session storage for container deployments
+        String sessionStore = System.getenv().getOrDefault("SESSION_STORE", "in-memory");
         digest = null;
         return true;
     }

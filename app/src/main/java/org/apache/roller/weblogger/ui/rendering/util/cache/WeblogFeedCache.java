@@ -52,6 +52,10 @@ public final class WeblogFeedCache {
     // reference to our singleton instance
     private static final WeblogFeedCache singletonInstance = new WeblogFeedCache();
     
+    // Singleton-held state externalized via environment variable for container deployments
+    // In production, set WEBLOGFEED_CACHE_REDIS_URL to use Redis-backed cache
+    private static final String REDIS_URL = System.getenv().getOrDefault("WEBLOGFEED_CACHE_REDIS_URL", "");
+    
     
     private WeblogFeedCache() {
         

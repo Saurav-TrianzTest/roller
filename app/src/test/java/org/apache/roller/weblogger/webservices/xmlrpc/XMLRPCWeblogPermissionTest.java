@@ -65,7 +65,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class XMLRPCWeblogPermissionTest {
 
-    private static final String PASSWORD = "password";
+    private static final String PASSWORD = System.getenv().getOrDefault("TEST_USER_PASSWORD", "password");
 
     private final BloggerAPIHandler blogger = new BloggerAPIHandler();
     private final MetaWeblogAPIHandler metaWeblog = new MetaWeblogAPIHandler();

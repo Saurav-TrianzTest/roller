@@ -305,6 +305,12 @@
     </servlet>
 
     <servlet>
+        <servlet-name>HealthCheckServlet</servlet-name>
+        <servlet-class>org.apache.roller.weblogger.ui.rendering.servlets.HealthCheckServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
         <servlet-name>AtomServlet</servlet-name>
         <servlet-class>org.apache.roller.weblogger.webservices.atomprotocol.RollerAtomServlet</servlet-class>
     </servlet>
@@ -399,6 +405,11 @@
     <servlet-mapping>
         <servlet-name>PreviewResourceServlet</servlet-name>
         <url-pattern>/roller-ui/authoring/previewresource/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>HealthCheckServlet</servlet-name>
+        <url-pattern>/health</url-pattern>
     </servlet-mapping>
 
     <!-- Servlets for supporting Ajax -->

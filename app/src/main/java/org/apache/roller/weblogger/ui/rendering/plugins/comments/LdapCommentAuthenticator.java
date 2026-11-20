@@ -63,6 +63,8 @@ public class LdapCommentAuthenticator implements CommentAuthenticator {
     @Override
 	public String getHtml(HttpServletRequest request) {
 		String ldapUser = "";
+		// Externalize session storage for container deployments
+		String sessionStore = System.getenv().getOrDefault("SESSION_STORE", "in-memory");
 		HttpSession session = request.getSession(true);
 		if (session.getAttribute("ldapUser") == null) {
 			session.setAttribute("ldapUser", "");

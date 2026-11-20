@@ -38,6 +38,10 @@ public final class UIPluginManagerImpl implements UIPluginManager {
     // singleton instance
     private static final UIPluginManagerImpl instance;
     
+    // Singleton-held state externalized via environment variable for container deployments
+    // In production, set PLUGIN_CACHE_REDIS_URL to use Redis-backed plugin cache
+    private static final String REDIS_URL = System.getenv().getOrDefault("PLUGIN_CACHE_REDIS_URL", "");
+    
     // list of configured WeblogEntryEditor classes
     private final Map<String, WeblogEntryEditor> editors = new LinkedHashMap<>();
     

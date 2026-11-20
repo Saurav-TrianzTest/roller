@@ -25,8 +25,8 @@ import org.apache.derby.drda.NetworkServerControl;
 import org.apache.roller.weblogger.business.startup.SQLScriptRunner;
 import org.junit.jupiter.api.extension.*;
 
-import java.io.File;
 import java.io.PrintWriter;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
@@ -74,7 +74,9 @@ class DerbyStartStopper {
 
         System.setProperty("derby.system.home", databaseDir);
         System.setProperty("derby.drda.portNumber", port);
-        System.setProperty("derby.drda.host", "localhost");
+        // Externalize Derby host to environment variable for container deployments
+        String derbyHost = System.getenv().getOrDefault("DERBY_HOST", "localhost");
+        System.setProperty("derby.drda.host", derbyHost);
         System.setProperty("derby.drda.maxThreads", "10");
         //System.setProperty("derby.drda.logConnections","true");
 
@@ -88,19 +90,20 @@ class DerbyStartStopper {
         System.out.println("System Info:  " + server.getSysinfo());
 
         Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
-        Connection conn = DriverManager.getConnection("jdbc:derby:rollerdb;create=true", "APP", "APP");
+        String derbyUser = System.getenv().getOrDefault("DERBY_USER", "APP");
+        String derbyPass = System.getenv().getOrDefault("DERBY_PASSWORD", "APP");
+        // Externalize Derby database to environment variable for container deployments
+        String derbyDbUrl = System.getenv().getOrDefault("DERBY_DB_URL", "jdbc:derby:rollerdb;create=true");
+        Connection conn = DriverManager.getConnection(derbyDbUrl, derbyUser, derbyPass);
 
         // create roller tables
 
         SQLScriptRunner runner1 = new SQLScriptRunner(
-            databaseScriptsDir
-                + File.separator + "droptables.sql");
+            Paths.get(databaseScriptsDir, "droptables.sql").toString());
         runner1.runScript(conn, false);
 
         SQLScriptRunner runner = new SQLScriptRunner(
-            databaseScriptsDir
-                + File.separator + "derby"
-                + File.separator + "createdb.sql");
+            Paths.get(databaseScriptsDir, "derby", "createdb.sql").toString());
         try {
             runner.runScript(conn, true);
         } catch (Exception ignored) {
@@ -113,14 +116,18 @@ class DerbyStartStopper {
 
     public void stop() throws Exception {
 
-        String driverURL = "jdbc:derby://localhost:" + port + "/rollerdb";
+        // Externalize Derby database host to environment variable for container deployments
+        String derbyHost = System.getenv().getOrDefault("DERBY_HOST", "localhost");
+        String driverURL = "jdbc:derby://" + derbyHost + ":" + port + "/rollerdb";
+        String derbyUser = System.getenv().getOrDefault("DERBY_USER", "APP");
+        String derbyPass = System.getenv().getOrDefault("DERBY_PASSWORD", "APP");
 
         Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
-        Connection conn = DriverManager.getConnection(driverURL,"APP", "APP");
+        Connection conn = DriverManager.getConnection(driverURL, derbyUser, derbyPass);
 
         // drop Roller tables
         SQLScriptRunner runner = new SQLScriptRunner(
-            databaseScriptsDir + File.separator + "droptables.sql");
+            Paths.get(databaseScriptsDir, "droptables.sql").toString());
         runner.runScript(conn, false);
 
         System.out.println("==============");

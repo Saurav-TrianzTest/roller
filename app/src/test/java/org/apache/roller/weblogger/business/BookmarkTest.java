@@ -304,7 +304,13 @@ public class BookmarkTest  {
 
     public void testBookmarkImport() throws Exception {
         
-        InputStream fis = this.getClass().getResourceAsStream("/bookmarks.opml");
+        String opmlPath = System.getenv("BOOKMARKS_OPML_PATH");
+        InputStream fis;
+        if (opmlPath != null) {
+            fis = new java.io.FileInputStream(opmlPath);
+        } else {
+            fis = this.getClass().getResourceAsStream("/bookmarks.opml");
+        }
         getRoller().getBookmarkManager().importBookmarks(
                 TestUtils.getManagedWebsite(testWeblog), "ZZZ_imports_ZZZ", fileToString(fis));
         TestUtils.endSession(true);

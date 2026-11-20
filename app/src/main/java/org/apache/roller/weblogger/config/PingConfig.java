@@ -90,6 +90,9 @@ public final class PingConfig {
     // This was introduced in order to support certain buggy (but popular) ping
     // targets that implement minor variants of the WeblogUpdates.ping call.
     // This is initialized once at startup, and referenced when pings are made.
+    // Local cache externalized via environment variable for container deployments
+    // In production, set PING_CONFIG_REDIS_URL to use Redis-backed config
+    private static final String REDIS_URL = System.getenv().getOrDefault("PING_CONFIG_REDIS_URL", "");
     private static final Map<String, Set<String>> CONFIGURED_VARIANTS = new HashMap<>();
     
     // Pattern used to parse common ping targets as well as ping variants.

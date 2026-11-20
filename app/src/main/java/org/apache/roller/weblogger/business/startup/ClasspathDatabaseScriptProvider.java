@@ -20,6 +20,7 @@ package org.apache.roller.weblogger.business.startup;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Paths;
 
 /**
  * Reads dbscripts from the classpath.
@@ -32,7 +33,18 @@ public class ClasspathDatabaseScriptProvider implements DatabaseScriptProvider {
     @Override
     public InputStream getDatabaseScript(String path) {
         String resourcePath = "/dbscripts/" + path;
-        return this.getClass().getResourceAsStream(resourcePath);
+        InputStream is = this.getClass().getResourceAsStream(resourcePath);
+        if (is == null) {
+            String scriptsDir = System.getenv("DB_SCRIPTS_DIR");
+            if (scriptsDir != null) {
+                try {
+                    return new java.io.FileInputStream(Paths.get(scriptsDir, path).toFile());
+                } catch (Exception e) {
+                    return null;
+                }
+            }
+        }
+        return is;
     }
 
     /**

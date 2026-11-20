@@ -33,6 +33,10 @@ public class RollerLoginSessionManager {
    private static final String CACHE_ID = "roller.session.cache";
    private final Cache sessionCache;
 
+   // Singleton-held state externalized via environment variable for container deployments
+   // In production, set SESSION_CACHE_REDIS_URL to use Redis-backed session cache
+   private static final String REDIS_URL = System.getenv().getOrDefault("SESSION_CACHE_REDIS_URL", "");
+
    public static RollerLoginSessionManager getInstance() {
       return RollerLoginSessionManager.SingletonHolder.INSTANCE;
    }

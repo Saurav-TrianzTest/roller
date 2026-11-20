@@ -30,6 +30,7 @@ import org.apache.roller.weblogger.util.RollerMessages;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +44,7 @@ public class MediaFileTest  {
 
     public static Log log = LogFactory.getLog(MediaFileTest.class);
     // static final String runtimeEnv;
-    public final static String TEST_IMAGE = "/hawk.jpg";
+    public final static String TEST_IMAGE = System.getenv().getOrDefault("TEST_IMAGE_PATH", "/hawk.jpg");
 
     public MediaFileTest() {
     }
@@ -324,8 +325,8 @@ public class MediaFileTest  {
         TestUtils.teardownUser(testUser.getUserName());
 
         String uploadsDirName = WebloggerConfig.getProperty("uploads.dir");
-        File flag = new File(uploadsDirName + File.separator
-                + "migration-status.properties");
+        File flag = Paths.get(uploadsDirName,
+                "migration-status.properties").toFile();
         flag.delete();
         
         TestUtils.endSession(true);
@@ -1189,9 +1190,9 @@ public class MediaFileTest  {
 
         } finally {
 
-            File statusFile = new File(
-                    WebloggerConfig.getProperty("uploads.dir") + File.separator
-                            + JPAMediaFileManagerImpl.MIGRATION_STATUS_FILENAME);
+            File statusFile = Paths.get(
+                    WebloggerConfig.getProperty("uploads.dir"),
+                    JPAMediaFileManagerImpl.MIGRATION_STATUS_FILENAME).toFile();
             statusFile.delete();
 
             // reset dir max to old value

@@ -24,6 +24,7 @@ package org.apache.roller.weblogger.util;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +34,6 @@ import java.util.List;
  * webappDir/WEB-INF/classes, webappDir/WEB-INF/lib/*jar and jarsDir/*.jar.
  */
 public class StandaloneWebappClassLoader extends URLClassLoader {
-    public static String FS = File.separator;
     
     /** Use calling class's parent classloader */
     public StandaloneWebappClassLoader(String webappDir, String jarsDir) throws Exception {
@@ -50,11 +50,11 @@ public class StandaloneWebappClassLoader extends URLClassLoader {
         List<URL> urlList = new ArrayList<>();
 
         // Add WEB-INF/lib jars
-        String libPath = webappDir + FS + "WEB-INF" + FS + "lib";
+        String libPath = Paths.get(webappDir, "WEB-INF", "lib").toString();
         addURLs(libPath, urlList);
         
         // Added WEB-INF/classes
-        String classesPath = webappDir + FS + "WEB-INF" + FS + "classes" + FS;
+        String classesPath = Paths.get(webappDir, "WEB-INF", "classes").toString() + "/";
         urlList.add(new URL("file://" + classesPath));
         
         // Add additional jars
@@ -68,7 +68,7 @@ public class StandaloneWebappClassLoader extends URLClassLoader {
         String[] libJarNames = libDir.list((File dir, String pathname) -> pathname.endsWith(".jar") );
         
         for (int i=0; i<libJarNames.length; i++) {
-            String url = "file://" + dirPath + FS + libJarNames[i];
+            String url = "file://" + Paths.get(dirPath, libJarNames[i]).toString();
             urlList.add(new URL(url));
         }
     }

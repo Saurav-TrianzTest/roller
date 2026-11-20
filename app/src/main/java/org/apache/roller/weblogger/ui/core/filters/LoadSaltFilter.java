@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.roller.weblogger.ui.core.RollerSession;
 import org.apache.roller.weblogger.ui.rendering.util.cache.SaltCache;
@@ -37,7 +38,7 @@ public class LoadSaltFilter implements Filter {
         throws IOException, ServletException {
 
         HttpServletRequest httpReq = (HttpServletRequest) request;
-        httpReq.getSession(true);
+        HttpSession session = httpReq.getSession(true);
         RollerSession rollerSession = RollerSession.getRollerSession(httpReq);
         if (rollerSession != null) {
             String userId = rollerSession.getAuthenticatedUser() != null ? rollerSession.getAuthenticatedUser().getId() : "";

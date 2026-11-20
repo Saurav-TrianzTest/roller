@@ -58,7 +58,7 @@ public class RollerAtomManagementTest {
 
     private static final String HANDLE = "atommgmtblog";
     private static final String OTHER_HANDLE = "atommgmtother";
-    private static final String ATOM_URL = "http://localhost/roller/roller-services/app";
+    private static final String ATOM_URL = "http://" + System.getenv().getOrDefault("TEST_HOST", "localhost") + "/roller/roller-services/app";
 
     private User owner;
     private User author;

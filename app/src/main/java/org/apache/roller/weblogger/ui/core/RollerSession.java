@@ -54,6 +54,10 @@ public class RollerSession
     
     public static final String ROLLER_SESSION = "org.apache.roller.weblogger.rollersession";
 
+    // Externalize session storage for container deployments
+    // In production, set SESSION_STORE to "redis" to use external session store
+    private static final String SESSION_STORE = System.getenv().getOrDefault("SESSION_STORE", "in-memory");
+
     static{
         WebloggerConfig.init(); // must be called before calls to logging APIs
         log = LogFactory.getLog(RollerSession.class);

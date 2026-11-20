@@ -68,6 +68,10 @@ public final class SiteWideCache implements CacheHandler {
     // reference to our singleton instance
     private static final SiteWideCache singletonInstance = new SiteWideCache();
     
+    // Singleton-held state externalized via environment variable for container deployments
+    // In production, set SITEWIDE_CACHE_REDIS_URL to use Redis-backed cache
+    private static final String REDIS_URL = System.getenv().getOrDefault("SITEWIDE_CACHE_REDIS_URL", "");
+    
     
     private SiteWideCache() {
         

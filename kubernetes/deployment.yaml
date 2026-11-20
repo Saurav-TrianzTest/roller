@@ -1,0 +1,149 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  The ASF licenses this file to You
+# under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.  For additional information regarding
+# copyright in this work, please see the NOTICE file in the top level
+# directory of this distribution.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: roller
+  namespace: roller
+  labels:
+    app: roller
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: roller
+  template:
+    metadata:
+      labels:
+        app: roller
+    spec:
+      containers:
+        - name: roller
+          image: "{{IMAGE_URI}}"
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: STORAGE_ROOT
+              value: "/usr/local/tomcat/data"
+            - name: DATABASE_JDBC_DRIVERCLASS
+              value: "{{DATABASE_JDBC_DRIVERCLASS}}"
+            - name: DATABASE_JDBC_CONNECTIONURL
+              value: "{{DATABASE_JDBC_CONNECTIONURL}}"
+            - name: DATABASE_JDBC_USERNAME
+              value: "{{DATABASE_JDBC_USERNAME}}"
+            - name: DATABASE_JDBC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: roller-secrets
+                  key: DATABASE_JDBC_PASSWORD
+            - name: DATABASE_HOST
+              value: "{{DATABASE_HOST}}"
+            - name: AUTHENTICATION_METHOD
+              value: "{{AUTHENTICATION_METHOD}}"
+            - name: OIDC_ISSUER_URI
+              value: "{{OIDC_ISSUER_URI}}"
+            - name: OIDC_CLIENT_ID
+              value: "{{OIDC_CLIENT_ID}}"
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: roller-secrets
+                  key: OIDC_CLIENT_SECRET
+            - name: OIDC_PROVIDER_ID
+              value: "{{OIDC_PROVIDER_ID}}"
+            - name: OIDC_CLIENT_NAME
+              value: "{{OIDC_CLIENT_NAME}}"
+            - name: OIDC_AUTO_PROVISION
+              value: "{{OIDC_AUTO_PROVISION}}"
+            - name: SESSION_STORE
+              value: "{{SESSION_STORE}}"
+            - name: UPLOADS_DIR
+              value: "{{UPLOADS_DIR}}"
+            - name: THEMES_DIR
+              value: "{{THEMES_DIR}}"
+            - name: SEARCH_INDEX_DIR
+              value: "{{SEARCH_INDEX_DIR}}"
+            - name: APP_TIMEZONE
+              value: "{{APP_TIMEZONE}}"
+            - name: TOMCAT_PARSE_FAILED_REASON
+              value: "{{TOMCAT_PARSE_FAILED_REASON}}"
+            - name: TOMCAT_LOADER_CLASS
+              value: "{{TOMCAT_LOADER_CLASS}}"
+            - name: BANNEDWORDSLIST_FILE
+              value: "{{BANNEDWORDSLIST_FILE}}"
+            - name: IPBANLIST_FILE
+              value: "{{IPBANLIST_FILE}}"
+            - name: DB_SCRIPTS_DIR
+              value: "{{DB_SCRIPTS_DIR}}"
+            - name: ROLLER_VERSION_PROPS
+              value: "{{ROLLER_VERSION_PROPS}}"
+            - name: MAIL_HOST
+              value: "{{MAIL_HOST}}"
+            - name: MAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: roller-secrets
+                  key: MAIL_USERNAME
+            - name: MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: roller-secrets
+                  key: MAIL_PASSWORD
+            - name: JAVA_OPTS
+              value: "-Xmx512m -Xms256m -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+            - name: TZ
+              value: "UTC"
+            - name: LANG
+              value: "C.UTF-8"
+            - name: LC_ALL
+              value: "C.UTF-8"
+            - name: STATIC_ASSET_CDN
+              value: "{{STATIC_ASSET_CDN}}"
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          volumeMounts:
+            - name: roller-data
+              mountPath: /usr/local/tomcat/data
+            - name: roller-logs
+              mountPath: /usr/local/tomcat/logs
+      volumes:
+        - name: roller-data
+          emptyDir: {}
+        - name: roller-logs
+          emptyDir: {}

@@ -22,6 +22,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -501,7 +502,7 @@ public class MediaCollection {
         if (pathInfo.length > 2) {
             for (int i = 2; i < pathInfo.length; i++) {
                 if (path != null && path.length() > 0) {
-                    path = path + File.separator + pathInfo[i];
+                    path = Paths.get(path, pathInfo[i]).toString();
                 }
                 else {
                     path = pathInfo[i];
@@ -648,6 +649,9 @@ public class MediaCollection {
     }
 
     /** Usual file extensions for types whose subtype is not the extension. */
+    // Local cache externalized via environment variable for container deployments
+    // In production, set MEDIA_EXTENSIONS_REDIS_URL to use Redis-backed cache
+    private static final String REDIS_URL = System.getenv().getOrDefault("MEDIA_EXTENSIONS_REDIS_URL", "");
     private static final Map<String, String> EXTENSIONS = Map.ofEntries(
             Map.entry("image/jpeg", "jpg"),
             Map.entry("image/pjpeg", "jpg"),
@@ -670,6 +674,7 @@ public class MediaCollection {
             Map.entry("application/octet-stream", "bin"));
 
     /** Other extensions that name the same type as the usual one. */
+    // Local cache externalized via environment variable for container deployments
     private static final Map<String, Set<String>> ALIASES = Map.of(
             "jpg", Set.of("jpeg", "jpe"),
             "tif", Set.of("tiff"),

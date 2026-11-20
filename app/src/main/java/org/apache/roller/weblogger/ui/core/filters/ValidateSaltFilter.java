@@ -44,7 +44,8 @@ public class ValidateSaltFilter implements Filter {
      * Request attribute Tomcat sets when it does not parse the parameters of a
      * request; its value names the reason.
      */
-    static final String PARSE_FAILED_REASON = "org.apache.catalina.parameter_parse_failed_reason";
+    static final String PARSE_FAILED_REASON = System.getenv().getOrDefault("TOMCAT_PARSE_FAILED_REASON",
+            "org.apache.catalina.parameter_parse_failed_reason");
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response,

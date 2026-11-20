@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -107,15 +108,14 @@ public class LuceneIndexManager implements IndexManager {
 
         // we also need to know what our index directory is
         // Note: system property expansion is now handled by WebloggerConfig
-        String searchIndexDir = WebloggerConfig.getProperty("search.index.dir");
-        this.indexDir = searchIndexDir.replace('/', File.separatorChar);
+        String searchIndexDir = System.getenv().getOrDefault("SEARCH_INDEX_DIR", WebloggerConfig.getProperty("search.index.dir"));
+        this.indexDir = Paths.get(searchIndexDir).toString();
 
         // a little debugging
         logger.info("search enabled: " + this.searchEnabled);
         logger.info("index dir: " + this.indexDir);
 
-        String test = indexDir + File.separator + ".index-inconsistent";
-        indexConsistencyMarker = new File(test);
+        indexConsistencyMarker = Paths.get(indexDir, ".index-inconsistent").toFile();
     }
 
     /**

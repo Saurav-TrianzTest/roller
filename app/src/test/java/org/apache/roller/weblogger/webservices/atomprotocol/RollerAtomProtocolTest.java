@@ -63,7 +63,7 @@ import org.mockito.MockedStatic;
 public class RollerAtomProtocolTest {
 
     private static final String HANDLE = "atomtestblog";
-    private static final String ATOM_URL = "http://localhost/roller/roller-services/app";
+    private static final String ATOM_URL = "http://" + System.getenv().getOrDefault("TEST_HOST", "localhost") + "/roller/roller-services/app";
 
     private User testUser;
     private Weblog testWeblog;

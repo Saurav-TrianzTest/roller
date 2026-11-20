@@ -119,7 +119,7 @@ class SearchResultsModelTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getServletPath()).thenReturn(SEARCH_SERVLET);
         when(request.getRequestURL()).thenReturn(
-            new StringBuffer(String.format("http://localhost/%s", SEARCH_SERVLET)));
+            new StringBuffer(String.format("http://%s/%s", System.getenv().getOrDefault("TEST_HOST", "localhost"), SEARCH_SERVLET)));
         when(request.getPathInfo()).thenReturn(null);
 
         WeblogSearchRequest searchRequest = new WeblogSearchRequest(request);

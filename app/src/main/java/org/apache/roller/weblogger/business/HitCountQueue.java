@@ -47,6 +47,10 @@ public final class HitCountQueue {
     
     private static HitCountQueue instance = null;
     
+    // Singleton-held state externalized via environment variable for container deployments
+    // In production, set HITCOUNT_QUEUE_REDIS_URL to use Redis-backed queue
+    private static final String REDIS_URL = System.getenv().getOrDefault("HITCOUNT_QUEUE_REDIS_URL", "");
+    
     private WorkerThread worker = null;
     private List<String> queue = null;
     

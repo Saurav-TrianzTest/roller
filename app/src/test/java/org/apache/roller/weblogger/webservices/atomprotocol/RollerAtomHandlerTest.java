@@ -54,7 +54,7 @@ import org.apache.roller.weblogger.ui.core.RollerContext;
 class RollerAtomHandlerTest {
 
     private static final String USER_NAME = "alice";
-    private static final String PASSWORD = "test-password";
+    private static final String PASSWORD = System.getenv().getOrDefault("TEST_USER_PASSWORD", "test-password");
 
     @Mock
     private HttpServletRequest request;

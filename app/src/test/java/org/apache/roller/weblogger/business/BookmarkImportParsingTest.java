@@ -107,9 +107,17 @@ public class BookmarkImportParsingTest {
     @Test
     public void ordinaryOpmlStillImports() throws Exception {
         String opml;
-        try (InputStream in = getClass().getResourceAsStream("/bookmarks.opml")) {
-            assertTrue(in != null, "the ordinary OPML fixture must be on the classpath");
-            opml = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        String opmlPath = System.getenv("BOOKMARKS_OPML_PATH");
+        if (opmlPath != null) {
+            try (InputStream in = new java.io.FileInputStream(opmlPath)) {
+                assertTrue(in != null, "the ordinary OPML fixture must be available");
+                opml = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+            }
+        } else {
+            try (InputStream in = getClass().getResourceAsStream("/bookmarks.opml")) {
+                assertTrue(in != null, "the ordinary OPML fixture must be on the classpath");
+                opml = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+            }
         }
         try {
             bookmarkManager().importBookmarks(TestUtils.getManagedWebsite(testWeblog),

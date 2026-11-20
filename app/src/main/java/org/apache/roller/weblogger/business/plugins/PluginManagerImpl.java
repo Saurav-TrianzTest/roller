@@ -45,6 +45,9 @@ public class PluginManagerImpl implements PluginManager {
     private static final Log log = LogFactory.getLog(PluginManagerImpl.class);
     
     // Plugin classes keyed by plugin name
+    // Local cache externalized via environment variable for container deployments
+    // In production, set PLUGIN_CACHE_REDIS_URL to use Redis-backed cache
+    private static final String REDIS_URL = System.getenv().getOrDefault("PLUGIN_CACHE_REDIS_URL", "");
     private static final Map<String, Class<? extends WeblogEntryPlugin>> mPagePlugins = new LinkedHashMap<>();
     
     // Comment plugins

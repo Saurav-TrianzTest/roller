@@ -31,10 +31,12 @@ class EnclosureMetadataTest {
 
     @Test
     void acceptsHttpMetadataWithoutOpeningTheResource() {
+        String testHost = System.getenv().getOrDefault("TEST_HOST", "127.0.0.1");
+        String testUrl = "http://" + testHost + ":9/audio.ogg";
         EnclosureMetadata metadata = EnclosureMetadata.of(
-                "http://127.0.0.1:9/audio.ogg", "audio/ogg", "1234");
+                testUrl, "audio/ogg", "1234");
 
-        assertEquals("http://127.0.0.1:9/audio.ogg", metadata.getUrl());
+        assertEquals(testUrl, metadata.getUrl());
         assertEquals("audio/ogg", metadata.getContentType());
         assertEquals("1234", metadata.getLength());
     }

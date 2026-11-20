@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  */
 public final class PropertyExpander {
     
-    // The pattern for a system property.  Matches ${property.name}, with the interior matched reluctantly.
+    // The pattern for a system property.  Matches ${property.name} or ${property.name:default}, with the interior matched reluctantly.
     private static final Pattern EXPANSION_PATTERN = Pattern.compile("(\\$\\{([^}]+?)\\})", java.util.regex.Pattern.MULTILINE);
     
     
@@ -66,11 +66,23 @@ public final class PropertyExpander {
 
         StringBuilder expanded = new StringBuilder(input.length());
         while (matcher.find()) {
-            String propName = matcher.group(2);
+            String propExpr = matcher.group(2);
+            String propName = propExpr;
+            String defaultValue = null;
+            // Support ${property.name:default} syntax
+            int colonIndex = propExpr.indexOf(':');
+            if (colonIndex >= 0) {
+                propName = propExpr.substring(0, colonIndex);
+                defaultValue = propExpr.substring(colonIndex + 1);
+            }
             String value = (String) props.get(propName);
-            // if no value is found, use a value equal to the original expression
+            // if no value is found, use the default value if specified, or leave the expression unexpanded
             if (value == null) {
-                value = matcher.group(0);
+                if (defaultValue != null) {
+                    value = defaultValue;
+                } else {
+                    value = matcher.group(0);
+                }
             }
             // Fake a literal replacement since Matcher.quoteReplacement() is not present in 1.4.
             matcher.appendReplacement(expanded, "");

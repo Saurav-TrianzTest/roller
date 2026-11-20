@@ -24,7 +24,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
+import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -40,8 +40,7 @@ public class BannedwordslistTest  {
     @BeforeEach
     public void setUp() throws Exception {
         bannedwordslist = Bannedwordslist.getBannedwordslist();
-        String FS = File.separator;
-        String bannedwordslistName = System.getProperty("project.build.directory") + FS + "classes" + "bannedwordslist.txt";
+        String bannedwordslistName = Paths.get(System.getenv().getOrDefault("PROJECT_BUILD_DIRECTORY", System.getProperty("project.build.directory")), "classes", "bannedwordslist.txt").toString();
         log.info("Processing Banned-words list file: " + bannedwordslistName);
         bannedwordslist.loadBannedwordslistFromFile(bannedwordslistName);
     }

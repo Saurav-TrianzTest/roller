@@ -61,7 +61,7 @@ public class UserTest  {
         
         User testUser = new User();
         testUser.setUserName("testUser");
-        testUser.setPassword("password");
+        testUser.setPassword(System.getenv().getOrDefault("TEST_USER_PASSWORD", "password"));
         testUser.setScreenName("Test User Screen Name");
         testUser.setFullName("Test User");
         testUser.setEmailAddress("TestUser@dev.null");

@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -90,7 +91,7 @@ public class ThemeManagerImpl implements ThemeManager {
 		this.roller = roller;
 
 		// get theme directory from config and verify it
-		this.themeDir = WebloggerConfig.getProperty("themes.dir");
+		this.themeDir = System.getenv().getOrDefault("THEMES_DIR", WebloggerConfig.getProperty("themes.dir"));
 		if (themeDir == null || themeDir.isBlank()) {
 			throw new RuntimeException(
 					"couldn't get themes directory from config");
@@ -378,7 +379,7 @@ public class ThemeManagerImpl implements ThemeManager {
 		// first, get a list of the themes available
 		File themesdir = new File(this.themeDir);
 		FilenameFilter filter = (File dir, String name) -> {
-            File file = new File(dir.getAbsolutePath() + File.separator + name);
+            File file = Paths.get(dir.getAbsolutePath(), name).toFile();
             return file.isDirectory() && !file.getName().startsWith(".");
         };
 		String[] themenames = themesdir.list(filter);
@@ -392,7 +393,7 @@ public class ThemeManagerImpl implements ThemeManager {
             // now go through each theme and load it into a Theme object
             for (String themeName : themenames) {
                 try {
-                    SharedTheme theme = new SharedThemeFromDir(this.themeDir + File.separator + themeName);
+                    SharedTheme theme = new SharedThemeFromDir(Paths.get(this.themeDir, themeName).toString());
                     themeMap.put(theme.getId(), theme);
                     log.info("Loaded theme '" + themeName + "'");
                 } catch (Exception unexpected) {
@@ -415,8 +416,8 @@ public class ThemeManagerImpl implements ThemeManager {
 
 		try {
 
-            SharedTheme theme = new SharedThemeFromDir(this.themeDir + File.separator
-					+ reloadTheme);
+            SharedTheme theme = new SharedThemeFromDir(Paths.get(this.themeDir,
+                    reloadTheme).toString());
 
             Theme loadedTheme = themes.get(theme.getId());
 

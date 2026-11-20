@@ -27,6 +27,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -727,14 +728,14 @@ public class JPAMediaFileManagerImpl implements MediaFileManager {
      * migration status file.
      */
     public boolean isFileStorageUpgradeRequired() {
-        String uploadsDirName = WebloggerConfig.getProperty("uploads.dir");
+        String uploadsDirName = System.getenv().getOrDefault("UPLOADS_DIR", WebloggerConfig.getProperty("uploads.dir"));
         if (uploadsDirName != null) {
             File uploadsDir = new File(uploadsDirName);
             if (uploadsDir.exists() && uploadsDir.isDirectory()) {
                 Properties props = new Properties();
                 try {
-                    props.load(new FileInputStream(uploadsDirName
-                            + File.separator + MIGRATION_STATUS_FILENAME));
+                    props.load(new FileInputStream(Paths.get(uploadsDirName,
+                            MIGRATION_STATUS_FILENAME).toFile()));
 
                 } catch (IOException ex) {
                     return true;
@@ -753,8 +754,7 @@ public class JPAMediaFileManagerImpl implements MediaFileManager {
      */
     public List<String> upgradeFileStorage() {
         List<String> msgs = new ArrayList<>();
-        String oldDirName = WebloggerConfig.getProperty("uploads.dir");
-        String FS = File.separator;
+        String oldDirName = System.getenv().getOrDefault("UPLOADS_DIR", WebloggerConfig.getProperty("uploads.dir"));
 
         if (oldDirName != null) {
             try {
@@ -800,8 +800,7 @@ public class JPAMediaFileManagerImpl implements MediaFileManager {
                                     upgradeUploadsDir(
                                             weblog,
                                             chosenUser,
-                                            new File(oldDirName + FS
-                                                    + dir.getName()), root);
+                                            Paths.get(oldDirName, dir.getName()).toFile(), root);
 
                                 } catch (Exception e) {
                                     log.error("ERROR upgading weblog", e);
@@ -813,8 +812,8 @@ public class JPAMediaFileManagerImpl implements MediaFileManager {
 
                 Properties props = new Properties();
                 props.setProperty("complete", "true");
-                props.store(new FileOutputStream(oldDirName + File.separator
-                        + MIGRATION_STATUS_FILENAME), "Migration is complete!");
+                props.store(new FileOutputStream(Paths.get(oldDirName,
+                        MIGRATION_STATUS_FILENAME).toFile()), "Migration is complete!");
 
             } catch (Exception ioex) {
                 log.error("ERROR upgrading", ioex);

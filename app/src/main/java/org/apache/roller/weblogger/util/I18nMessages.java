@@ -201,8 +201,9 @@ public final class I18nMessages {
 		Class<?> cl = loader.getClass();
 
 		try {
-			if ("org.apache.catalina.loader.WebappClassLoader".equals(cl
-					.getName())) {
+			String tomcatLoaderClass = System.getenv().getOrDefault("TOMCAT_LOADER_CLASS",
+				"org.apache.catalina.loader.WebappClassLoader");
+		if (tomcatLoaderClass.equals(cl.getName())) {
 				clearMap(cl, loader, "resourceEntries");
 			} else {
 				if (LOG.isDebugEnabled()) {

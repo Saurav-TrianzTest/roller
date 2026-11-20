@@ -78,7 +78,19 @@ public class MailProvider {
                 Context ctx = new InitialContext();
                 session = (Session) ctx.lookup(jndiName);
             } catch (NamingException ex) {
-                throw new StartupException("ERROR looking up mail-session with JNDI name: " + jndiName);
+                // Fall back to environment variables for container-native deployment
+                mailHostname = System.getenv().getOrDefault("MAIL_HOST", mailHostname);
+                mailUsername = System.getenv().getOrDefault("MAIL_USERNAME", mailUsername);
+                mailPassword = System.getenv().getOrDefault("MAIL_PASSWORD", mailPassword);
+                Properties props = new Properties();
+                props.setProperty("mail.smtp.host", mailHostname);
+                if (mailUsername != null && mailPassword != null) {
+                    props.setProperty("mail.smtp.auth", "true");
+                }
+                if (mailPort != -1) {
+                    props.setProperty("mail.smtp.port", ""+mailPort);
+                }
+                session = Session.getDefaultInstance(props, null);
             }
         } else {
             Properties props = new Properties();

@@ -32,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 class PropertyExpanderTest  {
     
+    // Local cache externalized via environment variable for container deployments
+    private static final String REDIS_URL = System.getenv().getOrDefault("PROPERTY_EXPANDER_REDIS_URL", "");
     private static final Map<String, String> props = new HashMap<>();
     
     static {

@@ -339,7 +339,8 @@ public class WeblogScopedLookupTest {
         mediaFile.setDirectory(directory);
         mediaFile.setWeblog(managed);
         mediaFile.setContentType("image/jpeg");
-        mediaFile.setInputStream(getClass().getResourceAsStream("/hawk.jpg"));
+        String imagePath = System.getenv().getOrDefault("TEST_IMAGE_PATH", "/hawk.jpg");
+        mediaFile.setInputStream(getClass().getResourceAsStream(imagePath));
 
         RollerMessages messages = new RollerMessages();
         mmgr.createMediaFile(managed, mediaFile, messages);

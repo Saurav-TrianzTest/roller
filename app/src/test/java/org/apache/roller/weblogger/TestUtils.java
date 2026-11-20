@@ -206,7 +206,7 @@ public final class TestUtils {
 
         User testUser = new User();
         testUser.setUserName(userName);
-        testUser.setPassword("password");
+        testUser.setPassword(System.getenv().getOrDefault("TEST_USER_PASSWORD", "password"));
         testUser.setScreenName("Test User Screen Name");
         testUser.setFullName("Test User");
         testUser.setEmailAddress("TestUser@dev.null");
@@ -493,7 +493,7 @@ public final class TestUtils {
 
         PingTarget testPing = new PingTarget();
         testPing.setName("testCommonPing");
-        testPing.setPingUrl("http://localhost/testCommonPing");
+        testPing.setPingUrl("http://" + System.getenv().getOrDefault("PING_TEST_HOST", "localhost") + "/testCommonPing");
 
         // store ping
         PingTargetManager pingMgr = WebloggerFactory.getWeblogger()

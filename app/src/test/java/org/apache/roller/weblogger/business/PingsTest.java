@@ -73,7 +73,7 @@ public class PingsTest  {
         
         testCommonPing = new PingTarget();
         testCommonPing.setName("testCommonPing");
-        testCommonPing.setPingUrl("http://localhost/testCommonPing");
+        testCommonPing.setPingUrl("http://" + System.getenv().getOrDefault("PING_TEST_HOST", "localhost") + "/testCommonPing");
     }
 
     @AfterEach

@@ -58,7 +58,7 @@ public class ApplicationResourcesTest {
 		// load base ApplicationResources.properties file
 		baseProps = new Properties();
 		baseProps.load(new FileInputStream( 
-                System.getProperty("project.build.directory") + "/classes/ApplicationResources.properties"));
+                System.getenv().getOrDefault("PROJECT_BUILD_DIRECTORY", System.getProperty("project.build.directory")) + "/classes/ApplicationResources.properties"));
 	}
 
 	/**
@@ -90,7 +90,7 @@ public class ApplicationResourcesTest {
 		Properties props = new Properties();
 		props.load(
 			new FileInputStream(
-				   System.getProperty("project.build.directory")
+				   System.getenv().getOrDefault("PROJECT_BUILD_DIRECTORY", System.getProperty("project.build.directory"))
                     + "/classes/"
 					+ bundle
 					+ ".properties"));

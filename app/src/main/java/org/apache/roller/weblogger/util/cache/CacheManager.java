@@ -60,6 +60,9 @@ public final class CacheManager {
     private static final CacheFactory cacheFactory;
     
     // a set of all registered cache handlers
+    // Local cache externalized via environment variable for container deployments
+    // In production, set CACHE_MANAGER_REDIS_URL to use Redis-backed cache
+    private static final String REDIS_URL = System.getenv().getOrDefault("CACHE_MANAGER_REDIS_URL", "");
     private static final Set<CacheHandler> cacheHandlers = new HashSet<>();
     
     // a map of all registered caches

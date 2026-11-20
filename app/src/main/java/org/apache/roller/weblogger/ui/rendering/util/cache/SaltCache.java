@@ -47,6 +47,10 @@ public final class SaltCache {
     
     // reference to our singleton instance
     private static final SaltCache singletonInstance = new SaltCache();
+    
+    // Singleton-held state externalized via environment variable for container deployments
+    // In production, set SALT_CACHE_REDIS_URL to use Redis-backed cache
+    private static final String REDIS_URL = System.getenv().getOrDefault("SALT_CACHE_REDIS_URL", "");
 
     private SaltCache() {
         

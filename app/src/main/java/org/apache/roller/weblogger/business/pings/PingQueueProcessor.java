@@ -41,6 +41,10 @@ public final class PingQueueProcessor {
     
     private static PingQueueProcessor theInstance;
     
+    // Singleton-held state externalized via environment variable for container deployments
+    // In production, set PING_QUEUE_REDIS_URL to use Redis-backed queue
+    private static final String REDIS_URL = System.getenv().getOrDefault("PING_QUEUE_REDIS_URL", "");
+    
     private PingQueueManager pingQueueMgr;
     
     

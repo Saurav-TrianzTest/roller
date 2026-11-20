@@ -81,7 +81,12 @@ class DatabaseInstallerUpgradeTest {
         // /roller-version.properties, so derive the expectation from the
         // same source and parser instead of pinning a release constant
         Properties props = new Properties();
-        props.load(getClass().getResourceAsStream("/roller-version.properties"));
+        String versionPropsPath = System.getenv("ROLLER_VERSION_PROPS");
+        if (versionPropsPath != null) {
+            props.load(new java.io.FileInputStream(versionPropsPath));
+        } else {
+            props.load(getClass().getResourceAsStream("/roller-version.properties"));
+        }
         int expectedVersion = DatabaseInstaller.parseVersionString(props.getProperty("ro.version", "UNKNOWN"));
 
         installer.upgradeDatabase(true);
@@ -109,7 +114,12 @@ class DatabaseInstallerUpgradeTest {
         DatabaseInstaller installer = new DatabaseInstaller(db, scripts);
 
         Properties props = new Properties();
-        props.load(getClass().getResourceAsStream("/roller-version.properties"));
+        String versionPropsPath = System.getenv("ROLLER_VERSION_PROPS");
+        if (versionPropsPath != null) {
+            props.load(new java.io.FileInputStream(versionPropsPath));
+        } else {
+            props.load(getClass().getResourceAsStream("/roller-version.properties"));
+        }
         int expectedVersion = DatabaseInstaller.parseVersionString(props.getProperty("ro.version", "UNKNOWN"));
 
         // a 520 database upgrades through the 520->610 schema step; run with

@@ -35,7 +35,7 @@ public class SaltConfigurationTest {
     @Test
     public void testSubmittedSaltIsValidatedBeforeResponseSaltIsLoaded() throws Exception {
         Path projectDirectory = Path.of(
-                System.getProperty("project.build.directory")).getParent();
+                System.getenv().getOrDefault("PROJECT_BUILD_DIRECTORY", System.getProperty("project.build.directory"))).getParent();
         String webXml = Files.readString(projectDirectory.resolve(
                 "src/main/webapp/WEB-INF/web.xml"));
 

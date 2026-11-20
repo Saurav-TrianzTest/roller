@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -58,15 +59,12 @@ public class FileContentManagerImpl implements FileContentManager {
         // Note: System property expansion is now handled by WebloggerConfig.
 
         if (inStorageDir == null || inStorageDir.isBlank()) {
-            inStorageDir = System.getProperty("user.home") + File.separator
-                    + "roller_data" + File.separator + "mediafiles";
+            inStorageDir = Paths.get(System.getenv().getOrDefault("STORAGE_ROOT",
+                    System.getenv().getOrDefault("STORAGE_ROOT_DEFAULT", "/data/roller_data")),
+                    "mediafiles").toString();
         }
 
-        if (!inStorageDir.endsWith(File.separator)) {
-            inStorageDir += File.separator;
-        }
-
-        this.storageDir = inStorageDir.replace('/', File.separatorChar);
+        this.storageDir = Paths.get(inStorageDir).normalize().toString();
 
     }
 

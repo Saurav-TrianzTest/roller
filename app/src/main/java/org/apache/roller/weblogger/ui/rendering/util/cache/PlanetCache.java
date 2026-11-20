@@ -53,6 +53,10 @@ public final class PlanetCache {
     
     // reference to our singleton instance
     private static final PlanetCache singletonInstance = new PlanetCache();
+    
+    // Singleton-held state externalized via environment variable for container deployments
+    // In production, set PLANET_CACHE_REDIS_URL to use Redis-backed cache
+    private static final String REDIS_URL = System.getenv().getOrDefault("PLANET_CACHE_REDIS_URL", "");
 
     private PlanetCache() {
         

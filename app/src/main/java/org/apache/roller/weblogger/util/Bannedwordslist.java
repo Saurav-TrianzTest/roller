@@ -30,6 +30,7 @@ import java.io.FileOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -148,8 +149,8 @@ public final class Bannedwordslist {
                 
                 // save the new bannedwordslist
                 try (InputStream instream = connection.getInputStream()) {
-                    String uploadDir = WebloggerConfig.getProperty("uploads.dir");
-                    String path = uploadDir + File.separator + BANNEDWORDSLIST_FILE;
+                    String uploadDir = System.getenv().getOrDefault("UPLOADS_DIR", WebloggerConfig.getProperty("uploads.dir"));
+                    String path = Paths.get(uploadDir, BANNEDWORDSLIST_FILE).toString();
                     
                     mLogger.debug("writing updated MT bannedwordslist to "+path);
                     
@@ -186,8 +187,8 @@ public final class Bannedwordslist {
         try {
             String path = bannedwordslistFilePath;
             if (path == null) {
-                String uploadDir = WebloggerConfig.getProperty("uploads.dir");
-                path = uploadDir + File.separator + BANNEDWORDSLIST_FILE;
+                String uploadDir = System.getenv().getOrDefault("UPLOADS_DIR", WebloggerConfig.getProperty("uploads.dir"));
+                path = Paths.get(uploadDir, BANNEDWORDSLIST_FILE).toString();
             }
             File bannedwordslistFile = new File(path);
             
@@ -204,7 +205,16 @@ public final class Bannedwordslist {
             
         } catch (Exception e) {
             // Roller keeps a copy in the webapp just in case
-            txtStream = getClass().getResourceAsStream("/bannedwordslist.txt");
+            String bannedwordslistPath = System.getenv("BANNEDWORDSLIST_FILE");
+            if (bannedwordslistPath != null) {
+                try {
+                    txtStream = new java.io.FileInputStream(bannedwordslistPath);
+                } catch (Exception ex) {
+                    txtStream = getClass().getResourceAsStream("/bannedwordslist.txt");
+                }
+            } else {
+                txtStream = getClass().getResourceAsStream("/bannedwordslist.txt");
+            }
             mLogger.warn(
                 "Couldn't find downloaded bannedwordslist, loaded bannedwordslist.txt from classpath instead");
         }
