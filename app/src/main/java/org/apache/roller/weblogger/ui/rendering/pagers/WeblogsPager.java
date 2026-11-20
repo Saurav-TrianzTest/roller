@@ -31,6 +31,10 @@ import org.apache.roller.weblogger.business.WebloggerFactory;
 import org.apache.roller.weblogger.business.WeblogManager;
 import org.apache.roller.weblogger.pojos.Weblog;
 import org.apache.roller.weblogger.pojos.wrapper.WeblogWrapper;
+import java.time.Instant;
+import java.util.TimeZone;
+import java.time.ZonedDateTime;
+import java.time.ZoneOffset;
 
 
 /**
@@ -129,10 +133,10 @@ public class WeblogsPager extends AbstractPager<WeblogWrapper> {
             List<WeblogWrapper> results = new ArrayList<>();
             Date startDate = null;
             if (sinceDays != -1) {
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(new Date());
-                cal.add(Calendar.DATE, -1 * sinceDays);
-                startDate = cal.getTime();
+                // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+                ZonedDateTime cal = ZonedDateTime.now(ZoneOffset.UTC);
+                cal = cal.minusDays(sinceDays);
+                startDate = Date.from(cal.toInstant());
             }
             try {
                 Weblogger roller = WebloggerFactory.getWeblogger();

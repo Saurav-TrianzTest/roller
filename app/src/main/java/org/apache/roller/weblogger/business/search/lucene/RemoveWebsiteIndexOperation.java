@@ -20,6 +20,7 @@ package org.apache.roller.weblogger.business.search.lucene;
 
 import java.io.IOException;
 import java.util.Date;
+import java.time.Instant;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,7 +71,7 @@ public class RemoveWebsiteIndexOperation extends WriteToIndexOperation {
 
     @Override
     public void doRun() {
-        Date start = new Date();
+        Date start = Date.from(Instant.now());
 
         // since this operation can be run on a separate thread we must treat
         // the weblog object passed in as a detached object which is proned to
@@ -103,7 +104,7 @@ public class RemoveWebsiteIndexOperation extends WriteToIndexOperation {
             endWriting();
         }
 
-        Date end = new Date();
+        Date end = Date.from(Instant.now());
         double length = (end.getTime() - start.getTime()) / (double) RollerConstants.SEC_IN_MS;
 
         if (website != null) {

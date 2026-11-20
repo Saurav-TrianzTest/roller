@@ -27,7 +27,9 @@ import org.apache.commons.logging.LogFactory;
  */
 public class ContinuousWorkerThread extends WorkerThread {
     private static Log mLogger = LogFactory.getLog(ContinuousWorkerThread.class);
-    private static final int DEFAULT_SLEEP_IN_MS = 10000;
+    // cr-java-0077: Externalize port/sleep time to environment variable
+    private static final int DEFAULT_SLEEP_IN_MS = Integer.parseInt(
+            System.getenv().getOrDefault("ROLLER_WORKER_SLEEP_MS", "10000"));
     long sleepTime = DEFAULT_SLEEP_IN_MS;
 
     public ContinuousWorkerThread(String id) {

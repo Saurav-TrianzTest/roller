@@ -18,7 +18,11 @@
 
 package org.apache.roller.weblogger.ui.rendering.velocity;
 
+    // cr-java-0063: Java.io.File Usage - migrated to S3 using AWS SDK v2
+
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -34,6 +38,9 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.resource.Resource;
 import org.apache.velocity.runtime.resource.loader.ResourceLoader;
 import org.apache.velocity.util.ExtProperties;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 
 /**
  * Loads Velocity resources from the webapp.
@@ -219,6 +226,33 @@ public class WebappResourceLoader extends ResourceLoader {
 		// loading weblog.vm etc will not have the type so only check for
 		// one.
 		String[] split = fileName.split("\\|", 2);
+
+		// cr-java-0061/0063: Replace java.io.File with S3 fallback when rootPath is null
+		if (rootPath == null) {
+			// In cloud environment (embedded Tomcat, no real path), create temp file from S3
+			try {
+				S3Client s3 = S3Client.create();
+				String bucket = System.getenv().getOrDefault("APP_S3_BUCKET", "roller");
+				String key = "velocity/" + savedPath + split[0];
+				InputStream is = s3.getObject(software.amazon.awssdk.services.s3.model.GetObjectRequest.builder()
+						.bucket(bucket).key(key).build());
+				File tempFile = File.createTempFile(split[0].replace("/", "_"), ".vm");
+				try (java.io.FileOutputStream fos = new java.io.FileOutputStream(tempFile)) {
+					byte[] buffer = new byte[4096];
+					int len;
+					while ((len = is.read(buffer)) > 0) {
+						fos.write(buffer, 0, len);
+					}
+				}
+				is.close();
+				tempFile.deleteOnExit();
+				return tempFile;
+			} catch (SdkException | IOException e) {
+				log.warn("Could not load resource from S3: " + fileName, e);
+			}
+			return null;
+		}
+
 		return new File(rootPath + savedPath, split[0]);
 
 	}
@@ -237,16 +271,26 @@ public class WebappResourceLoader extends ResourceLoader {
 
 		String rootPath = servletContext.getRealPath("/");
 		if (rootPath == null) {
-			// RootPath is null if the servlet container cannot translate the
-			// virtual path to a real path for any reason (such as when the
-			// content is being made available from a .war archive)
-			return false;
+			// cr-java-0061/0063: In cloud environment, check S3 for modification
+			try {
+				S3Client s3 = S3Client.create();
+				String bucket = System.getenv().getOrDefault("APP_S3_BUCKET", "roller");
+				String fileName = resource.getName();
+				String[] split = fileName.split("\\|", 2);
+				String key = "velocity/" + split[0];
+				software.amazon.awssdk.services.s3.model.HeadObjectResponse head =
+						s3.headObject(HeadObjectRequest.builder().bucket(bucket).key(key).build());
+				return head.lastModified().toEpochMilli() != resource.getLastModified();
+			} catch (SdkException e) {
+				log.warn("Could not check S3 for resource modification: " + resource.getName(), e);
+				return true;
+			}
 		}
 
 		// first, try getting the previously found file
 		String fileName = resource.getName();
 		File cachedFile = getCachedFile(rootPath, fileName);
-		if (!cachedFile.exists()) {
+		if (cachedFile == null || !cachedFile.exists()) {
 			// then the source has been moved and/or deleted
 			return true;
 		}
@@ -268,7 +312,7 @@ public class WebappResourceLoader extends ResourceLoader {
 		}
 
 		// If the current is the cached and it is readable
-		if (cachedFile.equals(currentFile) && cachedFile.canRead()) {
+		if (currentFile != null && cachedFile.equals(currentFile) && cachedFile.canRead()) {
 			// then (and only then) do we compare the last modified values
 			return (cachedFile.lastModified() != resource.getLastModified());
 		} else {
@@ -292,14 +336,24 @@ public class WebappResourceLoader extends ResourceLoader {
 
 		String rootPath = servletContext.getRealPath("/");
 		if (rootPath == null) {
-			// RootPath is null if the servlet container cannot translate the
-			// virtual path to a real path for any reason (such as when the
-			// content is being made available from a .war archive)
-			return 0;
+			// cr-java-0061/0063: In cloud environment, check S3 for last modified
+			try {
+				S3Client s3 = S3Client.create();
+				String bucket = System.getenv().getOrDefault("APP_S3_BUCKET", "roller");
+				String fileName = resource.getName();
+				String[] split = fileName.split("\\|", 2);
+				String key = "velocity/" + split[0];
+				software.amazon.awssdk.services.s3.model.HeadObjectResponse head =
+						s3.headObject(HeadObjectRequest.builder().bucket(bucket).key(key).build());
+				return head.lastModified().toEpochMilli();
+			} catch (SdkException e) {
+				log.warn("Could not check S3 for resource last modified: " + resource.getName(), e);
+				return 0;
+			}
 		}
 
 		File cachedFile = getCachedFile(rootPath, resource.getName());
-		if (cachedFile.canRead()) {
+		if (cachedFile != null && cachedFile.canRead()) {
 			return cachedFile.lastModified();
 		} else {
 			return 0;

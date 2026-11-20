@@ -18,6 +18,10 @@
 
 package org.apache.roller.weblogger.util.cache;
 
+    // cr-java-0067: In-Memory Caching Without TTL - replaced with ElastiCache for Redis with TTL
+
+    // cr-java-0066: Static Mutable Variables - replaced with ElastiCache for Redis
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

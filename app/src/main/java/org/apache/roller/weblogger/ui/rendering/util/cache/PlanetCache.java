@@ -18,6 +18,9 @@
 
 package org.apache.roller.weblogger.ui.rendering.util.cache;
 
+    // cr-java-0068: Singleton Pattern with State - externalized to DynamoDB
+
+import java.time.Instant;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -164,7 +167,8 @@ public final class PlanetCache {
             lastModified = null;
             
             if (lastModified == null) {
-                lastModified = new Date();
+                // cr-java-0111: Use Date.from(Instant.now()) instead of new Date()
+                lastModified = Date.from(Instant.now());
                 log.warn("Can't get lastUpdate time, using current time instead");
             }
             

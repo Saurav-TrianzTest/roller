@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.core;
 
+    // cr-java-0068: Singleton Pattern with State - externalized to DynamoDB
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.roller.weblogger.pojos.User;

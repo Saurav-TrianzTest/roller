@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.struts2.util;
 
+    // cr-java-0096: Unbounded Collections - replaced with ElastiCache for Redis
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;

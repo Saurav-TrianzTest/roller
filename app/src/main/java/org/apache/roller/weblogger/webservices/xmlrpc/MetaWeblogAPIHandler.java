@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.webservices.xmlrpc;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.io.ByteArrayInputStream;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -49,6 +51,7 @@ import org.apache.roller.weblogger.ui.core.RollerContext;
 import org.apache.roller.weblogger.util.RollerMessages;
 import org.apache.roller.weblogger.util.Utilities;
 import org.apache.xmlrpc.XmlRpcException;
+import java.time.Instant;
 
 
 /**
@@ -162,7 +165,7 @@ public class MetaWeblogAPIHandler extends BloggerAPIHandler {
         try {
             
             Timestamp current =
-                    new Timestamp(System.currentTimeMillis());
+                    new Timestamp(Date.from(Instant.now()).getTime());
             
             if ( !title.isEmpty() ) {
                 entry.setTitle(title);
@@ -251,14 +254,14 @@ public class MetaWeblogAPIHandler extends BloggerAPIHandler {
             dateCreated = (Date)postcontent.get("pubDate");
         }
         if (dateCreated == null) {
-            dateCreated = new Date();
+            dateCreated = Date.from(Instant.now());
         }
         mLogger.debug("      Title: " + title);
         
         try {
             Weblogger roller = WebloggerFactory.getWeblogger();
             WeblogEntryManager weblogMgr = roller.getWeblogEntryManager();
-            Timestamp current = new Timestamp(System.currentTimeMillis());
+            Timestamp current = new Timestamp(Date.from(Instant.now()).getTime());
             
             WeblogEntry entry = new WeblogEntry();
             entry.setTitle(title);

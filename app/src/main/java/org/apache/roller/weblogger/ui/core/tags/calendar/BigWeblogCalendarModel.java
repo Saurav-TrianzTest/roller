@@ -18,7 +18,7 @@
 
 package org.apache.roller.weblogger.ui.core.tags.calendar;
 
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +33,7 @@ import org.apache.roller.weblogger.pojos.WeblogEntry;
 import org.apache.roller.weblogger.pojos.WeblogEntrySearchCriteria;
 import org.apache.roller.weblogger.ui.rendering.util.WeblogPageRequest;
 import org.apache.roller.util.DateUtil;
+import java.time.ZoneOffset;
 
 
 /**
@@ -42,18 +43,19 @@ public class BigWeblogCalendarModel extends WeblogCalendarModel {
     
     private static final Log mLogger = LogFactory.getLog(BigWeblogCalendarModel.class);
 
-    protected final SimpleDateFormat starDateFormat =
+    protected final DateTimeFormatter starDateFormat =
             DateUtil.get8charDateFormat();
 
-    protected final SimpleDateFormat singleDayFormat =
-            new SimpleDateFormat("dd");
+    protected final DateTimeFormatter singleDayFormat =
+            // cr-java-0111: DateTimeFormatter with UTC timezone
+            DateTimeFormatter.ofPattern("dd").withZone(ZoneOffset.UTC);
 
 
     public BigWeblogCalendarModel(WeblogPageRequest pRequest, String cat) {
         super(pRequest, cat);
         TimeZone tz = weblog.getTimeZoneInstance();
-        starDateFormat.setTimeZone(tz);
-        singleDayFormat.setTimeZone(tz);
+        starDateFormat.withZone(tz.toZoneId());
+        singleDayFormat.withZone(tz.toZoneId());
     }
     
     
@@ -87,8 +89,7 @@ public class BigWeblogCalendarModel extends WeblogCalendarModel {
             String dateString;
             List<?> entries = (List<?>)monthMap.get(day);
             if ( entries != null ) {
-                dateString = starDateFormat.format(
-                        ((WeblogEntry)entries.get(0)).getPubTime());
+                dateString = DateUtil.format(((WeblogEntry)entries.get(0)).getPubTime(), starDateFormat);
                 
                 // append 8 char date string on end of selfurl
                 String dayUrl = WebloggerFactory.getWeblogger().getUrlStrategy().getWeblogCollectionURL(weblog, locale, cat, dateString, null, -1, false);
@@ -97,7 +98,7 @@ public class BigWeblogCalendarModel extends WeblogCalendarModel {
                 sb.append("<a href=\"");
                 sb.append( dayUrl );
                 sb.append("\">");
-                sb.append(singleDayFormat.format(day));
+                sb.append( DateUtil.format(day, singleDayFormat) );
                 sb.append("</a></div>");
                 
                 for ( int i=0; i<entries.size(); i++ ) {
@@ -120,7 +121,7 @@ public class BigWeblogCalendarModel extends WeblogCalendarModel {
                 
             } else {
                 sb.append("<div class=\"hCalendarDayTitleBig\">");
-                sb.append(singleDayFormat.format(day));
+                sb.append( DateUtil.format(day, singleDayFormat) );
                 sb.append("</div>");
                 sb.append("<div class=\"bCalendarDayContentBig\"/>");
             }
@@ -147,7 +148,7 @@ public class BigWeblogCalendarModel extends WeblogCalendarModel {
         List<?> entries = (List<?>)monthMap.get( day );
         if ( entries != null && day != null ) {
             WeblogEntry entry = (WeblogEntry)entries.get(0);
-            dateString = starDateFormat.format(entry.getPubTime());
+            dateString = DateUtil.format(entry.getPubTime(), starDateFormat);
         }
         if (dateString == null && !alwaysURL) {
             return null;

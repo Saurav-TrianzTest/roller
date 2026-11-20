@@ -19,9 +19,12 @@
 package org.apache.roller.weblogger.ui.core.tags.calendar;
 
 import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -149,7 +152,7 @@ public class WeblogCalendarModel implements CalendarModel {
         }  
         
         // Fix for ROL-840 Don't include future entries
-        Date now = new Date();
+        Date now = Date.from(Instant.now());
         if (endDate.after(now)) {
         	endDate = now;
         	nextMonth = null;
@@ -177,10 +180,9 @@ public class WeblogCalendarModel implements CalendarModel {
 
     @Override
     public void setDay(String month) throws Exception {
-        SimpleDateFormat fmt = DateUtil.get8charDateFormat();
-        fmt.setCalendar(getCalendar());
-        ParsePosition pos = new ParsePosition(0);
-        initDay( fmt.parse( month, pos ) );
+        DateTimeFormatter fmt = DateUtil.get8charDateFormat().withZone(getCalendar().getTimeZone().toZoneId());
+        LocalDate localDate = LocalDate.parse(month, fmt);
+        initDay( Date.from(localDate.atStartOfDay(ZoneOffset.UTC).toInstant()) );
     }
     
     @Override
@@ -194,16 +196,14 @@ public class WeblogCalendarModel implements CalendarModel {
 
     // convenience method returns 8 char day stamp YYYYMMDD
     public static String format8chars(Date date, Calendar cal) {
-    	SimpleDateFormat format = DateUtil.get8charDateFormat();
-    	format.setCalendar(cal);
+    	DateTimeFormatter format = DateUtil.get8charDateFormat().withZone(cal.getTimeZone().toZoneId());
     	return DateUtil.format(date,format);
     }
     
     
     // convenience method returns 6 char month stamp YYYYMM
     public static String format6chars(Date date, Calendar cal) {
-    	SimpleDateFormat format = DateUtil.get6charDateFormat();
-    	format.setCalendar(cal);
+    	DateTimeFormatter format = DateUtil.get6charDateFormat().withZone(cal.getTimeZone().toZoneId());
     	return DateUtil.format(date,format);
     }
 
@@ -212,20 +212,23 @@ public class WeblogCalendarModel implements CalendarModel {
      */
     public static Date parseWeblogURLDateString(String dateString, TimeZone tz, Locale locale) {
         
-        Date ret = new Date();
+        Date ret = Date.from(Instant.now());
         Calendar cal = Calendar.getInstance(tz,locale);
         
         if (dateString != null
                 && dateString.length()==8
                 && StringUtils.isNumeric(dateString) ) {
-            SimpleDateFormat char8DateFormat = DateUtil.get8charDateFormat();
-            char8DateFormat.setCalendar(cal);
-            ParsePosition pos = new ParsePosition(0);
-            ret = char8DateFormat.parse(dateString, pos);
+            DateTimeFormatter char8DateFormat = DateUtil.get8charDateFormat().withZone(tz.toZoneId());
 
             // make sure the requested date is not in the future
             // Date is always ms offset from epoch in UTC, by no means of timezone.
-            Date today = new Date();
+            Date today = Date.from(Instant.now());
+            try {
+                LocalDate localDate = LocalDate.parse(dateString, char8DateFormat);
+                ret = Date.from(localDate.atStartOfDay(ZoneOffset.UTC).toInstant());
+            } catch (Exception e) {
+                // parse failed, keep ret as now
+            }
             if(ret.after(today)) {
                 ret = today;
             }
@@ -233,13 +236,16 @@ public class WeblogCalendarModel implements CalendarModel {
         } else if(dateString != null
                 && dateString.length()==6
                 && StringUtils.isNumeric(dateString)) {
-            SimpleDateFormat char6DateFormat = DateUtil.get6charDateFormat();
-            char6DateFormat.setCalendar(cal);
-            ParsePosition pos = new ParsePosition(0);
-            ret = char6DateFormat.parse(dateString, pos);
+            DateTimeFormatter char6DateFormat = DateUtil.get6charDateFormat().withZone(tz.toZoneId());
             
             // make sure the requested date is not in the future
-            Date today = new Date();
+            Date today = Date.from(Instant.now());
+            try {
+                LocalDate localDate = LocalDate.parse(dateString, char6DateFormat);
+                ret = Date.from(localDate.atStartOfDay(ZoneOffset.UTC).toInstant());
+            } catch (Exception e) {
+                // parse failed, keep ret as now
+            }
             if(ret.after(today)) {
                 ret = today;
             }

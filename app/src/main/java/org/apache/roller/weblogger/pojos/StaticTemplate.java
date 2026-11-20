@@ -25,6 +25,7 @@ import org.apache.roller.weblogger.pojos.TemplateRendition.TemplateLanguage;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.time.Instant;
 
 
 /**
@@ -39,7 +40,7 @@ public class StaticTemplate implements Template, Serializable {
     private String id = null;
     private String name = null;
     private String description = null;
-    private Date lastModified = new Date();
+    private Date lastModified = Date.from(Instant.now());
     private String  outputContentType = null;
     private TemplateRendition templateRendition;
 

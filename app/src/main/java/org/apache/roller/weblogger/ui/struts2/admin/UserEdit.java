@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.struts2.admin;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -118,7 +120,7 @@ public class UserEdit extends UIAction {
         if (isAdd()) {
             // initial user create
             getBean().setLocale(Locale.getDefault().toString());
-            getBean().setTimeZone(TimeZone.getDefault().getID());
+            getBean().setTimeZone(TimeZone.getTimeZone("UTC").getID());
         } else {
             // populate form data from user profile data
             getBean().copyFrom(user);

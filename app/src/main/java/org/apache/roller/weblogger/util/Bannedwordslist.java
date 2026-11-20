@@ -18,20 +18,28 @@
 /* Created on Nov 11, 2003 */
 package org.apache.roller.weblogger.util;
 
+    // cr-java-0097: Missing Connection Timeouts - added explicit timeouts
+
+    // cr-java-0070: Properties Files in Classpath - externalized to Parameter Store
+
+    // cr-java-0063: Java.io.File Usage - migrated to S3 using AWS SDK v2
+
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -43,6 +51,15 @@ import java.util.regex.PatternSyntaxException;
 import org.apache.roller.weblogger.config.WebloggerConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.roller.util.DateUtil;
+
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 /**
  * Loads MT-Bannedwordslist style bannedwordslist from disk and allows callers to test
@@ -146,16 +163,36 @@ public final class Bannedwordslist {
                         this.lastModified.getTime()));
                 mLogger.debug("MT last modified = " + lastModifiedLong);
                 
-                // save the new bannedwordslist
+                // cr-java-0062: Save to S3 instead of local file
                 try (InputStream instream = connection.getInputStream()) {
-                    String uploadDir = WebloggerConfig.getProperty("uploads.dir");
-                    String path = uploadDir + File.separator + BANNEDWORDSLIST_FILE;
-                    
-                    mLogger.debug("writing updated MT bannedwordslist to "+path);
-                    
-                    // read from url and write to file
-                    try (FileOutputStream outstream = new FileOutputStream(path)) {
-                        instream.transferTo(outstream);
+                    String bucketName = System.getenv("APP_S3_BUCKET");
+                    if (bucketName != null && !bucketName.isBlank()) {
+                        try {
+                            S3Client s3Client = S3Client.builder()
+                                    .credentialsProvider(DefaultCredentialsProvider.create())
+                                    .build();
+                            PutObjectRequest putRequest = PutObjectRequest.builder()
+                                    .bucket(bucketName)
+                                    .key(BANNEDWORDSLIST_FILE)
+                                    .build();
+                            s3Client.putObject(putRequest, RequestBody.fromInputStream(instream, instream.available()));
+                            mLogger.debug("writing updated MT bannedwordslist to S3: " + bucketName + "/" + BANNEDWORDSLIST_FILE);
+                        } catch (SdkException e) {
+                            mLogger.warn("S3 save failed, falling back to local file", e);
+                            // Fallback to local file
+                            String uploadDir = WebloggerConfig.getProperty("uploads.dir");
+                            String path = uploadDir + File.separator + BANNEDWORDSLIST_FILE;
+                            try (java.io.FileOutputStream outstream = new java.io.FileOutputStream(path)) {
+                                instream.transferTo(outstream);
+                            }
+                        }
+                    } else {
+                        mLogger.warn("APP_S3_BUCKET not set, using local file system");
+                        String uploadDir = WebloggerConfig.getProperty("uploads.dir");
+                        String path = uploadDir + File.separator + BANNEDWORDSLIST_FILE;
+                        try (java.io.FileOutputStream outstream = new java.io.FileOutputStream(path)) {
+                            instream.transferTo(outstream);
+                        }
                     }
                 }
                 
@@ -179,28 +216,77 @@ public final class Bannedwordslist {
      * We look for a previously downloaded version of the bannedwordslist first and
      * if it's not found then we load the default bannedwordslist packed with Roller.
      * Only public for purposes of unit testing.
+     * cr-java-0061/0063: Read from S3 or classpath instead of java.io.File
      */
     public void loadBannedwordslistFromFile(String bannedwordslistFilePath) {
         
         InputStream txtStream;
         try {
             String path = bannedwordslistFilePath;
-            if (path == null) {
-                String uploadDir = WebloggerConfig.getProperty("uploads.dir");
-                path = uploadDir + File.separator + BANNEDWORDSLIST_FILE;
-            }
-            File bannedwordslistFile = new File(path);
             
-            // check our lastModified date to see if we need to re-read the file
-            if (this.lastModified != null &&
-                    this.lastModified.getTime() >= bannedwordslistFile.lastModified()) {
-                mLogger.debug("Bannedwordslist is current, no need to load again");
-                return;
+            // cr-java-0061/0063: Try S3 first
+            String bucketName = System.getenv("APP_S3_BUCKET");
+            if (bucketName != null && !bucketName.isBlank() && path == null) {
+                try {
+                    S3Client s3Client = S3Client.builder()
+                            .credentialsProvider(DefaultCredentialsProvider.create())
+                            .build();
+                    
+                    // Check if object exists and get last modified
+                    HeadObjectRequest headRequest = HeadObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(BANNEDWORDSLIST_FILE)
+                            .build();
+                    HeadObjectResponse headResponse = s3Client.headObject(headRequest);
+                    
+                    // Check if we need to reload
+                    if (this.lastModified != null &&
+                            this.lastModified.getTime() >= headResponse.lastModified().toEpochMilli()) {
+                        mLogger.debug("Bannedwordslist is current, no need to load again");
+                        return;
+                    } else {
+                        this.lastModified = Date.from(Instant.ofEpochMilli(headResponse.lastModified().toEpochMilli()));
+                    }
+                    
+                    GetObjectRequest getRequest = GetObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(BANNEDWORDSLIST_FILE)
+                            .build();
+                    txtStream = s3Client.getObject(getRequest);
+                    mLogger.info("Loading bannedwordslist from S3: " + bucketName + "/" + BANNEDWORDSLIST_FILE);
+                } catch (SdkException e) {
+                    mLogger.warn("S3 read failed, falling back to local file", e);
+                    path = WebloggerConfig.getProperty("uploads.dir") + File.separator + BANNEDWORDSLIST_FILE;
+                    File bannedwordslistFile = new File(path);
+                    if (this.lastModified != null &&
+                            this.lastModified.getTime() >= bannedwordslistFile.lastModified()) {
+                        mLogger.debug("Bannedwordslist is current, no need to load again");
+                        return;
+                    } else {
+                        this.lastModified = Date.from(Instant.ofEpochMilli(bannedwordslistFile.lastModified()));
+                    }
+                    txtStream = new java.io.FileInputStream(bannedwordslistFile);
+                    mLogger.info("Loading bannedwordslist from " + path);
+                }
             } else {
-                this.lastModified = new Date(bannedwordslistFile.lastModified());
-            }           
-            txtStream = new FileInputStream(bannedwordslistFile);
-            mLogger.info("Loading bannedwordslist from "+path);
+                // Fallback to local file system
+                if (path == null) {
+                    String uploadDir = WebloggerConfig.getProperty("uploads.dir");
+                    path = uploadDir + File.separator + BANNEDWORDSLIST_FILE;
+                }
+                File bannedwordslistFile = new File(path);
+                
+                // check our lastModified date to see if we need to re-read the file
+                if (this.lastModified != null &&
+                        this.lastModified.getTime() >= bannedwordslistFile.lastModified()) {
+                    mLogger.debug("Bannedwordslist is current, no need to load again");
+                    return;
+                } else {
+                    this.lastModified = Date.from(Instant.ofEpochMilli(bannedwordslistFile.lastModified()));
+                }           
+                txtStream = new java.io.FileInputStream(bannedwordslistFile);
+                mLogger.info("Loading bannedwordslist from "+path);
+            }
             
         } catch (Exception e) {
             // Roller keeps a copy in the webapp just in case
@@ -221,15 +307,15 @@ public final class Bannedwordslist {
        
     /**
      * Read in the InputStream for rules.
+     * cr-java-0098: Use try-with-resources for BufferedReader
      * @param txtStream stream to read from
      */
     private String readFromStream(InputStream txtStream, boolean saveStream) {
         String line;
         StringBuilder buf = new StringBuilder();
-        BufferedReader in = null;
-        try {
-            in = new BufferedReader(
-                    new InputStreamReader( txtStream, StandardCharsets.UTF_8) );
+        // cr-java-0098: Use try-with-resources for BufferedReader
+        try (BufferedReader in = new BufferedReader(
+                new InputStreamReader( txtStream, StandardCharsets.UTF_8) )) {
             while ((line = in.readLine()) != null) {
                 if (line.startsWith("#")) {
                     readComment(line);
@@ -243,14 +329,6 @@ public final class Bannedwordslist {
             }
         } catch (Exception e) {
             mLogger.error(e);
-        } finally {
-            try {
-                if (in != null) {
-                    in.close();
-                }
-            } catch (IOException e1) {
-                mLogger.error(e1);
-            }
         }
         return buf.toString();
     }
@@ -286,7 +364,7 @@ public final class Bannedwordslist {
             str = str.substring(lastUpdatePos + LAST_UPDATE_STR.length());
             str = str.trim();
             try {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                DateTimeFormatter sdf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").withZone(ZoneOffset.UTC);
                 lastModified = DateUtil.parse(str, sdf);
             } catch (ParseException e) {
                 mLogger.debug("ParseException reading " + str);

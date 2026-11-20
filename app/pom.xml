@@ -15,6 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
+<!-- cr-java-0107: WAR Packaging - converted to executable JAR with embedded Tomcat -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -30,7 +31,7 @@ limitations under the License.
 
     <name>Roller webapp</name>
     <artifactId>roller-webapp</artifactId>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <properties>
         <servlet.version>6.1.0</servlet.version>
@@ -49,7 +50,7 @@ limitations under the License.
         <guice.version>7.0.0</guice.version>
         <log4j2.version>2.26.1</log4j2.version>
         <lucene.version>9.12.3</lucene.version> <!-- lucene 10 requires JDK 21 -->
-        <maven-war.version>3.5.1</maven-war.version>
+        <tomcat.embed.version>11.0.29</tomcat.embed.version>
         <maven-surefire.version>3.6.0</maven-surefire.version>
         <maven-antrun.version>1.0b3</maven-antrun.version>
         <rome.version>1.19.0</rome.version> <!-- ROME core; used for feeds/planet (AtomPub no longer uses Propono) -->
@@ -623,6 +624,54 @@ limitations under the License.
             </exclusions>
         </dependency>
 
+        <!-- Embedded Tomcat for executable JAR -->
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>${tomcat.embed.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-jasper</artifactId>
+            <version>${tomcat.embed.version}</version>
+        </dependency>
+
+        <!-- AWS SDK for Java v2 - S3, Secrets Manager, SSM, DynamoDB, SQS -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>secretsmanager</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>ssm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>dynamodb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sqs</artifactId>
+        </dependency>
+
+        <!-- Redis client for ElastiCache - session state and caching -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>5.2.0</version>
+        </dependency>
+
+        <!-- HikariCP connection pool for cloud database connections -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>5.1.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -633,11 +682,37 @@ limitations under the License.
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>${maven-war.version}</version>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.2</version>
                 <configuration>
-                    <attachClasses>true</attachClasses>
+                    <archive>
+                        <manifest>
+                            <mainClass>org.apache.roller.weblogger.ui.core.EmbeddedTomcatMain</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
+            </plugin>
+
+            <!-- Executable JAR with embedded Tomcat and all dependencies -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.apache.roller.weblogger.ui.core.EmbeddedTomcatMain</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
@@ -881,6 +956,15 @@ limitations under the License.
                 <includes>
                     <include>roller-version.properties</include>
                 </includes>
+            </resource>
+            <resource>
+                <!-- Include webapp content (JSPs, HTML, CSS, JS, web.xml) in the JAR -->
+                <directory>${project.basedir}/src/main/webapp</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>**/**</include>
+                </includes>
+                <targetPath>webapp</targetPath>
             </resource>
         </resources>
 

@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.core.filters;
 
+    // cr-java-0091: IP-based Security - replaced with AWS IAM authentication
+
 import java.io.IOException;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;

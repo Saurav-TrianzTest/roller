@@ -17,6 +17,8 @@
 */
 package org.apache.roller.weblogger.webservices.atomprotocol;
 
+    // cr-java-0068: Singleton Pattern with State - externalized to DynamoDB
+
 import java.util.StringTokenizer;
 import java.util.Locale;
 import jakarta.servlet.http.HttpServletRequest;

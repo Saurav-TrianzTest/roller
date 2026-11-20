@@ -20,6 +20,7 @@ package org.apache.roller.planet.pojos;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.time.Instant;
 
 
 /**
@@ -36,7 +37,7 @@ public class StaticTemplate implements Template, Serializable {
     private String description = null;
     private String contents = null;
     private String link = null;
-    private Date lastModified = new Date();
+    private Date lastModified = Date.from(Instant.now());
     private String templateLanguage = null;
     private boolean hidden = false;
     private boolean navbar = false;

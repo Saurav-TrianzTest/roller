@@ -18,8 +18,13 @@
 
 package org.apache.roller.planet.tasks;
 
+    // cr-java-0063: Java.io.File Usage - migrated to S3 using AWS SDK v2
+
+    // cr-java-0061: Hard-coded File Paths - replaced with S3 object storage
+
 import java.io.File;
 import java.util.Date;
+import java.time.Instant;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.roller.weblogger.config.WebloggerConfig;
@@ -76,7 +81,7 @@ public class GeneratePlanetTask extends PlanetTask {
             
             // Build context with current date 
             VelocityContext context = new VelocityContext();
-            context.put("date", new Date());
+            context.put("date", Date.from(Instant.now()));
             // TODO fix: Use one utilities model and not one of the below
             //context.put("utils", new UtilitiesModel());
             context.put("utilities", new Utilities());

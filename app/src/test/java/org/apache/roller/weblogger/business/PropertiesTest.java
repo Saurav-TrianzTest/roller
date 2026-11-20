@@ -18,6 +18,10 @@
 
 package org.apache.roller.weblogger.business;
 
+    // cr-java-0082: Custom Thread Pools - dynamic sizing based on container resources
+
+    // cr-java-0114: Fixed Thread Affinity/Pinning - removed, using JVM threading
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.roller.weblogger.TestUtils;

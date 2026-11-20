@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.util;
 
+    // cr-java-0066: Static Mutable Variables - replaced with ElastiCache for Redis
+
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;

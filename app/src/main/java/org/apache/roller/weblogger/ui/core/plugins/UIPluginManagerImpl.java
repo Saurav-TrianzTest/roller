@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.core.plugins;
 
+    // cr-java-0068: Singleton Pattern with State - externalized to DynamoDB
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;

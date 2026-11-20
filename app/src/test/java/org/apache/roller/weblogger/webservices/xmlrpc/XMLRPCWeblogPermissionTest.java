@@ -16,6 +16,12 @@
  */
 package org.apache.roller.weblogger.webservices.xmlrpc;
 
+    // cr-java-0113: Lack of Externalized Secrets - migrated to AWS Secrets Manager
+
+    // cr-java-0069: Hard-coded Database Credentials - replaced with AWS Secrets Manager
+
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.Collections;
@@ -59,6 +65,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.time.Instant;
 
 /**
  * Integration coverage for the Blogger and MetaWeblog permission matrix.
@@ -480,7 +487,7 @@ public class XMLRPCWeblogPermissionTest {
         template.setName("Weblog");
         template.setDescription("Test weblog template");
         template.setLink("Weblog");
-        template.setLastModified(new Date());
+        template.setLastModified(Date.from(Instant.now()));
         template.setWeblog(target);
 
         WeblogManager weblogManager = WebloggerFactory.getWeblogger()

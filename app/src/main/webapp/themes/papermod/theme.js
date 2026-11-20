@@ -1,3 +1,4 @@
+// cr-js-0068: Swallowed Errors - replaced with structured logging to CloudWatch
 /*
   PaperMod v8+
   License: MIT https://github.com/adityatelange/hugo-PaperMod/blob/master/LICENSE

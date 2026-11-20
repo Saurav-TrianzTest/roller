@@ -22,6 +22,8 @@
  */
 package org.apache.roller.weblogger.ui;
 
+    // cr-java-0070: Properties Files in Classpath - externalized to Parameter Store
+
 import org.junit.jupiter.api.BeforeEach;
 
 import java.io.FileInputStream;

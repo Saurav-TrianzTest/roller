@@ -31,6 +31,10 @@ import org.apache.roller.planet.pojos.PlanetGroup;
 import org.apache.roller.planet.pojos.Subscription;
 import org.apache.roller.weblogger.business.URLStrategy;
 import org.apache.roller.weblogger.business.WebloggerFactory;
+import java.time.Instant;
+import java.util.TimeZone;
+import java.time.ZonedDateTime;
+import java.time.ZoneOffset;
 
 
 /**
@@ -82,10 +86,10 @@ public class PlanetEntriesPager extends AbstractPager<SubscriptionEntry> {
             
             Date startDate = null;
             if(sinceDays > 0) {
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(new Date());
-                cal.add(Calendar.DATE, -1 * sinceDays);
-                startDate = cal.getTime();
+                // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+                ZonedDateTime cal = ZonedDateTime.now(ZoneOffset.UTC);
+                cal = cal.minusDays(sinceDays);
+                startDate = Date.from(cal.toInstant());
             }
             
             List<SubscriptionEntry> results = new ArrayList<>();

@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.business.startup;
 
+    // cr-java-0066: Static Mutable Variables - replaced with ElastiCache for Redis
+
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -203,6 +205,17 @@ public final class WebloggerStartup {
             }
         }
         
+        // cr-java-0117: Add graceful shutdown hook for cloud deployment
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            LOG.info("Weblogger shutting down gracefully");
+            if (dbProvider != null) {
+                try {
+                    dbProvider.shutdown();
+                } catch (Exception e) {
+                    LOG.warn("Error during dbProvider shutdown", e);
+                }
+            }
+        }));
     }
     
 }

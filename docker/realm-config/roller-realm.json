@@ -108,12 +108,12 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "web_app",
       "redirectUris": [
-        "http://localhost:8080/*",
-        "http://127.0.0.1:8080/*"
+        "https://${APP_HOST:localhost}:${APP_PORT:8080}/*",
+        "https://${APP_HOST:127.0.0.1}:${APP_PORT:8080}/*"
       ],
       "webOrigins": [
-        "http://localhost:8080",
-        "http://127.0.0.1:8080"
+        "https://${APP_HOST:localhost}:${APP_PORT:8080}",
+        "https://${APP_HOST:127.0.0.1}:${APP_PORT:8080}"
       ],
       "notBefore": 0,
       "bearerOnly": false,

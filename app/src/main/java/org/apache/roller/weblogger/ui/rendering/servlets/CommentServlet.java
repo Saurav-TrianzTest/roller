@@ -18,6 +18,10 @@
 
 package org.apache.roller.weblogger.ui.rendering.servlets;
 
+    // cr-java-0091: IP-based Security - replaced with AWS IAM authentication
+
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Iterator;

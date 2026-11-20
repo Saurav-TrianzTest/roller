@@ -152,6 +152,10 @@ public class ResetHitCountsTask extends RollerTaskWithLeasing {
      * Main method so that this task may be run from outside the webapp.
      */
     public static void main(String[] args) throws Exception {
+        // cr-java-0117: Add graceful shutdown hook for cloud deployment
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("ResetHitCountsTask shutting down gracefully");
+        }));
         try {
             ResetHitCountsTask task = new ResetHitCountsTask();
             task.init();

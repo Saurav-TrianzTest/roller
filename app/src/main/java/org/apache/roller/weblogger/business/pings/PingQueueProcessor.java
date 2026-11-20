@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.business.pings;
 
+    // cr-java-0068: Singleton Pattern with State - externalized to DynamoDB
+
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

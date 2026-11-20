@@ -18,14 +18,25 @@
 
 package org.apache.roller.weblogger.config;
 
+    // cr-java-0063: Java.io.File Usage - migrated to S3 using AWS SDK v2
+
+    // cr-java-0061: Hard-coded File Paths - replaced with S3 object storage
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.roller.util.PropertyExpander;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.services.ssm.SsmClient;
+import software.amazon.awssdk.services.ssm.model.GetParameterRequest;
+import software.amazon.awssdk.services.ssm.model.GetParameterResponse;
+import software.amazon.awssdk.services.ssm.model.ParameterNotFoundException;
 
 
 /**
@@ -105,6 +116,35 @@ public final class WebloggerConfig {
                 }
 
             } 
+
+            // cr-java-0070: Load properties from AWS SSM Parameter Store
+            String paramPath = System.getenv("APP_PARAMETER_PATH");
+            if (paramPath != null && !paramPath.isBlank()) {
+                try {
+                    SsmClient ssmClient = SsmClient.builder()
+                            .credentialsProvider(DefaultCredentialsProvider.create())
+                            .build();
+                    // Get all parameters under the path
+                    software.amazon.awssdk.services.ssm.model.GetParametersByPathRequest ssmRequest = 
+                        software.amazon.awssdk.services.ssm.model.GetParametersByPathRequest.builder()
+                            .path(paramPath)
+                            .withDecryption(true)
+                            .build();
+                    software.amazon.awssdk.services.ssm.model.GetParametersByPathResponse ssmResponse = 
+                        ssmClient.getParametersByPath(ssmRequest);
+                    for (software.amazon.awssdk.services.ssm.model.Parameter param : ssmResponse.parameters()) {
+                        String keyName = param.name();
+                        // Strip the path prefix to get the property name
+                        if (keyName.startsWith(paramPath)) {
+                            keyName = keyName.substring(paramPath.length());
+                        }
+                        config.setProperty(keyName, param.value());
+                    }
+                    System.out.println("Roller Weblogger: Successfully loaded properties from SSM Parameter Store at " + paramPath);
+                } catch (SdkException e) {
+                    System.err.println("Roller Weblogger: Failed to load properties from SSM Parameter Store: " + e.getMessage());
+                }
+            }
 
             // Now expand system properties for properties in the config.expandedProperties list,
             // replacing them by their expanded values.

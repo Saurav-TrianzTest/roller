@@ -19,6 +19,7 @@
 package org.apache.roller.weblogger.planet.business;
 
 import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
@@ -111,7 +112,7 @@ public class WebloggerRomeFeedFetcher extends RomeFeedFetcher {
         
         // must have a last updated time
         if(newSub.getLastUpdated() == null) {
-            newSub.setLastUpdated(new Date());
+            newSub.setLastUpdated(Date.from(Instant.now()));
         }
         
         // lookup recent entries from weblog and add them to the subscription

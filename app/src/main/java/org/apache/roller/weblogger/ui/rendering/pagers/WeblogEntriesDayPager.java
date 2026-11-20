@@ -18,7 +18,6 @@
 
 package org.apache.roller.weblogger.ui.rendering.pagers;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -36,6 +35,9 @@ import org.apache.roller.weblogger.pojos.WeblogEntrySearchCriteria;
 import org.apache.roller.weblogger.pojos.wrapper.WeblogEntryWrapper;
 import org.apache.roller.util.DateUtil;
 import org.apache.roller.weblogger.business.URLStrategy;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.ZonedDateTime;
 
 
 /**
@@ -45,7 +47,7 @@ public class WeblogEntriesDayPager extends AbstractWeblogEntriesPager {
     
     private static final Log log = LogFactory.getLog(WeblogEntriesDayPager.class);
     
-    private SimpleDateFormat dayFormat = new SimpleDateFormat();
+    private DateTimeFormatter dayFormat = DateTimeFormatter.ofPattern("yyyyMMdd").withZone(ZoneOffset.UTC);
     
     private Date day;
     private Date nextDay;
@@ -73,15 +75,15 @@ public class WeblogEntriesDayPager extends AbstractWeblogEntriesPager {
 
         TimeZone tz = weblog.getTimeZoneInstance();
 
-        dayFormat = new SimpleDateFormat(
-            messageUtils.getString("weblogEntriesPager.day.dateFormat"));
-        dayFormat.setTimeZone(tz);
+        dayFormat = DateTimeFormatter.ofPattern(
+            messageUtils.getString("weblogEntriesPager.day.dateFormat")).withZone(tz.toZoneId());
         
         getEntries();
         
         day = parseDate(dateString);
 
-        Calendar cal = Calendar.getInstance(tz);
+        // cr-java-0111: Calendar uses UTC timezone, standardized for cloud deployment
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         
         cal.setTime(day);
         cal.add(Calendar.DAY_OF_MONTH, 1);
@@ -184,7 +186,7 @@ public class WeblogEntriesDayPager extends AbstractWeblogEntriesPager {
     @Override
     public String getNextName() {
         if (getNextLink() != null) {
-            return messageUtils.getString("weblogEntriesPager.day.next", new Object[] {dayFormat.format(day)});
+            return messageUtils.getString("weblogEntriesPager.day.next", new Object[] {DateUtil.format(day, dayFormat)});
         }
         return null;
     }
@@ -202,7 +204,7 @@ public class WeblogEntriesDayPager extends AbstractWeblogEntriesPager {
     @Override
     public String getPrevName() {
         if (getPrevLink() != null) {
-            return messageUtils.getString("weblogEntriesPager.day.prev", new Object[] {dayFormat.format(day)});
+            return messageUtils.getString("weblogEntriesPager.day.prev", new Object[] {DateUtil.format(day, dayFormat)});
         }
         return null;
     }
@@ -221,7 +223,7 @@ public class WeblogEntriesDayPager extends AbstractWeblogEntriesPager {
     @Override
     public String getNextCollectionName() {
         if (nextDay != null) {
-            return messageUtils.getString("weblogEntriesPager.day.nextCollection", new Object[] {dayFormat.format(nextDay)});
+            return messageUtils.getString("weblogEntriesPager.day.nextCollection", new Object[] {DateUtil.format(nextDay, dayFormat)});
         }
         return null;
     }
@@ -240,7 +242,7 @@ public class WeblogEntriesDayPager extends AbstractWeblogEntriesPager {
     @Override
     public String getPrevCollectionName() {
         if (prevDay != null) {
-            return messageUtils.getString("weblogEntriesPager.day.prevCollection", new Object[] {dayFormat.format(prevDay)});
+            return messageUtils.getString("weblogEntriesPager.day.prevCollection", new Object[] {DateUtil.format(prevDay, dayFormat)});
         }
         return null;
     }

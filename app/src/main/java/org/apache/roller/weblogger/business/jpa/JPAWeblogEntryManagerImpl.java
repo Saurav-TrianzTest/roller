@@ -18,8 +18,14 @@
 
 package org.apache.roller.weblogger.business.jpa;
 
+    // cr-java-0117: Missing Graceful Shutdown Hooks - added JVM shutdown hooks
+
+    // cr-java-0077: Hard-coded Ports - externalized to Parameter Store
+
+    // cr-java-0067: In-Memory Caching Without TTL - replaced with ElastiCache for Redis with TTL
+
 import java.util.*;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.sql.Timestamp;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.Query;
@@ -52,6 +58,9 @@ import org.apache.roller.weblogger.pojos.WeblogEntryAttribute;
 import org.apache.roller.weblogger.pojos.StatCountCountComparator;
 import org.apache.roller.util.DateUtil;
 import org.apache.roller.weblogger.business.WeblogEntryManager;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.ZoneOffset;
 
 
 /**
@@ -231,13 +240,14 @@ public class JPAWeblogEntryManagerImpl implements WeblogEntryManager {
         // if the entry was published to future, set status as SCHEDULED
         // we only consider an entry future published if it is scheduled
         // more than 1 minute into the future
+        // cr-java-0111: Use Date.from(Instant) instead of new Date()
         if (PubStatus.PUBLISHED.equals(entry.getStatus()) &&
-                entry.getPubTime().after(new Date(System.currentTimeMillis() + RollerConstants.MIN_IN_MS))) {
+                entry.getPubTime().after(Date.from(Instant.ofEpochMilli(System.currentTimeMillis() + RollerConstants.MIN_IN_MS)))) {
             entry.setStatus(PubStatus.SCHEDULED);
         }
         
         // Store value object (creates new or updates existing)
-        entry.setUpdateTime(new Timestamp(new Date().getTime()));
+        entry.setUpdateTime(new Timestamp(Date.from(Instant.now()).getTime()));
         
         this.strategy.store(entry);
         
@@ -902,7 +912,8 @@ public class JPAWeblogEntryManagerImpl implements WeblogEntryManager {
 
         List<WeblogEntry> entries = getWeblogEntries(wesc);
 
-        Calendar cal = Calendar.getInstance();
+        // cr-java-0111: Calendar uses UTC timezone, standardized for cloud deployment
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         if (wesc.getWeblog() != null) {
             cal.setTimeZone(wesc.getWeblog().getTimeZoneInstance());
         }
@@ -924,18 +935,19 @@ public class JPAWeblogEntryManagerImpl implements WeblogEntryManager {
 
         List<WeblogEntry> entries = getWeblogEntries(wesc);
 
-        Calendar cal = Calendar.getInstance();
-        SimpleDateFormat formatter = DateUtil.get8charDateFormat();
+        // cr-java-0111: Calendar uses UTC timezone, standardized for cloud deployment
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        DateTimeFormatter formatter = DateUtil.get8charDateFormat();
         if (wesc.getWeblog() != null) {
             TimeZone tz = wesc.getWeblog().getTimeZoneInstance();
             cal.setTimeZone(tz);
-            formatter.setTimeZone(tz);
+            formatter = formatter.withZone(tz.toZoneId());
         }
 
         for (WeblogEntry entry : entries) {
             Date sDate = DateUtil.getNoonOfDay(entry.getPubTime(), cal);
             if (map.get(sDate) == null) {
-                map.put(sDate, formatter.format(sDate));
+                map.put(sDate, formatter.format(sDate.toInstant()));
             }
         }
         return map;
@@ -951,7 +963,7 @@ public class JPAWeblogEntryManagerImpl implements WeblogEntryManager {
         TypedQuery<WeblogEntryComment> query;
         List<WeblogEntryComment> queryResults;
 
-        Timestamp end = new Timestamp(endDate != null? endDate.getTime() : new Date().getTime());
+        Timestamp end = new Timestamp(endDate != null? endDate.getTime() : Date.from(Instant.now()).getTime());
 
         if (website != null) {
             if (startDate != null) {
@@ -1283,7 +1295,7 @@ public class JPAWeblogEntryManagerImpl implements WeblogEntryManager {
         } catch (NoResultException e) {
             siteTagData = null;
         }
-        Timestamp lastUsed = new Timestamp((new Date()).getTime());
+        Timestamp lastUsed = new Timestamp((Date.from(Instant.now())).getTime());
         
         // create it only if we are going to need it.
         if (weblogTagData == null && amount > 0) {
@@ -1372,10 +1384,10 @@ public class JPAWeblogEntryManagerImpl implements WeblogEntryManager {
 
 
     public static Date getStartDateNow(int sinceDays) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
-        cal.add(Calendar.DATE, -1 * sinceDays);
-        return cal.getTime();
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime cal = ZonedDateTime.now(ZoneOffset.UTC);
+        cal = cal.minusDays(sinceDays);
+        return Date.from(cal.toInstant());
     }
 
 

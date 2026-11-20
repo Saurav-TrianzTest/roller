@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -45,6 +46,9 @@ import org.apache.roller.planet.pojos.SubscriptionEntry;
 import org.apache.roller.planet.pojos.Subscription;
 
 import static java.net.http.HttpResponse.BodyHandlers.ofInputStream;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.ZoneOffset;
 
 
 /**
@@ -130,12 +134,12 @@ public class RomeFeedFetcher implements FeedFetcher {
         // some kludge to deal with feeds w/ no entry dates
         // we assign arbitrary dates chronologically by entry starting either
         // from the current time or the last update time of the subscription
-        Calendar cal = Calendar.getInstance();
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime cal = ZonedDateTime.now(ZoneOffset.UTC);
         if (newSub.getLastUpdated() != null) {
-            cal.setTime(newSub.getLastUpdated());
+            cal = ZonedDateTime.ofInstant(newSub.getLastUpdated().toInstant(), ZoneOffset.UTC);
         } else {
-            cal.setTime(new Date());
-            cal.add(Calendar.DATE, -1);
+            cal = cal.minusDays(1);
         }
         
         // add entries
@@ -146,8 +150,8 @@ public class RomeFeedFetcher implements FeedFetcher {
             // some kludge to handle feeds with no entry dates
             if (newEntry.getPubTime() == null) {
                 log.debug("No published date, assigning fake date for "+feedURL);
-                newEntry.setPubTime(new Timestamp(cal.getTimeInMillis()));
-                cal.add(Calendar.DATE, -1);
+                newEntry.setPubTime(new Timestamp(cal.toInstant().toEpochMilli()));
+                cal = cal.minusDays(1);
             }
             
             newSub.addEntry(newEntry);

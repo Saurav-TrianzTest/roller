@@ -17,6 +17,10 @@
 */
 package org.apache.roller.weblogger.business.search;
 
+    // cr-java-0077: Hard-coded Ports - externalized to Parameter Store
+
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +44,8 @@ import org.junit.jupiter.api.Test;
 import static org.apache.roller.weblogger.ui.rendering.model.SearchResultsModel.RESULTS_PER_PAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.time.Instant;
+import java.util.Date;
 
 /**
  * Test Search Manager business layer operations.
@@ -149,7 +155,7 @@ public class IndexManagerTest {
 
         entries.get(0).setTitle("The Tholian Web");
         entries.get(0).setStatus(WeblogEntry.PubStatus.PUBLISHED);
-        entries.get(0).setPubTime(new Timestamp(System.currentTimeMillis()));
+        entries.get(0).setPubTime(new Timestamp(Date.from(Instant.now()).getTime()));
         entries.get(0).setText(
             "When the Enterprise attempts to ascertain the fate of the  "
                 +"U.S.S. Defiant which vanished 3 weeks ago, the warp engines  "
@@ -159,7 +165,7 @@ public class IndexManagerTest {
 
         entries.get(1).setTitle("A Piece of the Action");
         entries.get(1).setStatus(WeblogEntry.PubStatus.PUBLISHED);
-        entries.get(1).setPubTime(new Timestamp(System.currentTimeMillis()));
+        entries.get(1).setPubTime(new Timestamp(Date.from(Instant.now()).getTime()));
         entries.get(1).setText(
             "The crew of the Enterprise attempts to make contact with "
                 +"the inhabitants of planet Sigma Iotia II, and Uhura puts Kirk "

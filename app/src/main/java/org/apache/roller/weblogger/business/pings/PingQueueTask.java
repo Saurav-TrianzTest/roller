@@ -157,6 +157,10 @@ public class PingQueueTask extends RollerTaskWithLeasing {
      * Main method so that this task may be run from outside the webapp.
      */
     public static void main(String[] args) throws Exception {
+        // cr-java-0117: Add graceful shutdown hook for cloud deployment
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("PingQueueTask shutting down gracefully");
+        }));
         try {
             PingQueueTask task = new PingQueueTask();
             task.init();

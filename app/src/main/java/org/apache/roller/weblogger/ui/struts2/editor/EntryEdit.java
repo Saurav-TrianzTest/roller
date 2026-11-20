@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.struts2.editor;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -66,6 +68,8 @@ import org.apache.roller.weblogger.util.cache.CacheManager;
 import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.apache.struts2.interceptor.parameter.StrutsParameter;
 import org.apache.struts2.interceptor.validation.SkipValidation;
+import java.time.Instant;
+import java.util.TimeZone;
 
 /**
  * Edit a new or existing entry.
@@ -179,7 +183,7 @@ public final class EntryEdit extends UIAction {
             Timestamp pubTime = getBean().getPubTime(getLocale(),
                     getActionWeblog().getTimeZoneInstance());
             if (pubTime != null && pubTime.after(
-                    new Date(System.currentTimeMillis() + RollerConstants.MIN_IN_MS))) {
+                    new Date(Date.from(Instant.now()).getTime() + RollerConstants.MIN_IN_MS))) {
                 getBean().setStatus(PubStatus.SCHEDULED.name());
                 if (entry.isPublished()) {
                     // entry went from published to scheduled, need to reduce tag aggregates
@@ -233,7 +237,7 @@ public final class EntryEdit extends UIAction {
                 WeblogEntry weblogEntry = getEntry();
 
                 // set updatetime & pubtime
-                weblogEntry.setUpdateTime(new Timestamp(new Date().getTime()));
+                weblogEntry.setUpdateTime(new Timestamp(Date.from(Instant.now()).getTime()));
                 weblogEntry.setPubTime(getBean().getPubTime(getLocale(),
                         getActionWeblog().getTimeZoneInstance()));
 

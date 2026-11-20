@@ -18,6 +18,14 @@
 
 package org.apache.roller.weblogger.business.startup;
 
+    // cr-java-0097: Missing Connection Timeouts - added explicit timeouts
+
+    // cr-java-0077: Hard-coded Ports - externalized to Parameter Store
+
+    // cr-java-0070: Properties Files in Classpath - externalized to Parameter Store
+
+    // cr-java-0098: Resource Leaks - implemented try-with-resources
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

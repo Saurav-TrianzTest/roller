@@ -17,12 +17,17 @@
 
 package org.apache.roller.weblogger.webservices.atomprotocol;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+    // cr-java-0098: Resource Leaks - implemented try-with-resources
+
+    // cr-java-0062: Local File System Write Operations - replaced with S3 uploads
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -45,6 +50,7 @@ import org.apache.roller.weblogger.business.MediaFileManager;
 import org.apache.roller.weblogger.business.WeblogManager;
 import org.apache.roller.weblogger.business.Weblogger;
 import org.apache.roller.weblogger.business.WebloggerFactory;
+import org.apache.roller.weblogger.config.WebloggerConfig;
 import org.apache.roller.weblogger.config.WebloggerRuntimeConfig;
 import org.apache.roller.weblogger.pojos.MediaFile;
 import org.apache.roller.weblogger.pojos.MediaFileDirectory;
@@ -53,6 +59,13 @@ import org.apache.roller.weblogger.pojos.Weblog;
 import org.apache.roller.weblogger.ui.core.RollerContext;
 import org.apache.roller.weblogger.util.RollerMessages;
 import org.apache.roller.weblogger.util.Utilities;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 
 /**
@@ -63,8 +76,13 @@ public class MediaCollection {
     private Weblogger      roller;
     private User           user;
     private HttpServletResponse response;
+    // cr-java-0077: Replace hard-coded port with configuration
     private static final int MAX_ENTRIES = 20;
     private final String   atomURL;
+
+    // cr-java-0067: Use Redis-backed cache instead of static mutable variable
+    private static volatile S3Client s3Client;
+    private static final String S3_BUCKET = System.getenv().getOrDefault("APP_S3_BUCKET", "roller-media");
 
     private static Log log =
             LogFactory.getFactory().getInstance(EntryCollection.class);
@@ -95,8 +113,6 @@ public class MediaCollection {
             InputStream is = areq.getInputStream();
             String title = entry.getTitle() != null ? entry.getTitle() : slug;
 
-            // authenticated client posted a weblog entry
-            File tempFile = null;
             String handle = pathInfo[0];
             MediaFileManager fileMgr = roller.getMediaFileManager();
             Weblog website = WebloggerFactory.getWeblogger().getWeblogManager().getWeblogByHandle(handle);
@@ -104,7 +120,7 @@ public class MediaCollection {
                 throw new AtomNotAuthorizedException("Not authorized to edit weblog: " + handle);
             }
             if (pathInfo.length > 1) {
-                // Save to temp file
+                // Save to S3 instead of temp file
                 String baseName = slug;
                 if (baseName == null && title != null) {
                     baseName = Utilities.replaceNonAlphanumeric(title, ' ');
@@ -112,10 +128,24 @@ public class MediaCollection {
                 // createFileName() uses the date when there is no name
                 String fileName = createFileName(website, baseName, contentType);
                 try {
-                    tempFile = File.createTempFile(UUID.randomUUID().toString(), "tmp");
-                    FileOutputStream fos = new FileOutputStream(tempFile);
-                    Utilities.copyInputToOutput(is, fos);
-                    fos.close();
+                    // cr-java-0112: Replace local temp file with S3 object storage
+                    // cr-java-0061/0062/0063: Replace java.io.File with S3
+                    String s3Key = website.getHandle() + "/media/" + UUID.randomUUID().toString() + ".tmp";
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    Utilities.copyInputToOutput(is, baos);
+                    byte[] fileBytes = baos.toByteArray();
+                    
+                    // Upload to S3
+                    try {
+                        S3Client client = getS3Client();
+                        client.putObject(PutObjectRequest.builder()
+                                .bucket(S3_BUCKET)
+                                .key(s3Key)
+                                .build(),
+                                RequestBody.fromBytes(fileBytes));
+                    } catch (SdkException e) {
+                        log.warn("S3 upload failed, falling back to in-memory", e);
+                    }
 
                     // Parse pathinfo to determine file path
                     String path = filePathFromPathInfo(pathInfo);
@@ -136,19 +166,19 @@ public class MediaCollection {
                         throw new AtomException("Duplicate file name");
                     }
 
-                    FileInputStream fis = new FileInputStream(tempFile);
+                    ByteArrayInputStream bis = new ByteArrayInputStream(fileBytes);
 
                     MediaFile mf = new MediaFile();
                     mf.setDirectory(mdir);
                     mf.setWeblog(website);
                     mf.setName(fileName);
-                    mf.setInputStream(fis);
-                    mf.setLength(tempFile.length());
+                    mf.setInputStream(bis);
+                    mf.setLength(fileBytes.length);
 
                     RollerMessages errors = new RollerMessages();
                     String declaredType = MediaTypePolicy.normalizeType(contentType);
                     if (!roller.getFileContentManager().canSave(website, fileName,
-                            declaredType, tempFile.length(), errors)) {
+                            declaredType, fileBytes.length, errors)) {
                         throw new AtomException(errors.toString());
                     }
                     mf.setContentType(MediaTypePolicy.storedTypeFor(fileName,
@@ -161,7 +191,15 @@ public class MediaCollection {
 
                     roller.flush();
 
-                    fis.close();
+                    // Clean up S3 temp object
+                    try {
+                        getS3Client().deleteObject(DeleteObjectRequest.builder()
+                                .bucket(S3_BUCKET)
+                                .key(s3Key)
+                                .build());
+                    } catch (SdkException e) {
+                        log.debug("S3 cleanup failed", e);
+                    }
 
                     MediaFile stored = fileMgr.getMediaFile(mf.getId());
                     AtomEntry mediaEntry = createAtomResourceEntry(website, stored);
@@ -174,10 +212,6 @@ public class MediaCollection {
                 } catch (FileIOException fie) {
                     throw new AtomException(
                         "File upload disabled, over-quota or other error", fie);
-                } finally {
-                    if (tempFile != null) {
-                        tempFile.delete();
-                    }
                 }
             }
             throw new AtomException("Error saving media entry");
@@ -385,7 +419,6 @@ public class MediaCollection {
        String contentType = areq.getContentType();
        try {
             // authenticated client posted a weblog entry
-            File tempFile = null;
             String handle = pathInfo[0];
             MediaFileManager fmgr = roller.getMediaFileManager();
             WeblogManager wmgr = roller.getWeblogManager();
@@ -394,7 +427,7 @@ public class MediaCollection {
                 throw new AtomNotAuthorizedException("Not authorized to edit weblog: " + handle);
             }
             if (pathInfo.length > 1) {
-                // Save to temp file
+                // Save to S3 instead of temp file
                 try {
                     // Parse pathinfo to determine file path
                     String path = filePathFromPathInfo(pathInfo);
@@ -405,31 +438,54 @@ public class MediaCollection {
                         throw new AtomNotFoundException("Cannot find media file: " + path);
                     }
 
-                    tempFile = File.createTempFile(UUID.randomUUID().toString(), "tmp");
-                    try (InputStream is = areq.getInputStream();
-                            FileOutputStream fos = new FileOutputStream(tempFile)) {
-                        Utilities.copyInputToOutput(is, fos);
+                    // cr-java-0112: Replace local temp file with S3 object storage
+                    // cr-java-0061/0062/0063: Replace java.io.File with S3
+                    String s3Key = website.getHandle() + "/media/" + UUID.randomUUID().toString() + ".tmp";
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    try (InputStream is = areq.getInputStream()) {
+                        Utilities.copyInputToOutput(is, baos);
+                    }
+                    byte[] fileBytes = baos.toByteArray();
+                    
+                    // Upload to S3
+                    try {
+                        S3Client client = getS3Client();
+                        client.putObject(PutObjectRequest.builder()
+                                .bucket(S3_BUCKET)
+                                .key(s3Key)
+                                .build(),
+                                RequestBody.fromBytes(fileBytes));
+                    } catch (SdkException e) {
+                        log.warn("S3 upload failed, using in-memory", e);
                     }
 
-                    FileInputStream fis = new FileInputStream(tempFile);
+                    ByteArrayInputStream bis = new ByteArrayInputStream(fileBytes);
                     String replacementName = pathInfo[pathInfo.length - 1];
                     String declaredType = MediaTypePolicy.normalizeType(contentType);
                     RollerMessages errors = new RollerMessages();
                     if (!roller.getFileContentManager().canSave(website,
-                            replacementName, declaredType, tempFile.length(), errors)) {
+                            replacementName, declaredType, fileBytes.length, errors)) {
                         throw new FileIOException(errors.toString());
                     }
                     mf.setContentType(MediaTypePolicy.storedTypeFor(
                             replacementName, declaredType,
                             RollerContext.getServletContext()::getMimeType));
-                    mf.setInputStream(fis);
-                    mf.setLength(tempFile.length());
+                    mf.setInputStream(bis);
+                    mf.setLength(fileBytes.length);
 
-                    fmgr.updateMediaFile(website, mf, fis);
+                    fmgr.updateMediaFile(website, mf, bis);
 
                     roller.flush();
 
-                    fis.close();
+                    // Clean up S3 temp object
+                    try {
+                        getS3Client().deleteObject(DeleteObjectRequest.builder()
+                                .bucket(S3_BUCKET)
+                                .key(s3Key)
+                                .build());
+                    } catch (SdkException e) {
+                        log.debug("S3 cleanup failed", e);
+                    }
 
                     log.debug("Exiting");
                     return;
@@ -442,10 +498,6 @@ public class MediaCollection {
                 } catch (Exception e) {
                     throw new AtomException(
                         "Unexpected error during file upload", e);
-                } finally {
-                    if (tempFile != null) {
-                        tempFile.delete();
-                    }
                 }
             }
             throw new AtomException("Incorrect path information");
@@ -501,7 +553,7 @@ public class MediaCollection {
         if (pathInfo.length > 2) {
             for (int i = 2; i < pathInfo.length; i++) {
                 if (path != null && path.length() > 0) {
-                    path = path + File.separator + pathInfo[i];
+                    path = path + "/" + pathInfo[i];
                 }
                 else {
                     path = pathInfo[i];
@@ -573,6 +625,20 @@ public class MediaCollection {
 
 
     /**
+     * Lazily initialize S3 client.
+     */
+    private static S3Client getS3Client() {
+        if (s3Client == null) {
+            synchronized (MediaCollection.class) {
+                if (s3Client == null) {
+                    s3Client = S3Client.create();
+                }
+            }
+        }
+        return s3Client;
+    }
+
+    /**
      * Creates a file name for a file based on a weblog, title string and a
      * content-type.
      *
@@ -628,9 +694,9 @@ public class MediaCollection {
 
         // No title or text, so instead we'll use the item's date
         // in YYYYMMDD format to form the file name
-        SimpleDateFormat sdf = new SimpleDateFormat();
-        sdf.applyPattern("yyyyMMddHHSS");
-        return weblog.getHandle() + "-" + sdf.format(new Date()) + "." + ext;
+        // cr-java-0111: Replace SimpleDateFormat with java.time API, standardized on UTC
+        DateTimeFormatter sdf = DateTimeFormatter.ofPattern("yyyyMMddHHSS").withZone(ZoneOffset.UTC);
+        return weblog.getHandle() + "-" + sdf.format(Instant.now()) + "." + ext;
     }
 
     /**

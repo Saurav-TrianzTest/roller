@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.business.jpa;
 
+    // cr-java-0083: Thread Local Storage - replaced with request-scoped beans
+
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Properties;

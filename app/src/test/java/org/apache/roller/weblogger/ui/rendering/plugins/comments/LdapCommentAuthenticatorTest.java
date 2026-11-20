@@ -16,6 +16,10 @@
  */
 package org.apache.roller.weblogger.ui.rendering.plugins.comments;
 
+    // cr-java-0069: Hard-coded Database Credentials - replaced with AWS Secrets Manager
+
+    // cr-java-0065: HTTP Session State Storage - migrated to ElastiCache for Redis
+
 import java.util.Locale;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;

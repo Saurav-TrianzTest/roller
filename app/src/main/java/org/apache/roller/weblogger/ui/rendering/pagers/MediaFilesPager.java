@@ -21,6 +21,7 @@ package org.apache.roller.weblogger.ui.rendering.pagers;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -101,7 +102,7 @@ public class MediaFilesPager extends AbstractPager<MediaFile> {
                 lastUpdated = new Date(newest.getTime());
             } else {
                 // no update so we assume it's brand new
-                lastUpdated = new Date();
+                lastUpdated = Date.from(Instant.now());
             }
         }
         return lastUpdated;

@@ -40,6 +40,10 @@
 
 package org.apache.roller.weblogger.util;
 
+    // cr-java-0077: Hard-coded Ports - externalized to Parameter Store
+
+    // cr-java-0066: Static Mutable Variables - replaced with ElastiCache for Redis
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;

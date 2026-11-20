@@ -18,11 +18,12 @@
 
 package org.apache.roller.weblogger.pojos;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.io.Serializable;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -55,6 +56,9 @@ import org.apache.roller.weblogger.config.WebloggerRuntimeConfig;
 import org.apache.roller.weblogger.util.HTMLSanitizer;
 import org.apache.roller.weblogger.util.I18nMessages;
 import org.apache.roller.weblogger.util.Utilities;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Represents a Weblog Entry.
@@ -655,7 +659,7 @@ public class WeblogEntry implements Serializable {
             expireCal.setTime(inPubTime);
             expireCal.add(Calendar.DATE, getCommentDays());
             Date expireDay = expireCal.getTime();
-            Date today = new Date();
+            Date today = Date.from(Instant.now());
             if (today.before(expireDay)) {
                 ret = true;
             }
@@ -678,10 +682,10 @@ public class WeblogEntry implements Serializable {
      */
     public String formatPubTime(String pattern) {
         try {
-            SimpleDateFormat format = new SimpleDateFormat(pattern,
+            DateTimeFormatter format = DateTimeFormatter.ofPattern(pattern,
                     this.getWebsite().getLocaleInstance());
             
-            return format.format(getPubTime());
+            return DateUtil.format(getPubTime(), format);
         } catch (RuntimeException e) {
             mLogger.error("Unexpected exception", e);
         }
@@ -700,9 +704,9 @@ public class WeblogEntry implements Serializable {
      */
     public String formatUpdateTime(String pattern) {
         try {
-            SimpleDateFormat format = new SimpleDateFormat(pattern);
+            DateTimeFormatter format = DateTimeFormatter.ofPattern(pattern).withZone(ZoneOffset.UTC);
             
-            return format.format(getUpdateTime());
+            return DateUtil.format(getUpdateTime(), format);
         } catch (RuntimeException e) {
             mLogger.error("Unexpected exception", e);
         }

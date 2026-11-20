@@ -18,7 +18,6 @@
 
 package org.apache.roller.weblogger.ui.rendering.model;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
@@ -41,6 +40,9 @@ import org.apache.roller.weblogger.pojos.wrapper.UserWrapper;
 import org.apache.roller.weblogger.ui.rendering.util.ParsedRequest;
 import org.apache.roller.weblogger.util.URLUtilities;
 import org.apache.roller.weblogger.util.Utilities;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Model which provides access to a set of general utilities.
@@ -118,7 +120,7 @@ public class UtilitiesModel implements Model {
      * Return date for current time.
      */
     public static Date getNow() {
-        return new Date();
+        return Date.from(Instant.now());
     }
     
     /**
@@ -137,12 +139,13 @@ public class UtilitiesModel implements Model {
             return fmt;
         }
         
-        SimpleDateFormat format = new SimpleDateFormat(fmt, weblog.getLocaleInstance());
+        // cr-java-0111: DateTimeFormatter with UTC timezone
+        DateTimeFormatter format = DateTimeFormatter.ofPattern(fmt, weblog.getLocaleInstance()).withZone(ZoneOffset.UTC);
         if(tzOverride != null) {
-            format.setTimeZone(tzOverride);
+            format = format.withZone(tzOverride.toZoneId());
         }
         
-        return format.format(d);
+        return DateUtil.format(d, format);
     }
     
     /**

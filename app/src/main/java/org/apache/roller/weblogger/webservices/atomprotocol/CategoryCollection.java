@@ -20,6 +20,7 @@ package org.apache.roller.weblogger.webservices.atomprotocol;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -68,7 +69,7 @@ public class CategoryCollection {
             String uri = atomURL + "/" + weblog.getHandle() + "/categories";
             feed.setId(uri);
             feed.setTitle(weblog.getName() + " categories");
-            feed.setUpdated(new Date());
+            feed.setUpdated(Date.from(Instant.now()));
             feed.getLinks().add(CollectionSupport.link("self", uri));
             for (WeblogCategory category : manager().getWeblogCategories(weblog)) {
                 feed.getEntries().add(createAtomEntry(weblog, category));
@@ -179,7 +180,7 @@ public class CategoryCollection {
         AtomEntry entry = new AtomEntry();
         entry.setId(editURI);
         entry.setTitle(category.getName());
-        entry.setUpdated(new Date());
+        entry.setUpdated(Date.from(Instant.now()));
         if (category.getDescription() != null) {
             entry.setSummary(CollectionSupport.text("text", category.getDescription()));
         }

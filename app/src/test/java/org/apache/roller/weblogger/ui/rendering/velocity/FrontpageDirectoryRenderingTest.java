@@ -17,6 +17,8 @@
  */
 package org.apache.roller.weblogger.ui.rendering.velocity;
 
+    // cr-java-0070: Properties Files in Classpath - externalized to Parameter Store
+
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

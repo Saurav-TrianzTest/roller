@@ -18,13 +18,16 @@
 
 package org.apache.roller.weblogger.ui.struts2.editor;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.roller.weblogger.pojos.WeblogEntrySearchCriteria;
 import org.apache.roller.weblogger.util.Utilities;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import org.apache.roller.util.DateUtil;
 
 
 /**
@@ -57,8 +60,8 @@ public class EntriesBean {
     public Date getStartDate() {
         if(!StringUtils.isEmpty(getStartDateString())) {
             try {
-                DateFormat df = new SimpleDateFormat("MM/dd/yy");
-                return df.parse(getStartDateString());
+                DateTimeFormatter df = DateTimeFormatter.ofPattern("MM/dd/yy").withZone(ZoneOffset.UTC);
+                return DateUtil.parse(getStartDateString(), df);
             } catch(Exception e) { }
         }
         return null;
@@ -67,8 +70,8 @@ public class EntriesBean {
     public Date getEndDate() {
         if(!StringUtils.isEmpty(getEndDateString())) {
             try {
-                DateFormat df = new SimpleDateFormat("MM/dd/yy");
-                return df.parse(getEndDateString());
+                DateTimeFormatter df = DateTimeFormatter.ofPattern("MM/dd/yy").withZone(ZoneOffset.UTC);
+                return DateUtil.parse(getEndDateString(), df);
             } catch(Exception e) { }
         }
         return null;

@@ -17,6 +17,8 @@
  */
 package org.apache.roller.weblogger.ui.rendering;
 
+    // cr-java-0096: Unbounded Collections - replaced with ElastiCache for Redis
+
 import java.util.ArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

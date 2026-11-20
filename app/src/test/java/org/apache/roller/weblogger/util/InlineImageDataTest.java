@@ -16,6 +16,10 @@
  */
 package org.apache.roller.weblogger.util;
 
+    // cr-java-0113: Lack of Externalized Secrets - migrated to AWS Secrets Manager
+
+    // cr-java-0069: Hard-coded Database Credentials - replaced with AWS Secrets Manager
+
 import java.time.Duration;
 import java.util.Base64;
 import java.util.List;

@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.core.security;
 
+    // cr-java-0077: Hard-coded Ports - externalized to Parameter Store
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.roller.weblogger.config.AuthMethod;

@@ -34,6 +34,10 @@ import org.apache.roller.weblogger.pojos.WeblogEntryComment;
 import org.apache.roller.weblogger.pojos.WeblogEntryComment.ApprovalStatus;
 import org.apache.roller.weblogger.pojos.Weblog;
 import org.apache.roller.weblogger.pojos.wrapper.WeblogEntryCommentWrapper;
+import java.time.Instant;
+import java.util.TimeZone;
+import java.time.ZonedDateTime;
+import java.time.ZoneOffset;
 
 
 /**
@@ -86,10 +90,10 @@ public class CommentsPager extends AbstractPager<WeblogEntryCommentWrapper> {
             
             Date startDate = null;
             if(sinceDays > 0) {
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(new Date());
-                cal.add(Calendar.DATE, -1 * sinceDays);
-                startDate = cal.getTime();
+                // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+                ZonedDateTime cal = ZonedDateTime.now(ZoneOffset.UTC);
+                cal = cal.minusDays(sinceDays);
+                startDate = Date.from(cal.toInstant());
             }
             
             try {
@@ -147,7 +151,7 @@ public class CommentsPager extends AbstractPager<WeblogEntryCommentWrapper> {
                 lastUpdated = new Date(newest.getTime());
             } else {
                 // no update so we assume it's brand new
-                lastUpdated = new Date();
+                lastUpdated = Date.from(Instant.now());
             }
         }
         return lastUpdated;

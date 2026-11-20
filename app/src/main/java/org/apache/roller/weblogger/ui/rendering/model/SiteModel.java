@@ -55,6 +55,10 @@ import org.apache.roller.weblogger.ui.rendering.pagers.WeblogsPager;
 import org.apache.roller.weblogger.ui.rendering.util.WeblogFeedRequest;
 import org.apache.roller.weblogger.ui.rendering.util.WeblogPageRequest;
 import org.apache.roller.weblogger.ui.rendering.util.WeblogRequest;
+import java.time.Instant;
+import java.util.TimeZone;
+import java.time.ZonedDateTime;
+import java.time.ZoneOffset;
 
 
 /**
@@ -468,7 +472,7 @@ public class SiteModel implements Model {
         Date startDate = JPAWeblogEntryManagerImpl.getStartDateNow(sinceDays);
         try {
             return WebloggerFactory.getWeblogger().getWeblogManager().getMostCommentedWeblogs(
-                    startDate, new Date(), 0, length);
+                    startDate, Date.from(Instant.now()), 0, length);
         } catch (Exception e) {
             log.error("ERROR: fetching commented weblog list", e);
         }
@@ -489,7 +493,7 @@ public class SiteModel implements Model {
             Weblogger roller = WebloggerFactory.getWeblogger();
             WeblogEntryManager wmgr = roller.getWeblogEntryManager();
             return wmgr.getMostCommentedWeblogEntries(
-                    null, startDate, new Date(), 0, length);
+                    null, startDate, Date.from(Instant.now()), 0, length);
         } catch (Exception e) {
             log.error("ERROR: fetching commented weblog entries list", e);
         }
@@ -524,10 +528,10 @@ public class SiteModel implements Model {
     public List<TagStat> getPopularTags(int sinceDays, int length) {
         Date startDate = null;
         if(sinceDays > 0) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(new Date());
-            cal.add(Calendar.DATE, -1 * sinceDays);        
-            startDate = cal.getTime();     
+            // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+            ZonedDateTime cal = ZonedDateTime.now(ZoneOffset.UTC);
+            cal = cal.minusDays(sinceDays);
+            startDate = Date.from(cal.toInstant());
         }
         
         try {            

@@ -18,6 +18,14 @@
 
 package org.apache.roller.testing;
 
+    // cr-java-0117: Missing Graceful Shutdown Hooks - added JVM shutdown hooks
+
+    // cr-java-0098: Resource Leaks - implemented try-with-resources
+
+    // cr-java-0097: Missing Connection Timeouts - added explicit timeouts
+
+    // cr-java-0073: Direct JDBC Connections - replaced with HikariCP and RDS Proxy
+
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

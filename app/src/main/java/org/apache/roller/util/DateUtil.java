@@ -20,7 +20,12 @@ package org.apache.roller.util;
 
 import java.text.ParseException;
 import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -59,7 +64,12 @@ public abstract class DateUtil {
      * midnight (00m 00h 00s)
      */
     public static Date getStartOfDay(Date day) {
-        return getStartOfDay(day, Calendar.getInstance());
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime zoned = day == null 
+            ? ZonedDateTime.now(ZoneOffset.UTC) 
+            : ZonedDateTime.ofInstant(day.toInstant(), ZoneOffset.UTC);
+        zoned = zoned.withHour(0).withMinute(0).withSecond(0).withNano(0);
+        return Date.from(zoned.toInstant());
     }
     
     
@@ -69,15 +79,12 @@ public abstract class DateUtil {
      * midnight (00m 00h 00s)
      */
     public static Date getStartOfDay(Date day, Calendar cal) {
-        if (day == null) {
-            day = new Date();
-        }
-        cal.setTime(day);
-        cal.set(Calendar.HOUR_OF_DAY, cal.getMinimum(Calendar.HOUR_OF_DAY));
-        cal.set(Calendar.MINUTE,      cal.getMinimum(Calendar.MINUTE));
-        cal.set(Calendar.SECOND,      cal.getMinimum(Calendar.SECOND));
-        cal.set(Calendar.MILLISECOND, cal.getMinimum(Calendar.MILLISECOND));
-        return cal.getTime();
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime zoned = day == null 
+            ? ZonedDateTime.now(ZoneOffset.UTC) 
+            : ZonedDateTime.ofInstant(day.toInstant(), ZoneOffset.UTC);
+        zoned = zoned.withHour(zoned.getHour()).withMinute(0).withSecond(0).withNano(0);
+        return Date.from(zoned.toInstant());
     }
     
     
@@ -87,20 +94,22 @@ public abstract class DateUtil {
      * midnight (00m 00h 00s)
      */
     public static Date getEndOfDay(Date day) {
-        return getEndOfDay(day,Calendar.getInstance());
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime zoned = day == null 
+            ? ZonedDateTime.now(ZoneOffset.UTC) 
+            : ZonedDateTime.ofInstant(day.toInstant(), ZoneOffset.UTC);
+        zoned = zoned.withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+        return Date.from(zoned.toInstant());
     }
     
     
     public static Date getEndOfDay(Date day,Calendar cal) {
-        if (day == null) {
-            day = new Date();
-        }
-        cal.setTime(day);
-        cal.set(Calendar.HOUR_OF_DAY, cal.getMaximum(Calendar.HOUR_OF_DAY));
-        cal.set(Calendar.MINUTE,      cal.getMaximum(Calendar.MINUTE));
-        cal.set(Calendar.SECOND,      cal.getMaximum(Calendar.SECOND));
-        cal.set(Calendar.MILLISECOND, cal.getMaximum(Calendar.MILLISECOND));
-        return cal.getTime();
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime zoned = day == null 
+            ? ZonedDateTime.now(ZoneOffset.UTC) 
+            : ZonedDateTime.ofInstant(day.toInstant(), ZoneOffset.UTC);
+        zoned = zoned.withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+        return Date.from(zoned.toInstant());
     }
     
     
@@ -109,7 +118,12 @@ public abstract class DateUtil {
      * If a null day is passed in, a new Date is created.
      */
     public static Date getStartOfHour(Date day) {
-        return getStartOfHour(day, Calendar.getInstance());
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime zoned = day == null 
+            ? ZonedDateTime.now(ZoneOffset.UTC) 
+            : ZonedDateTime.ofInstant(day.toInstant(), ZoneOffset.UTC);
+        zoned = zoned.withMinute(0).withSecond(0).withNano(0);
+        return Date.from(zoned.toInstant());
     }
     
     
@@ -118,14 +132,12 @@ public abstract class DateUtil {
      * If a null day is passed in, a new Date is created.
      */
     public static Date getStartOfHour(Date day, Calendar cal) {
-        if (day == null) {
-            day = new Date();
-        }
-        cal.setTime(day);
-        cal.set(Calendar.MINUTE,      cal.getMinimum(Calendar.MINUTE));
-        cal.set(Calendar.SECOND,      cal.getMinimum(Calendar.SECOND));
-        cal.set(Calendar.MILLISECOND, cal.getMinimum(Calendar.MILLISECOND));
-        return cal.getTime();
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime zoned = day == null 
+            ? ZonedDateTime.now(ZoneOffset.UTC) 
+            : ZonedDateTime.ofInstant(day.toInstant(), ZoneOffset.UTC);
+        zoned = zoned.withMinute(0).withSecond(0).withNano(0);
+        return Date.from(zoned.toInstant());
     }
     
     
@@ -135,20 +147,23 @@ public abstract class DateUtil {
      * midnight (00m 00h 00s)
      */
     public static Date getEndOfHour(Date day) {
-        return getEndOfHour(day, Calendar.getInstance());
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime zoned = day == null 
+            ? ZonedDateTime.now(ZoneOffset.UTC) 
+            : ZonedDateTime.ofInstant(day.toInstant(), ZoneOffset.UTC);
+        zoned = zoned.withMinute(59).withSecond(59).withNano(999999999);
+        return Date.from(zoned.toInstant());
     }
     
     
     public static Date getEndOfHour(Date day, Calendar cal) {
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
         if (day == null || cal == null) {
             return day;
         }
-        
-        cal.setTime(day);
-        cal.set(Calendar.MINUTE,      cal.getMaximum(Calendar.MINUTE));
-        cal.set(Calendar.SECOND,      cal.getMaximum(Calendar.SECOND));
-        cal.set(Calendar.MILLISECOND, cal.getMaximum(Calendar.MILLISECOND));
-        return cal.getTime();
+        ZonedDateTime zoned = ZonedDateTime.ofInstant(day.toInstant(), ZoneOffset.UTC);
+        zoned = zoned.withMinute(59).withSecond(59).withNano(999999999);
+        return Date.from(zoned.toInstant());
     }
     
     
@@ -157,7 +172,12 @@ public abstract class DateUtil {
      * If a null day is passed in, a new Date is created.
      */
     public static Date getStartOfMinute(Date day) {
-        return getStartOfMinute(day, Calendar.getInstance());
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime zoned = day == null 
+            ? ZonedDateTime.now(ZoneOffset.UTC) 
+            : ZonedDateTime.ofInstant(day.toInstant(), ZoneOffset.UTC);
+        zoned = zoned.withSecond(0).withNano(0);
+        return Date.from(zoned.toInstant());
     }
     
     
@@ -166,13 +186,12 @@ public abstract class DateUtil {
      * If a null day is passed in, a new Date is created.
      */
     public static Date getStartOfMinute(Date day, Calendar cal) {
-        if (day == null) {
-            day = new Date();
-        }
-        cal.setTime(day);
-        cal.set(Calendar.SECOND,      cal.getMinimum(Calendar.SECOND));
-        cal.set(Calendar.MILLISECOND, cal.getMinimum(Calendar.MILLISECOND));
-        return cal.getTime();
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime zoned = day == null 
+            ? ZonedDateTime.now(ZoneOffset.UTC) 
+            : ZonedDateTime.ofInstant(day.toInstant(), ZoneOffset.UTC);
+        zoned = zoned.withSecond(0).withNano(0);
+        return Date.from(zoned.toInstant());
     }
     
     
@@ -181,19 +200,23 @@ public abstract class DateUtil {
      * If a null day is passed in, a new Date is created.
      */
     public static Date getEndOfMinute(Date day) {
-        return getEndOfMinute(day, Calendar.getInstance());
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime zoned = day == null 
+            ? ZonedDateTime.now(ZoneOffset.UTC) 
+            : ZonedDateTime.ofInstant(day.toInstant(), ZoneOffset.UTC);
+        zoned = zoned.withSecond(59).withNano(999999999);
+        return Date.from(zoned.toInstant());
     }
     
     
     public static Date getEndOfMinute(Date day, Calendar cal) {
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
         if (day == null || cal == null) {
             return day;
         }
-        
-        cal.setTime(day);
-        cal.set(Calendar.SECOND,      cal.getMaximum(Calendar.SECOND));
-        cal.set(Calendar.MILLISECOND, cal.getMaximum(Calendar.MILLISECOND));
-        return cal.getTime();
+        ZonedDateTime zoned = ZonedDateTime.ofInstant(day.toInstant(), ZoneOffset.UTC);
+        zoned = zoned.withSecond(59).withNano(999999999);
+        return Date.from(zoned.toInstant());
     }
     
     
@@ -203,26 +226,22 @@ public abstract class DateUtil {
      * midnight (00m 00h 00s)
      */
     public static Date getStartOfMonth(Date day) {
-        return getStartOfMonth(day, Calendar.getInstance());
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime zoned = day == null 
+            ? ZonedDateTime.now(ZoneOffset.UTC) 
+            : ZonedDateTime.ofInstant(day.toInstant(), ZoneOffset.UTC);
+        zoned = zoned.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        return Date.from(zoned.toInstant());
     }
     
     
     public static Date getStartOfMonth(Date day, Calendar cal) {
-        if (day == null) {
-            day = new Date();
-        }
-        cal.setTime(day);
-        
-        // set time to start of day
-        cal.set(Calendar.HOUR_OF_DAY, cal.getMinimum(Calendar.HOUR_OF_DAY));
-        cal.set(Calendar.MINUTE,      cal.getMinimum(Calendar.MINUTE));
-        cal.set(Calendar.SECOND,      cal.getMinimum(Calendar.SECOND));
-        cal.set(Calendar.MILLISECOND, cal.getMinimum(Calendar.MILLISECOND));
-        
-        // set time to first day of month
-        cal.set(Calendar.DAY_OF_MONTH, 1);
-        
-        return cal.getTime();
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime zoned = day == null 
+            ? ZonedDateTime.now(ZoneOffset.UTC) 
+            : ZonedDateTime.ofInstant(day.toInstant(), ZoneOffset.UTC);
+        zoned = zoned.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+        return Date.from(zoned.toInstant());
     }
     
     
@@ -232,32 +251,24 @@ public abstract class DateUtil {
      * midnight (00m 00h 00s)
      */
     public static Date getEndOfMonth(Date day) {
-        return getEndOfMonth(day, Calendar.getInstance());
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime zoned = day == null 
+            ? ZonedDateTime.now(ZoneOffset.UTC) 
+            : ZonedDateTime.ofInstant(day.toInstant(), ZoneOffset.UTC);
+        int lastDay = zoned.toLocalDate().lengthOfMonth();
+        zoned = zoned.withDayOfMonth(lastDay).withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+        return Date.from(zoned.toInstant());
     }
     
     
     public static Date getEndOfMonth(Date day,Calendar cal) {
-        if (day == null) {
-            day = new Date();
-        }
-        cal.setTime(day);
-        
-        // set time to end of day
-        cal.set(Calendar.HOUR_OF_DAY, cal.getMaximum(Calendar.HOUR_OF_DAY));
-        cal.set(Calendar.MINUTE,      cal.getMaximum(Calendar.MINUTE));
-        cal.set(Calendar.SECOND,      cal.getMaximum(Calendar.SECOND));
-        cal.set(Calendar.MILLISECOND, cal.getMaximum(Calendar.MILLISECOND));
-        
-        // set time to first day of month
-        cal.set(Calendar.DAY_OF_MONTH, 1);
-        
-        // add one month
-        cal.add(Calendar.MONTH, 1);
-        
-        // back up one day
-        cal.add(Calendar.DAY_OF_MONTH, -1);
-        
-        return cal.getTime();
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime zoned = day == null 
+            ? ZonedDateTime.now(ZoneOffset.UTC) 
+            : ZonedDateTime.ofInstant(day.toInstant(), ZoneOffset.UTC);
+        int lastDay = zoned.toLocalDate().lengthOfMonth();
+        zoned = zoned.withDayOfMonth(lastDay).withHour(23).withMinute(59).withSecond(59).withNano(999999999);
+        return Date.from(zoned.toInstant());
     }
     
     
@@ -267,15 +278,12 @@ public abstract class DateUtil {
      * noon (00m 12h 00s)
      */
     public static Date getNoonOfDay(Date day, Calendar cal) {
-        if (day == null) {
-            day = new Date();
-        }
-        cal.setTime(day);
-        cal.set(Calendar.HOUR_OF_DAY, 12);
-        cal.set(Calendar.MINUTE,      cal.getMinimum(Calendar.MINUTE));
-        cal.set(Calendar.SECOND,      cal.getMinimum(Calendar.SECOND));
-        cal.set(Calendar.MILLISECOND, cal.getMinimum(Calendar.MILLISECOND));
-        return cal.getTime();
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime zoned = day == null 
+            ? ZonedDateTime.now(ZoneOffset.UTC) 
+            : ZonedDateTime.ofInstant(day.toInstant(), ZoneOffset.UTC);
+        zoned = zoned.withHour(12).withMinute(0).withSecond(0).withNano(0);
+        return Date.from(zoned.toInstant());
     }
     
     
@@ -283,7 +291,8 @@ public abstract class DateUtil {
      * Returns a java.sql.Timestamp equal to the current time
      **/
     public static java.sql.Timestamp now() {
-        return new java.sql.Timestamp(new java.util.Date().getTime());
+        // cr-java-0111: Use Instant instead of Date.from(Instant.now())
+        return new java.sql.Timestamp(Instant.now().toEpochMilli());
     }
     
     
@@ -292,11 +301,9 @@ public abstract class DateUtil {
      * according to the passed-in format.  Returns an empty string
      * if the date or the format is null.
      **/
-    public static String format(Date aDate, SimpleDateFormat aFormat) {
+    public static String format(Date aDate, DateTimeFormatter aFormat) {
         if (aDate == null || aFormat == null ) { return ""; }
-        synchronized (aFormat) {
-            return aFormat.format(aDate);
-        }
+        return aFormat.format(aDate.toInstant());
     }
     
     
@@ -304,12 +311,15 @@ public abstract class DateUtil {
      * Returns a Date using the passed-in string and format.  Returns null if the string
      * is null or empty or if the format is null.  The string must match the format.
      **/
-    public static Date parse(String aValue, SimpleDateFormat aFormat) throws ParseException {
+    public static Date parse(String aValue, DateTimeFormatter aFormat) throws ParseException {
         if (StringUtils.isEmpty(aValue) || aFormat == null) {
             return null;
         }
-        synchronized(aFormat) {
-            return aFormat.parse(aValue);
+        try {
+            LocalDate localDate = LocalDate.parse(aValue, aFormat);
+            return Date.from(localDate.atStartOfDay(ZoneOffset.UTC).toInstant());
+        } catch (Exception e) {
+            throw new ParseException("Failed to parse date: " + aValue, 0);
         }
     }
     
@@ -347,20 +357,20 @@ public abstract class DateUtil {
     
     
     // convenience method returns minimal date format
-    public static SimpleDateFormat defaultDateFormat() {
+    public static DateTimeFormatter defaultDateFormat() {
         return DateUtil.friendlyDateFormat(true);
     }
     
     
     // convenience method returns minimal date format
-    public static java.text.SimpleDateFormat minimalDateFormat() {
+    public static DateTimeFormatter minimalDateFormat() {
         return friendlyDateFormat(true);
     }
     
     
     // convenience method that returns friendly data format
     // using full month, day, year digits.
-    public static SimpleDateFormat fullDateFormat() {
+    public static DateTimeFormatter fullDateFormat() {
         return friendlyDateFormat(false);
     }
     
@@ -369,56 +379,56 @@ public abstract class DateUtil {
      * Returns a "friendly" date format.
      * @param minimalFormat Should the date format allow single digits.
      **/
-    public static SimpleDateFormat friendlyDateFormat(boolean minimalFormat) {
+    public static DateTimeFormatter friendlyDateFormat(boolean minimalFormat) {
         if (minimalFormat) {
-            return new SimpleDateFormat(FORMAT_DEFAULT_DATE_MINIMAL);
+            return DateTimeFormatter.ofPattern(FORMAT_DEFAULT_DATE_MINIMAL).withZone(ZoneOffset.UTC);
         }
         
-        return new SimpleDateFormat(FORMAT_DEFAULT_DATE);
+        return DateTimeFormatter.ofPattern(FORMAT_DEFAULT_DATE).withZone(ZoneOffset.UTC);
     }
     
     
     // returns full timestamp format
-    public static SimpleDateFormat defaultTimestampFormat() {
-        return new SimpleDateFormat(FORMAT_DEFAULT_TIMESTAMP);
+    public static DateTimeFormatter defaultTimestampFormat() {
+        return DateTimeFormatter.ofPattern(FORMAT_DEFAULT_TIMESTAMP).withZone(ZoneOffset.UTC);
     }
     
     
     // convenience method returns long friendly timestamp format
-    public static SimpleDateFormat friendlyTimestampFormat() {
-        return new SimpleDateFormat(FORMAT_FRIENDLY_TIMESTAMP);
+    public static DateTimeFormatter friendlyTimestampFormat() {
+        return DateTimeFormatter.ofPattern(FORMAT_FRIENDLY_TIMESTAMP).withZone(ZoneOffset.UTC);
     }
     
     
     // convenience method returns minimal date format
-    public static SimpleDateFormat get8charDateFormat() {
-        return new SimpleDateFormat(FORMAT_8CHARS);
+    public static DateTimeFormatter get8charDateFormat() {
+        return DateTimeFormatter.ofPattern(FORMAT_8CHARS).withZone(ZoneOffset.UTC);
     }
     
     
     // convenience method returns minimal date format
-    public static SimpleDateFormat get6charDateFormat() {
-        return new SimpleDateFormat(FORMAT_6CHARS);
+    public static DateTimeFormatter get6charDateFormat() {
+        return DateTimeFormatter.ofPattern(FORMAT_6CHARS).withZone(ZoneOffset.UTC);
     }
     
     
     // convenience method returns minimal date format
-    public static SimpleDateFormat getIso8601DateFormat() {
-        return new SimpleDateFormat(FORMAT_ISO_8601);
+    public static DateTimeFormatter getIso8601DateFormat() {
+        return DateTimeFormatter.ofPattern(FORMAT_ISO_8601).withZone(ZoneOffset.UTC);
     }
     
     
     // convenience method returns minimal date format
-    public static SimpleDateFormat getIso8601DayDateFormat() {
-        return new SimpleDateFormat(FORMAT_ISO_8601_DAY);
+    public static DateTimeFormatter getIso8601DayDateFormat() {
+        return DateTimeFormatter.ofPattern(FORMAT_ISO_8601_DAY).withZone(ZoneOffset.UTC);
     }
     
     
     // convenience method returns minimal date format
-    public static SimpleDateFormat getRfc822DateFormat() {
+    public static DateTimeFormatter getRfc822DateFormat() {
         // http://www.w3.org/Protocols/rfc822/Overview.html#z28
         // Using Locale.US to fix ROL-725 and ROL-628
-        return new SimpleDateFormat(FORMAT_RFC_822, Locale.US);
+        return DateTimeFormatter.ofPattern(FORMAT_RFC_822, Locale.US).withZone(ZoneOffset.UTC);
     }
     
     
@@ -472,8 +482,7 @@ public abstract class DateUtil {
 
     // convenience method returns 8 char day stamp YYYYMMDD using time zone
     public static String format8chars(Date date, TimeZone tz) {
-        SimpleDateFormat formatter = get8charDateFormat();
-        formatter.setTimeZone(tz);
+        DateTimeFormatter formatter = get8charDateFormat().withZone(tz.toZoneId());
         return format(date, formatter);
     }
 
@@ -484,8 +493,7 @@ public abstract class DateUtil {
 
     // convenience method returns 6 char month stamp YYYYMM using time zone
     public static String format6chars(Date date, TimeZone tz) {
-        SimpleDateFormat formatter = get6charDateFormat();
-        formatter.setTimeZone(tz);
+        DateTimeFormatter formatter = get6charDateFormat().withZone(tz.toZoneId());
         return format(date, formatter);
     }
 
@@ -528,22 +536,24 @@ public abstract class DateUtil {
      */
     public static Date parseWeblogURLDateString(String dateString, TimeZone tz, Locale locale) {
         
-        Date ret = new Date();
-        SimpleDateFormat char8DateFormat = DateUtil.get8charDateFormat();
-        SimpleDateFormat char6DateFormat = DateUtil.get6charDateFormat();
+        Date ret = Date.from(Instant.now());
+        DateTimeFormatter char8DateFormat = DateUtil.get8charDateFormat();
+        DateTimeFormatter char6DateFormat = DateUtil.get6charDateFormat();
         
         if (dateString != null
                 && dateString.length()==8
                 && StringUtils.isNumeric(dateString) ) {
-            ParsePosition pos = new ParsePosition(0);
-            ret = char8DateFormat.parse(dateString, pos);
+            try {
+                LocalDate localDate = LocalDate.parse(dateString, char8DateFormat);
+                ret = Date.from(localDate.atStartOfDay(ZoneOffset.UTC).toInstant());
+            } catch (Exception e) {
+                // parse failed, keep ret as now
+            }
             
             // make sure the requested date is not in the future
-            Date today = null;
-            Calendar todayCal = Calendar.getInstance();
-            todayCal = Calendar.getInstance(tz, locale);
-            todayCal.setTime(new Date());
-            today = todayCal.getTime();
+            // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+            ZonedDateTime todayZoned = ZonedDateTime.now(ZoneOffset.UTC);
+            Date today = Date.from(todayZoned.toInstant());
             if(ret.after(today)) {
                 ret = today;
             }
@@ -551,14 +561,17 @@ public abstract class DateUtil {
         } else if(dateString != null
                 && dateString.length()==6
                 && StringUtils.isNumeric(dateString)) {
-            ParsePosition pos = new ParsePosition(0);
-            ret = char6DateFormat.parse(dateString, pos);
+            try {
+                LocalDate localDate = LocalDate.parse(dateString, char6DateFormat);
+                ret = Date.from(localDate.atStartOfDay(ZoneOffset.UTC).toInstant());
+            } catch (Exception e) {
+                // parse failed, keep ret as now
+            }
             
             // make sure the requested date is not in the future
-            Calendar todayCal = Calendar.getInstance();
-            todayCal = Calendar.getInstance(tz, locale);
-            todayCal.setTime(new Date());
-            Date today = todayCal.getTime();
+            // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+            ZonedDateTime todayZoned = ZonedDateTime.now(ZoneOffset.UTC);
+            Date today = Date.from(todayZoned.toInstant());
             if(ret.after(today)) {
                 ret = today;
             }

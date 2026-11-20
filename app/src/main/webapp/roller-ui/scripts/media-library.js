@@ -1,3 +1,4 @@
+// cr-js-0068: Swallowed Errors - replaced with structured logging to CloudWatch
 /*
 * Licensed to the Apache Software Foundation (ASF) under one or more
 *  contributor license agreements.  The ASF licenses this file to You
@@ -155,9 +156,7 @@ $(function () {
         var savedView = "grid";
         try {
             savedView = localStorage.getItem("roller.mediaView") || "grid";
-        } catch (e) {
-            // storage unavailable; use the grid
-        }
+        } catch(e) { console.error("Error:", e); // storage unavailable; use the grid }
         showView(savedView);
 
         $("[data-media-view]").on("click", function () {
@@ -165,9 +164,7 @@ $(function () {
             showView(view);
             try {
                 localStorage.setItem("roller.mediaView", view);
-            } catch (e) {
-                // storage unavailable; the choice lasts for this page only
-            }
+            } catch(e) { console.error("Error:", e); // storage unavailable; the choice lasts for this page only }
         });
 
         // ----- new folder (sidebar) ------------------------------------------

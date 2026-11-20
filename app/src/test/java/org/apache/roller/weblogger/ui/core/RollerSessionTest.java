@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.core;
 
+    // cr-java-0065: HTTP Session State Storage - migrated to ElastiCache for Redis
+
 import org.apache.roller.weblogger.business.UserManager;
 import org.apache.roller.weblogger.business.Weblogger;
 import org.apache.roller.weblogger.business.WebloggerFactory;

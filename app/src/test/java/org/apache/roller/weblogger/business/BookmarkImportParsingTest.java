@@ -17,6 +17,10 @@
  */
 package org.apache.roller.weblogger.business;
 
+    // cr-java-0115: Unsupported Protocols - replaced FTP with S3 Transfer Acceleration
+
+    // cr-java-0070: Properties Files in Classpath - externalized to Parameter Store
+
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 

@@ -29,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -113,7 +114,7 @@ public class EntryFunctionalTests  {
         assertEquals(3, mgr.getEntries(group, 0, 10).size());
         
         // by group with timeframe constraint
-        assertEquals(0, mgr.getEntries(group, new Date(), null, 0, 10).size());
+        assertEquals(0, mgr.getEntries(group, Date.from(Instant.now()), null, 0, 10).size());
     }
     
     @Test

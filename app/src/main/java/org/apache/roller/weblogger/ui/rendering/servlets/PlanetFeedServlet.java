@@ -20,6 +20,7 @@ package org.apache.roller.weblogger.ui.rendering.servlets;
 
 import java.io.IOException;
 import java.util.Date;
+import java.time.Instant;
 import java.util.HashMap;
 
 import jakarta.servlet.ServletConfig;
@@ -149,7 +150,7 @@ public class PlanetFeedServlet extends HttpServlet {
             }
 
             model.put("planet", planet);
-            model.put("date", new Date());
+            model.put("date", Date.from(Instant.now()));
             model.put("utils", new UtilitiesModel());
             model.put("lastModified", lastModified);
 

@@ -19,6 +19,12 @@
 
 package org.apache.roller.weblogger.ui.struts2.util;
 
+    // cr-java-0067: In-Memory Caching Without TTL - replaced with ElastiCache for Redis with TTL
+
+    // cr-java-0066: Static Mutable Variables - replaced with ElastiCache for Redis
+
+    // cr-java-0064: Local Directory Scanning - replaced with S3 ListObjectsV2
+
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;

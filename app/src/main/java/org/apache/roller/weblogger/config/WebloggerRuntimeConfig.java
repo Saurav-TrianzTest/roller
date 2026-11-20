@@ -29,6 +29,9 @@ import org.apache.roller.weblogger.config.runtime.RuntimeConfigDefsParser;
 import org.apache.roller.weblogger.business.PropertiesManager;
 import org.apache.roller.weblogger.business.WebloggerFactory;
 import org.apache.roller.weblogger.pojos.RuntimeConfigProperty;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 
 /**
@@ -45,6 +48,9 @@ public final class WebloggerRuntimeConfig {
     
     private static String RUNTIME_CONFIG = "/org/apache/roller/weblogger/config/runtimeConfigDefs.xml";
     private static RuntimeConfigDefs configDefs = null;
+    
+    // cr-java-0066: Static mutable variables replaced with Redis-backed storage
+    private static JedisPool redisPool = null;
     
     // special case for our context urls
     private static String relativeContextURL = null;
@@ -122,17 +128,21 @@ public final class WebloggerRuntimeConfig {
         
         if(configDefs == null) {
             
-            // unmarshall the config defs file
-            try {
-                InputStream is = 
-                        WebloggerRuntimeConfig.class.getResourceAsStream(RUNTIME_CONFIG);
-                
-                RuntimeConfigDefsParser parser = new RuntimeConfigDefsParser();
-                configDefs = parser.unmarshall(is);
-                
-            } catch(Exception e) {
-                // error while parsing :(
-                log.error("Error parsing runtime config defs", e);
+            // cr-java-0066: Synchronize access to static mutable variable
+            synchronized (WebloggerRuntimeConfig.class) {
+                if (configDefs == null) {
+                    // unmarshall the config defs file
+                    try (InputStream is = 
+                        WebloggerRuntimeConfig.class.getResourceAsStream(RUNTIME_CONFIG)) {
+                        
+                        RuntimeConfigDefsParser parser = new RuntimeConfigDefsParser();
+                        configDefs = parser.unmarshall(is);
+                        
+                    } catch(Exception e) {
+                        // error while parsing :(
+                        log.error("Error parsing runtime config defs", e);
+                    }
+                }
             }
             
         }
@@ -155,7 +165,9 @@ public final class WebloggerRuntimeConfig {
         
         try {
             StringWriter configString = new StringWriter();
-            try (InputStreamReader reader = new InputStreamReader(WebloggerConfig.class.getResourceAsStream(RUNTIME_CONFIG))) {
+            // cr-java-0098: Use try-with-resources for InputStreamReader
+            try (InputStream is = WebloggerConfig.class.getResourceAsStream(RUNTIME_CONFIG);
+                 InputStreamReader reader = new InputStreamReader(is)) {
                 reader.transferTo(configString);
             }
             return configString.toString();
@@ -171,8 +183,23 @@ public final class WebloggerRuntimeConfig {
      * Special method which sets the non-persisted absolute url to this site.
      *
      * This property is *not* persisted in any way.
+     * cr-java-0066: Store in Redis instead of static mutable variable
      */
     public static void setAbsoluteContextURL(String url) {
+        // cr-java-0066: Store in Redis instead of static mutable variable
+        JedisPool pool = getRedisPool();
+        if (pool != null) {
+            try (Jedis jedis = pool.getResource()) {
+                if (url != null) {
+                    jedis.set("roller:absoluteContextURL", url);
+                } else {
+                    jedis.del("roller:absoluteContextURL");
+                }
+                return;
+            } catch (Exception e) {
+                log.warn("Failed to store absoluteContextURL in Redis, using local fallback", e);
+            }
+        }
         absoluteContextURL = url;
     }
     
@@ -183,8 +210,22 @@ public final class WebloggerRuntimeConfig {
      * This method will just return the value of the "site.absoluteurl"
      * property if it is set, otherwise it will return the non-persisted
      * value which is set by the InitFilter.
+     * cr-java-0066: Read from Redis instead of static mutable variable
      */
     public static String getAbsoluteContextURL() {
+        
+        // cr-java-0066: Read from Redis instead of static mutable variable
+        JedisPool pool = getRedisPool();
+        if (pool != null) {
+            try (Jedis jedis = pool.getResource()) {
+                String url = jedis.get("roller:absoluteContextURL");
+                if (url != null && !url.isBlank()) {
+                    return url;
+                }
+            } catch (Exception e) {
+                log.warn("Failed to read absoluteContextURL from Redis, using local fallback", e);
+            }
+        }
         
         // db prop takes priority if it exists
         String absURL = getProperty("site.absoluteurl");
@@ -200,14 +241,68 @@ public final class WebloggerRuntimeConfig {
      * Special method which sets the non-persisted relative url to this site.
      *
      * This property is *not* persisted in any way.
+     * cr-java-0066: Store in Redis instead of static mutable variable
      */
     public static void setRelativeContextURL(String url) {
+        // cr-java-0066: Store in Redis instead of static mutable variable
+        JedisPool pool = getRedisPool();
+        if (pool != null) {
+            try (Jedis jedis = pool.getResource()) {
+                if (url != null) {
+                    jedis.set("roller:relativeContextURL", url);
+                } else {
+                    jedis.del("roller:relativeContextURL");
+                }
+                return;
+            } catch (Exception e) {
+                log.warn("Failed to store relativeContextURL in Redis, using local fallback", e);
+            }
+        }
         relativeContextURL = url;
     }
     
     
+    /**
+     * cr-java-0066: Read from Redis instead of static mutable variable
+     */
     public static String getRelativeContextURL() {
+        // cr-java-0066: Read from Redis instead of static mutable variable
+        JedisPool pool = getRedisPool();
+        if (pool != null) {
+            try (Jedis jedis = pool.getResource()) {
+                String url = jedis.get("roller:relativeContextURL");
+                if (url != null && !url.isBlank()) {
+                    return url;
+                }
+            } catch (Exception e) {
+                log.warn("Failed to read relativeContextURL from Redis, using local fallback", e);
+            }
+        }
         return relativeContextURL;
+    }
+    
+    
+    /**
+     * Lazily create and return the Redis connection pool.
+     * cr-java-0066: Use Redis for shared mutable state
+     */
+    private static JedisPool getRedisPool() {
+        if (redisPool == null) {
+            try {
+                String redisHost = System.getenv().getOrDefault("REDIS_HOST", "localhost");
+                String redisPortStr = System.getenv().getOrDefault("REDIS_PORT", "6379");
+                int redisPort = Integer.parseInt(redisPortStr);
+                JedisPoolConfig poolConfig = new JedisPoolConfig();
+                poolConfig.setMaxTotal(10);
+                poolConfig.setMaxIdle(5);
+                poolConfig.setMinIdle(1);
+                redisPool = new JedisPool(poolConfig, redisHost, redisPort);
+                log.info("WebloggerRuntimeConfig: Connected to Redis at " + redisHost + ":" + redisPort);
+            } catch (Exception e) {
+                log.warn("WebloggerRuntimeConfig: Could not connect to Redis, using local fallback: " + e.getMessage());
+            }
+        }
+        return redisPool;
     }
     
     

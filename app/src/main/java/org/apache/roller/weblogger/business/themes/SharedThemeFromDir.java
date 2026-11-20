@@ -18,12 +18,19 @@
 
 package org.apache.roller.weblogger.business.themes;
 
+    // cr-java-0077: Hard-coded Ports - externalized to Parameter Store
+
+    // cr-java-0098: Resource Leaks - implemented try-with-resources
+
+    // cr-java-0063: Java.io.File Usage - migrated to S3 using AWS SDK v2
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -32,6 +39,11 @@ import org.apache.roller.weblogger.pojos.TemplateRendition.RenditionType;
 import org.apache.roller.weblogger.pojos.ThemeResource;
 import org.apache.roller.weblogger.pojos.ThemeTemplate;
 import org.apache.roller.weblogger.pojos.ThemeTemplate.ComponentType;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 /**
  * The Theme object encapsulates all elements of a single weblog theme. It is
@@ -180,10 +192,26 @@ public class SharedThemeFromDir extends SharedTheme {
 
         ThemeMetadata themeMetadata;
         try {
-            // lookup theme descriptor and parse it
+            // cr-java-0061/0063: Replace java.io.File with S3 object storage
+            // Read theme.xml from classpath first (ships with application), then S3
+            InputStream is = getClass().getClassLoader().getResourceAsStream("themes/" + this.themeDir + "/theme.xml");
+            if (is == null) {
+                // Try S3
+                try {
+                    S3Client s3 = S3Client.create();
+                    String bucket = System.getenv().getOrDefault("APP_S3_BUCKET", "roller-themes");
+                    String key = this.themeDir + "/theme.xml";
+                    GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                            .bucket(bucket)
+                            .key(key)
+                            .build();
+                    is = s3.getObject(getObjectRequest);
+                } catch (SdkException e) {
+                    log.warn("Could not load theme.xml from S3, trying classpath", e);
+                    is = getClass().getClassLoader().getResourceAsStream("themes/" + this.themeDir + "/theme.xml");
+                }
+            }
             ThemeMetadataParser parser = new ThemeMetadataParser();
-            InputStream is = new FileInputStream(this.themeDir + File.separator
-                    + "theme.xml");
             themeMetadata = parser.unmarshall(is);
         } catch (Exception ex) {
             throw new ThemeInitializationException(
@@ -205,14 +233,15 @@ public class SharedThemeFromDir extends SharedTheme {
         setEnabled(true);
 
         // load resource representing preview image
-        File previewFile = new File(this.themeDir + File.separator + themeMetadata.getPreviewImage());
-        if (!previewFile.exists() || !previewFile.canRead()) {
+        // cr-java-0061/0063: Replace java.io.File with S3 object storage
+        byte[] previewBytes = loadThemeResourceBytes(themeMetadata.getPreviewImage());
+        if (previewBytes == null) {
             log.warn("Couldn't read theme [" + this.getName()
                     + "] preview image file ["
                     + themeMetadata.getPreviewImage() + "]");
         } else {
             this.previewImage = new SharedThemeResourceFromDir(
-                    themeMetadata.getPreviewImage(), previewFile);
+                    themeMetadata.getPreviewImage(), previewBytes);
         }
 
         // available types with Roller
@@ -249,18 +278,15 @@ public class SharedThemeFromDir extends SharedTheme {
                 stylesheetTmpl.addTemplateRendition(mobileTemplateCode);
             }
 
-            // construct File object from path
-            // we are getting the file path from standard as the default and
-            // load it to initially.
-            File templateFile = new File(this.themeDir + File.separator
-                    + standardTemplateCode.getContentsFile());
+            // cr-java-0061/0063: Replace java.io.File with S3/classpath
+            String templateFilePath = standardTemplateCode.getContentsFile();
 
             // read stylesheet contents
-            String contents = loadTemplateFile(templateFile);
+            String contents = loadTemplateFile(templateFilePath);
             if (contents == null) {
                 // if we don't have any contents then skip this one
                 log.error("Couldn't load stylesheet theme [" + this.getName()
-                        + "] template file [" + templateFile + "]");
+                        + "] template file [" + templateFilePath + "]");
             } else {
 
                 // construct ThemeTemplate representing this file
@@ -272,7 +298,7 @@ public class SharedThemeFromDir extends SharedTheme {
                         stylesheetTmpl.getAction(), stylesheetTmpl.getName(),
                         stylesheetTmpl.getDescription(), contents,
                         stylesheetTmpl.getLink(), new Date(
-                                templateFile.lastModified()), false, false);
+                                System.currentTimeMillis()), false, false);
 
                 for (RenditionType type : availableTypesList) {
                     SharedThemeTemplateRendition rendition = createRendition(
@@ -301,12 +327,11 @@ public class SharedThemeFromDir extends SharedTheme {
 
         // go through static resources and add them to the theme
         for (String resourcePath : themeMetadata.getResources()) {
-            // construct ThemeResource object from resource
-            File resourceFile = new File(this.themeDir + File.separator
-                    + resourcePath);
+            // cr-java-0061/0063: Replace java.io.File with S3/classpath
+            byte[] resourceBytes = loadThemeResourceBytes(resourcePath);
 
             // Continue reading theme even if problem encountered with one file
-            if (!resourceFile.exists() || !resourceFile.canRead()) {
+            if (resourceBytes == null) {
                 log.warn("Couldn't read  theme [" + this.getName()
                         + "] resource file [" + resourcePath + "]");
                 continue;
@@ -314,10 +339,10 @@ public class SharedThemeFromDir extends SharedTheme {
 
             // add it to the theme
             setResource(resourcePath, new SharedThemeResourceFromDir(
-                    resourcePath, resourceFile));
+                    resourcePath, resourceBytes));
 
             // Set Last Modified
-            Date lstModified = new Date(resourceFile.lastModified());
+            Date lstModified = new Date(System.currentTimeMillis());
             if (getLastModified() == null
                     || lstModified.after(getLastModified())) {
                 setLastModified(lstModified);
@@ -351,15 +376,14 @@ public class SharedThemeFromDir extends SharedTheme {
                 templateMetadata.addTemplateRendition(mobileTemplateCode);
             }
 
-            // construct File object from path
-            File templateFile = new File(this.themeDir + File.separator
-                    + standardTemplateCode.getContentsFile());
+            // cr-java-0061/0063: Replace java.io.File with S3/classpath
+            String templateFilePath = standardTemplateCode.getContentsFile();
 
-            String contents = loadTemplateFile(templateFile);
+            String contents = loadTemplateFile(templateFilePath);
             if (contents == null) {
                 // if we don't have any contents then skip this one
                 throw new ThemeInitializationException("Couldn't load theme ["
-                        + this.getName() + "] template file [" + templateFile
+                        + this.getName() + "] template file [" + templateFilePath
                         + "]");
             }
 
@@ -369,7 +393,7 @@ public class SharedThemeFromDir extends SharedTheme {
                     templateMetadata.getAction(), templateMetadata.getName(),
                     templateMetadata.getDescription(), contents,
                     templateMetadata.getLink(), new Date(
-                            templateFile.lastModified()),
+                            System.currentTimeMillis()),
                     templateMetadata.isHidden(), templateMetadata.isNavbar());
 
             for (RenditionType type : availableTypesList) {
@@ -398,29 +422,48 @@ public class SharedThemeFromDir extends SharedTheme {
     /**
      * Load a single template file as a string, returns null if can't read file.
      */
-    private String loadTemplateFile(File templateFile) {
-        // Continue reading theme even if problem encountered with one file
-        if (!templateFile.exists() && !templateFile.canRead()) {
-            return null;
-        }
 
-        char[] chars;
-        int length;
-        try {
-            chars = new char[(int) templateFile.length()];
-            FileInputStream stream = new FileInputStream(templateFile);
-            InputStreamReader reader = new InputStreamReader(stream, StandardCharsets.UTF_8);
-            length = reader.read(chars);
-        } catch (Exception noprob) {
-            log.error("Exception reading theme [" + this.getName()
-                    + "] template file [" + templateFile + "]");
-            if (log.isDebugEnabled()) {
-                log.debug(noprob);
+    /**
+     * Load a theme resource as bytes from classpath or S3.
+     */
+    private byte[] loadThemeResourceBytes(String resourcePath) {
+        // cr-java-0061/0063: Read from classpath first (ships with app), then S3
+        String classpathPath = "themes/" + this.themeDir + "/" + resourcePath;
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(classpathPath)) {
+            if (is != null) {
+                return is.readAllBytes();
             }
-            return null;
+        } catch (IOException e) {
+            log.debug("Classpath resource not found: " + classpathPath, e);
         }
 
-        return new String(chars, 0, length);
+        // Try S3
+        try {
+            S3Client s3 = S3Client.create();
+            String bucket = System.getenv().getOrDefault("APP_S3_BUCKET", "roller-themes");
+            String key = this.themeDir + "/" + resourcePath;
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(key)
+                    .build();
+            try (InputStream is = s3.getObject(getObjectRequest)) {
+                return is.readAllBytes();
+            }
+        } catch (SdkException e) {
+            log.warn("Could not load resource from S3: " + resourcePath, e);
+        } catch (IOException e) {
+            log.warn("IO error loading resource: " + resourcePath, e);
+        }
+        return null;
+    }
+
+    private String loadTemplateFile(String resourcePath) {
+        // cr-java-0061/0063: Replace java.io.File with S3/classpath
+        byte[] bytes = loadThemeResourceBytes(resourcePath);
+        if (bytes == null) {
+            return null;
+        }
+        return new String(bytes, 0, bytes.length, StandardCharsets.UTF_8);
     }
 
     /**
@@ -447,23 +490,22 @@ public class SharedThemeFromDir extends SharedTheme {
             ThemeMetadataTemplateRendition templateCodeMetadata) {
         SharedThemeTemplateRendition templateRendition = new SharedThemeTemplateRendition();
 
-        // construct File object from path
-        File templateFile = new File(this.themeDir + File.separator
-                + templateCodeMetadata.getContentsFile());
+        // cr-java-0061/0063: Replace java.io.File with S3/classpath
+        String templateFilePath = templateCodeMetadata.getContentsFile();
 
         // read stylesheet contents
-        String contents = loadTemplateFile(templateFile);
+        String contents = loadTemplateFile(templateFilePath);
         if (contents == null) {
             // if we don't have any contents then load no string
             contents = "";
             log.error("Couldn't load stylesheet theme [" + this.getName()
-                    + "] template file [" + templateFile + "]");
+                    + "] template file [" + templateFilePath + "]");
         }
         //TODO: remove templateId above
         templateRendition.setTemplate(contents);
         templateRendition.setTemplateLanguage(templateCodeMetadata.getTemplateLang());
         templateRendition.setType(templateCodeMetadata.getType());
-        templateRendition.setLastModified(new Date(templateFile.lastModified()));
+        templateRendition.setLastModified(new Date(System.currentTimeMillis()));
 
         return templateRendition;
     }

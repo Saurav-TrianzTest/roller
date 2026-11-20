@@ -19,6 +19,7 @@
 package org.apache.roller.weblogger.ui.rendering.pagers;
 
 import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
@@ -143,7 +144,7 @@ public class WeblogEntriesPermalinkPager extends AbstractWeblogEntriesPager {
                 WeblogEntryManager wmgr = roller.getWeblogEntryManager();
                 nextEntry = wmgr.getNextEntry(currEntry, null, locale);
                 // make sure that entry is published and not to future
-                if (nextEntry != null && nextEntry.getPubTime().after(new Date())
+                if (nextEntry != null && nextEntry.getPubTime().after(Date.from(Instant.now()))
                         && nextEntry.getStatus().equals(PubStatus.PUBLISHED)) {
                     nextEntry = null;
                 }
@@ -163,7 +164,7 @@ public class WeblogEntriesPermalinkPager extends AbstractWeblogEntriesPager {
                 WeblogEntryManager wmgr = roller.getWeblogEntryManager();
                 prevEntry = wmgr.getPreviousEntry(currEntry, null, locale);
                 // make sure that entry is published and not to future
-                if (prevEntry != null && prevEntry.getPubTime().after(new Date())
+                if (prevEntry != null && prevEntry.getPubTime().after(Date.from(Instant.now()))
                         && prevEntry.getStatus().equals(PubStatus.PUBLISHED)) {
                     prevEntry = null;
                 }

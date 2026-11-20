@@ -17,6 +17,8 @@
  */
 package org.apache.roller.weblogger.ui.core.security;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;

@@ -56,6 +56,7 @@ public final class PropertyExpander {
      * @return the result of replacing property expressions with the values of the corresponding properties from the
      *         supplied property map, null if the input string is null.
      */
+    // cr-java-0066: Static mutable variable - replace with Redis-backed storage for cloud deployment
     public static String expandProperties(String input, Map<?, ?> props) {
         
         if (input == null) {

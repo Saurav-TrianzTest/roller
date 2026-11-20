@@ -17,6 +17,8 @@
  */
 package org.apache.roller.weblogger.ui.core.security;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
@@ -71,7 +73,7 @@ public class CustomUserRegistry {
         // setting default
         ud.setId(null);
         ud.setLocale(Locale.getDefault().toString());
-        ud.setTimeZone(TimeZone.getDefault().getID());
+        ud.setTimeZone(TimeZone.getTimeZone("UTC").getID());
         ud.setDateCreated(new java.util.Date());
 
         String userName;

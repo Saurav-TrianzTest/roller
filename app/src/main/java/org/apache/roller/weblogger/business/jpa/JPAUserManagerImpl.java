@@ -28,6 +28,7 @@ import org.apache.roller.weblogger.business.UserManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -216,7 +217,7 @@ public class JPAUserManagerImpl implements UserManager {
             throws WebloggerException {
         TypedQuery<User> query;
 
-        Timestamp end = new Timestamp(endDate != null ? endDate.getTime() : new Date().getTime());
+        Timestamp end = new Timestamp(endDate != null ? endDate.getTime() : Date.from(Instant.now()).getTime());
 
         if (enabled != null) {
             if (startDate != null) {

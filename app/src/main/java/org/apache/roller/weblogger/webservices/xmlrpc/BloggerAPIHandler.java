@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.webservices.xmlrpc;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -47,6 +49,7 @@ import org.apache.roller.weblogger.pojos.WeblogPermission;
 import org.apache.roller.weblogger.pojos.ThemeTemplate.ComponentType;
 import org.apache.roller.weblogger.util.Utilities;
 import org.apache.xmlrpc.XmlRpcException;
+import java.time.Instant;
 
 /**
  * Weblogger XML-RPC Handler for the Blogger v1 API.
@@ -340,7 +343,7 @@ public class BloggerAPIHandler extends BaseAPIHandler {
         WeblogEntry entry = validateEntry(postid, user,
                 publish ? WeblogPermission.POST : null);
         try {
-            Timestamp current = new Timestamp(System.currentTimeMillis());
+            Timestamp current = new Timestamp(Date.from(Instant.now()).getTime());
 
             Weblogger roller = WebloggerFactory.getWeblogger();
             WeblogEntryManager weblogMgr = roller.getWeblogEntryManager();
@@ -412,7 +415,7 @@ public class BloggerAPIHandler extends BaseAPIHandler {
             Weblogger roller = WebloggerFactory.getWeblogger();
             WeblogEntryManager weblogMgr = roller.getWeblogEntryManager();
             
-            Timestamp current = new Timestamp(System.currentTimeMillis());
+            Timestamp current = new Timestamp(Date.from(Instant.now()).getTime());
             
             WeblogEntry entry = new WeblogEntry();
             entry.setTitle(title);
@@ -478,7 +481,7 @@ public class BloggerAPIHandler extends BaseAPIHandler {
             if (weblog != null) {
                 List<WeblogEntry> entries = getRecentEntries(weblog, user,
                         numposts, WeblogEntrySearchCriteria.SortBy.PUBLICATION_TIME,
-                        new Date());
+                        Date.from(Instant.now()));
                 for (WeblogEntry entry : entries) {
                     if (!entry.hasWritePermissions(user)) {
                         continue;

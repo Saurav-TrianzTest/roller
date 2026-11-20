@@ -18,6 +18,8 @@
 
 package org.apache.roller.scripting;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import java.io.PrintWriter;

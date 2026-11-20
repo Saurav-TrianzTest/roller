@@ -24,6 +24,7 @@ import org.apache.roller.weblogger.pojos.TemplateRendition.TemplateLanguage;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.time.Instant;
 
 
 /**
@@ -43,7 +44,7 @@ public class StaticThemeTemplate implements ThemeTemplate, Serializable {
     private String contents = null;
     private boolean hidden = false;
     private boolean navbar = false;
-    private Date lastModified = new Date();
+    private Date lastModified = Date.from(Instant.now());
     private TemplateLanguage templateLanguage = null;
     private String outputContentType = null;
     private RenditionType type = RenditionType.STANDARD;

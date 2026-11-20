@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.util.cache;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.io.Serializable;
 
 

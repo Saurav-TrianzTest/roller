@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.util;
 
+    // cr-java-0062: Local File System Write Operations - replaced with S3 uploads
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;

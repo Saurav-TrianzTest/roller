@@ -16,6 +16,8 @@
  */
 package org.apache.roller.weblogger.business.search.lucene;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -40,6 +42,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import java.time.Instant;
+import java.util.Date;
 
 /**
  * The index holds only what search needs, and an index built by an earlier
@@ -99,7 +103,7 @@ class IndexedFieldsTest {
         when(entry.getTitle()).thenReturn("Title");
         when(entry.getLocale()).thenReturn("en");
         when(entry.getText()).thenReturn("Text");
-        Timestamp now = new Timestamp(System.currentTimeMillis());
+        Timestamp now = new Timestamp(Date.from(Instant.now()).getTime());
         when(entry.getUpdateTime()).thenReturn(now);
         when(entry.getPubTime()).thenReturn(now);
         when(entry.getComments()).thenReturn(List.of(comment));

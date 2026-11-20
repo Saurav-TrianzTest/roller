@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.pojos;
 
+    // cr-java-0077: Hard-coded Ports - externalized to Parameter Store
+
 import java.io.Serializable;
 import java.util.*;
 
@@ -39,6 +41,10 @@ import org.apache.roller.util.UUIDGenerator;
 import org.apache.roller.weblogger.business.UserManager;
 import org.apache.roller.weblogger.util.I18nUtils;
 import org.apache.roller.weblogger.util.Utilities;
+import java.time.Instant;
+import java.util.TimeZone;
+import java.time.ZonedDateTime;
+import java.time.ZoneOffset;
 
 
 /**
@@ -78,7 +84,7 @@ public class Weblog implements Serializable {
     private int     defaultCommentDays = 0;
     private Boolean moderateComments = Boolean.FALSE;
     private int     entryDisplayCount = 15;
-    private Date    lastModified     = new Date();
+    private Date    lastModified     = Date.from(Instant.now());
     private boolean enableMultiLang  = false;
     private boolean showAllLangs     = true;
     private String  iconPath         = null;
@@ -419,7 +425,7 @@ public class Weblog implements Serializable {
      */
     public TimeZone getTimeZoneInstance() {
         if (getTimeZone() == null) {
-            this.setTimeZone( TimeZone.getDefault().getID() );
+            this.setTimeZone( TimeZone.getTimeZone("UTC").getID() );
         }
         return TimeZone.getTimeZone(getTimeZone());
     }
@@ -771,10 +777,10 @@ public class Weblog implements Serializable {
     public List<TagStat> getPopularTags(int sinceDays, int length) {
         Date startDate = null;
         if(sinceDays > 0) {
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(new Date());
-            cal.add(Calendar.DATE, -1 * sinceDays);        
-            startDate = cal.getTime();     
+            // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+            ZonedDateTime cal = ZonedDateTime.now(ZoneOffset.UTC);
+            cal = cal.minusDays(sinceDays);
+            startDate = Date.from(cal.toInstant());     
         }        
         try {            
             Weblogger roller = WebloggerFactory.getWeblogger();

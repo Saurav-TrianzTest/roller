@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.rendering.servlets;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import org.apache.commons.lang3.StringUtils;
@@ -65,6 +67,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.time.Instant;
 
 /**
  * Provides access to weblog pages.
@@ -387,7 +390,7 @@ public class PageServlet extends HttpServlet {
                 invalid = true;
             } else if (!entry.isPublished()) {
                 invalid = true;
-            } else if (new Date().before(entry.getPubTime())) {
+            } else if (Date.from(Instant.now()).before(entry.getPubTime())) {
                 invalid = true;
             }
         } else if (pageRequest.getWeblogCategoryName() != null) {

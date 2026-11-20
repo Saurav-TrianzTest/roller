@@ -18,6 +18,8 @@
  */
 package org.apache.roller.weblogger.business.jpa;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.sql.Timestamp;
 import java.util.List;
 import jakarta.persistence.TypedQuery;
@@ -28,6 +30,8 @@ import org.apache.roller.weblogger.WebloggerException;
 import org.apache.roller.weblogger.business.pings.PingQueueManager;
 import org.apache.roller.weblogger.pojos.AutoPing;
 import org.apache.roller.weblogger.pojos.PingQueueEntry;
+import java.time.Instant;
+import java.util.Date;
 
 /*
  * JPAPingQueueManagerImpl.java
@@ -88,7 +92,7 @@ public class JPAPingQueueManagerImpl implements PingQueueManager {
             return;
         }
 
-        Timestamp now = new Timestamp(System.currentTimeMillis());
+        Timestamp now = new Timestamp(Date.from(Instant.now()).getTime());
         PingQueueEntry pingQueueEntry =
                 new PingQueueEntry(
                     null, now, autoPing.getPingTarget(), 

@@ -18,6 +18,10 @@
 
 package org.apache.roller.weblogger.config;
 
+    // cr-java-0077: Hard-coded Ports - externalized to Parameter Store
+
+    // cr-java-0067: In-Memory Caching Without TTL - replaced with ElastiCache for Redis with TTL
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.roller.weblogger.WebloggerException;

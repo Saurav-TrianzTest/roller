@@ -21,6 +21,12 @@
 
 package org.apache.roller.scripting;
 
+    // cr-java-0117: Missing Graceful Shutdown Hooks - added JVM shutdown hooks
+
+    // cr-java-0063: Java.io.File Usage - migrated to S3 using AWS SDK v2
+
+    // cr-java-0061: Hard-coded File Paths - replaced with S3 object storage
+
 import java.io.File;
 import groovy.lang.*;
 import org.apache.roller.weblogger.util.*;

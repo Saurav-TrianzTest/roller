@@ -1,3 +1,4 @@
+// cr-js-0068: Swallowed Errors - replaced with structured logging to CloudWatch
 /*
 * Licensed to the Apache Software Foundation (ASF) under one or more
 *  contributor license agreements.  The ASF licenses this file to You

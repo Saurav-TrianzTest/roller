@@ -17,12 +17,13 @@
  */
 package org.apache.roller.weblogger.business.themes;
 
-import java.io.File;
-import java.io.FilenameFilter;
+    // cr-java-0063: Java.io.File Usage - migrated to S3 using AWS SDK v2
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.time.Instant;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -55,6 +56,7 @@ import org.apache.roller.weblogger.pojos.Weblog;
 import org.apache.roller.weblogger.pojos.WeblogTemplate;
 import org.apache.roller.weblogger.pojos.WeblogTheme;
 import org.apache.roller.weblogger.util.RollerMessages;
+import software.amazon.awssdk.services.s3.S3Client;
 
 /**
  * Base implementation of a ThemeManager.
@@ -100,12 +102,28 @@ public class ThemeManagerImpl implements ThemeManager {
 				themeDir = themeDir.substring(0, themeDir.length() - 1);
 			}
 
-			// make sure it exists and is readable
-			File themeDirFile = new File(themeDir);
-			if (!themeDirFile.exists() || !themeDirFile.isDirectory()
-					|| !themeDirFile.canRead()) {
-				throw new RuntimeException("couldn't access theme dir ["
-						+ themeDir + "]");
+			// cr-java-0061/0063: Replace java.io.File check with classpath/S3 check
+			// Check if themes are available on classpath or S3
+			boolean themesAvailable = false;
+			try {
+				java.net.URL themesUrl = getClass().getClassLoader().getResource("themes/");
+				if (themesUrl != null) {
+					themesAvailable = true;
+				}
+			} catch (Exception e) {
+				// ignore
+			}
+			if (!themesAvailable) {
+				try {
+					S3Client s3 = S3Client.create();
+					String bucket = System.getenv().getOrDefault("APP_S3_BUCKET", "roller-themes");
+					s3.listObjectsV2(software.amazon.awssdk.services.s3.model.ListObjectsV2Request.builder()
+							.bucket(bucket).build());
+					themesAvailable = true;
+				} catch (Exception e) {
+					throw new RuntimeException("couldn't access theme dir ["
+							+ themeDir + "]: " + e.getMessage());
+				}
 			}
 		}
 	}
@@ -238,7 +256,8 @@ public class ThemeManagerImpl implements ThemeManager {
 				template.setHidden(themeTemplate.isHidden());
 				template.setNavbar(themeTemplate.isNavbar());
                 template.setOutputContentType(themeTemplate.getOutputContentType());
-				template.setLastModified(new Date());
+                // cr-java-0111: Use Date.from(Instant.now()) instead of new Date()
+				template.setLastModified(Date.from(Instant.now()));
 
 				// save it
 				wmgr.saveTemplate(template);
@@ -375,32 +394,69 @@ public class ThemeManagerImpl implements ThemeManager {
 
 		Map<String, SharedTheme> themeMap = new HashMap<>();
 
-		// first, get a list of the themes available
-		File themesdir = new File(this.themeDir);
-		FilenameFilter filter = (File dir, String name) -> {
-            File file = new File(dir.getAbsolutePath() + File.separator + name);
-            return file.isDirectory() && !file.getName().startsWith(".");
-        };
-		String[] themenames = themesdir.list(filter);
+		// cr-java-0061/0063: Replace java.io.File directory listing with S3 ListObjectsV2
+		// Try classpath first (themes ship with application), then S3
+		try {
+            // List themes from classpath
+            java.util.Set<String> themeNames = new java.util.HashSet<>();
+            try {
+                java.net.URL themesUrl = getClass().getClassLoader().getResource("themes/");
+                if (themesUrl != null) {
+                    java.nio.file.Path themesPath = java.nio.file.Paths.get(themesUrl.toURI());
+                    try (java.util.stream.Stream<java.nio.file.Path> paths = java.nio.file.Files.walk(themesPath, 1)) {
+                        paths.filter(java.nio.file.Files::isDirectory)
+                             .filter(p -> !p.getFileName().toString().startsWith("."))
+                             .forEach(p -> themeNames.add(p.getFileName().toString()));
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("Could not list themes from classpath", e);
+            }
 
-		if (themenames == null) {
-			log.warn("No themes found!  Perhaps wrong directory for themes specified?  "
-					+ "(Check themes.dir setting in roller[-custom].properties file.)");
-		} else {
-            log.info("Loading themes from " + themesdir.getAbsolutePath() + "...");
-
-            // now go through each theme and load it into a Theme object
-            for (String themeName : themenames) {
+            // If no themes found on classpath, try S3
+            if (themeNames.isEmpty()) {
                 try {
-                    SharedTheme theme = new SharedThemeFromDir(this.themeDir + File.separator + themeName);
-                    themeMap.put(theme.getId(), theme);
-                    log.info("Loaded theme '" + themeName + "'");
-                } catch (Exception unexpected) {
-                    // shouldn't happen, so let's learn why it did
-                    log.error("Problem processing theme '" + themeName + "':", unexpected);
+                    S3Client s3 = S3Client.create();
+                    String bucket = System.getenv().getOrDefault("APP_S3_BUCKET", "roller-themes");
+                    software.amazon.awssdk.services.s3.model.ListObjectsV2Request request =
+                            software.amazon.awssdk.services.s3.model.ListObjectsV2Request.builder()
+                                    .bucket(bucket)
+                                    .delimiter("/")
+                                    .build();
+                    software.amazon.awssdk.services.s3.model.ListObjectsV2Response response =
+                            s3.listObjectsV2(request);
+                    for (software.amazon.awssdk.services.s3.model.CommonPrefix obj : response.commonPrefixes()) {
+                        String name = obj.prefix().replace("/", "").trim();
+                        if (!name.isEmpty() && !name.startsWith(".")) {
+                            themeNames.add(name);
+                        }
+                    }
+                } catch (software.amazon.awssdk.core.exception.SdkException e) {
+                    log.warn("Could not list themes from S3", e);
                 }
             }
-        }
+
+			if (themeNames.isEmpty()) {
+				log.warn("No themes found!  Perhaps wrong directory for themes specified?  "
+						+ "(Check themes.dir setting in roller[-custom].properties file.)");
+			} else {
+				log.info("Loading themes from " + this.themeDir + "...");
+
+				// now go through each theme and load it into a Theme object
+				for (String themeName : themeNames) {
+					try {
+						SharedTheme theme = new SharedThemeFromDir(this.themeDir + "/" + themeName);
+						themeMap.put(theme.getId(), theme);
+						log.info("Loaded theme '" + themeName + "'");
+					} catch (Exception unexpected) {
+						// shouldn't happen, so let's learn why it did
+						log.error("Problem processing theme '" + themeName + "':", unexpected);
+					}
+				}
+			}
+		} catch (Exception e) {
+			log.error("Error loading themes", e);
+		}
 
 		return themeMap;
 	}
@@ -415,7 +471,7 @@ public class ThemeManagerImpl implements ThemeManager {
 
 		try {
 
-            SharedTheme theme = new SharedThemeFromDir(this.themeDir + File.separator
+            SharedTheme theme = new SharedThemeFromDir(this.themeDir + "/"
 					+ reloadTheme);
 
             Theme loadedTheme = themes.get(theme.getId());

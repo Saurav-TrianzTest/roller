@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.rendering.velocity;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Map;

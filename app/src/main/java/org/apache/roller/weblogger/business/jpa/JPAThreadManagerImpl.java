@@ -20,6 +20,7 @@ package org.apache.roller.weblogger.business.jpa;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.time.Instant;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
@@ -65,7 +66,7 @@ public class JPAThreadManagerImpl extends ThreadManagerImpl {
         LOG.debug("Attempting to register lease for task - " + task.getName());
         
         // keep a copy of the current time
-        Date currentTime = new Date();
+        Date currentTime = Date.from(Instant.now());
         
         // query for existing lease record first
         TaskLock taskLock;

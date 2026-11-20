@@ -34,6 +34,7 @@ import org.apache.struts2.interceptor.parameter.StrutsParameter;
 import org.apache.struts2.interceptor.validation.SkipValidation;
 
 import java.util.Date;
+import java.time.Instant;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -118,7 +119,7 @@ public class TemplateEdit extends UIAction {
 
                 WeblogTemplate templateToSave = getTemplate();
                 getBean().copyTo(templateToSave);
-                templateToSave.setLastModified(new Date());
+                templateToSave.setLastModified(Date.from(Instant.now()));
 
                 if (getBean().getAutoContentType() == null || !getBean().getAutoContentType()) {
                     templateToSave.setOutputContentType(getBean().getManualContentType());

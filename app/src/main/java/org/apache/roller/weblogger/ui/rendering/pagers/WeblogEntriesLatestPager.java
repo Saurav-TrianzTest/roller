@@ -21,6 +21,7 @@ package org.apache.roller.weblogger.ui.rendering.pagers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -74,7 +75,7 @@ public class WeblogEntriesLatestPager extends AbstractWeblogEntriesPager {
             try {
                 WeblogEntrySearchCriteria wesc = new WeblogEntrySearchCriteria();
                 wesc.setWeblog(weblog);
-                wesc.setEndDate(new Date());
+                wesc.setEndDate(Date.from(Instant.now()));
                 wesc.setCatName(catName);
                 wesc.setTags(tags);
                 wesc.setStatus(WeblogEntry.PubStatus.PUBLISHED);

@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.business.runnable;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

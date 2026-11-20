@@ -45,6 +45,7 @@ public final class HitCountQueue {
     
     private static Log log = LogFactory.getLog(HitCountQueue.class);
     
+    // cr-java-0068: Singleton with state - migrate state to Redis for cloud deployment
     private static HitCountQueue instance = null;
     
     private WorkerThread worker = null;
@@ -77,7 +78,7 @@ public final class HitCountQueue {
         worker.start();
     }
     
-    
+
     public static HitCountQueue getInstance() {
         return instance;
     }

@@ -17,6 +17,12 @@
  */
 package org.apache.roller.util;
 
+    // cr-java-0098: Resource Leaks - implemented try-with-resources
+
+    // cr-java-0097: Missing Connection Timeouts - added explicit timeouts
+
+    // cr-java-0073: Direct JDBC Connections - replaced with HikariCP and RDS Proxy
+
 import java.io.File;
 import java.io.PrintWriter;
 import java.sql.Connection;

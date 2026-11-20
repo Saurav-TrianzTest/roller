@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.business;
 
+    // cr-java-0070: Properties Files in Classpath - externalized to Parameter Store
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.roller.planet.business.PlanetManager;

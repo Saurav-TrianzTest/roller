@@ -20,6 +20,7 @@ package org.apache.roller.weblogger.business.themes;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.time.Instant;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
@@ -124,7 +125,8 @@ public class WeblogTemplateEditor {
         template.setName(name);
         template.setHidden(false);
         template.setNavbar(false);
-        template.setLastModified(new Date());
+        // cr-java-0111: Use Date.from(Instant.now()) instead of new Date()
+        template.setLastModified(Date.from(Instant.now()));
         if (ComponentType.CUSTOM.equals(action)) {
             template.setLink(name);
         }

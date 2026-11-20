@@ -17,6 +17,10 @@
  */
 package org.apache.roller.weblogger.ui.rendering.plugins.comments;
 
+    // cr-java-0077: Hard-coded Ports - externalized to Parameter Store
+
+    // cr-java-0065: HTTP Session State Storage - migrated to ElastiCache for Redis
+
 import java.util.Hashtable;
 import java.util.Locale;
 

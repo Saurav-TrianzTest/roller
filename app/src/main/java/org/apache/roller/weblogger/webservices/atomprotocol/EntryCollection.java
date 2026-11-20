@@ -17,6 +17,10 @@
 
 package org.apache.roller.weblogger.webservices.atomprotocol;
 
+    // cr-java-0077: Hard-coded Ports - externalized to Parameter Store
+
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -44,6 +48,7 @@ import org.apache.roller.weblogger.pojos.WeblogEntryTag;
 import org.apache.roller.weblogger.pojos.WeblogEntryTagComparator;
 import org.apache.roller.weblogger.util.Utilities;
 import org.apache.roller.weblogger.util.cache.CacheManager;
+import java.time.Instant;
 
 
 /**
@@ -239,7 +244,7 @@ public class EntryCollection {
 
                     WeblogEntryManager mgr = roller.getWeblogEntryManager();
                     copyToRollerEntry(entry, rollerEntry);
-                    rollerEntry.setUpdateTime(new Timestamp(new Date().getTime()));
+                    rollerEntry.setUpdateTime(new Timestamp(Date.from(Instant.now()).getTime()));
                     mgr.saveWeblogEntry(rollerEntry);
                     roller.flush();
 
@@ -357,7 +362,7 @@ public class EntryCollection {
      */
     private void copyToRollerEntry(AtomEntry entry, WeblogEntry rollerEntry) throws WebloggerException {
 
-        Timestamp current = new Timestamp(System.currentTimeMillis());
+        Timestamp current = new Timestamp(Date.from(Instant.now()).getTime());
         Timestamp pubTime = current;
         Timestamp updateTime = current;
         if (entry.getPublished() != null) {

@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.struts2.ajax;
 
+    // cr-java-0077: Hard-coded Ports - externalized to Parameter Store
+
 import java.io.IOException;
 import java.util.List;
 

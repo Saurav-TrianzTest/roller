@@ -32,14 +32,16 @@ import org.apache.roller.weblogger.pojos.WeblogEntryAttribute;
 import org.apache.roller.weblogger.util.Utilities;
 
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TimeZone;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import org.apache.roller.util.DateUtil;
+import java.time.ZonedDateTime;
 
 
 /**
@@ -269,9 +271,8 @@ public class EntryBean {
                 // locales and only operates in the standard English US locale.
 
                 // Don't require user add preceding '0' of month and day.
-                DateFormat df = new SimpleDateFormat("M/d/yy");
-                df.setTimeZone(timezone);
-                Date newDate = df.parse(getDateString());
+                DateTimeFormatter df = DateTimeFormatter.ofPattern("M/d/yy").withZone(timezone.toZoneId());
+                Date newDate = DateUtil.parse(getDateString(), df);
 
                 log.debug("dateString yields date - "+newDate);
 
@@ -378,8 +379,9 @@ public class EntryBean {
         if(entry.getPubTime() != null) {
             log.debug("entry pubtime is "+entry.getPubTime());
             
+            // cr-java-0111: Calendar uses UTC timezone, standardized for cloud deployment
             //Calendar cal = Calendar.getInstance(locale);
-            Calendar cal = Calendar.getInstance();
+            Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             cal.setTime(entry.getPubTime());
             cal.setTimeZone(entry.getWebsite().getTimeZoneInstance());
             
@@ -390,9 +392,8 @@ public class EntryBean {
             // TODO: at some point this date conversion should be locale sensitive,
             // however at this point our calendar widget does not take into account
             // locales and only operates in the standard English US locale.
-            DateFormat df = new SimpleDateFormat("MM/dd/yy");
-            df.setTimeZone(entry.getWebsite().getTimeZoneInstance());
-            setDateString(df.format(entry.getPubTime()));
+            DateTimeFormatter df = DateTimeFormatter.ofPattern("MM/dd/yy").withZone(entry.getWebsite().getTimeZoneInstance().toZoneId());
+            setDateString(DateUtil.format(entry.getPubTime(), df));
             
             log.debug("pubtime vals are "+getDateString()+", "+getHours()+", "+getMinutes()+", "+getSeconds());
         }

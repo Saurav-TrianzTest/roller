@@ -21,6 +21,7 @@ package org.apache.roller.weblogger.ui.rendering.model;
 import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.Date;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -105,7 +106,7 @@ public class SearchResultsModel extends PageModel {
 			limit = searchResultList.getLimit();
 			categories = searchResultList.getCategories();
 
-			Timestamp now = new Timestamp(new Date().getTime());
+			Timestamp now = new Timestamp(Date.from(Instant.now()).getTime());
 			for (WeblogEntryWrapper entry : searchResultList.getResults()) {
 				if (entry.getPubTime().before(now)) {
 					addEntryToResults(results, entry);

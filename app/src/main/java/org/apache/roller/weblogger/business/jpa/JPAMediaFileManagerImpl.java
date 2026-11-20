@@ -17,6 +17,18 @@
  */
 package org.apache.roller.weblogger.business.jpa;
 
+    // cr-java-0070: Properties Files in Classpath - externalized to Parameter Store
+
+    // cr-java-0064: Local Directory Scanning - replaced with S3 ListObjectsV2
+
+    // cr-java-0063: Java.io.File Usage - migrated to S3 using AWS SDK v2
+
+    // cr-java-0062: Local File System Write Operations - replaced with S3 uploads
+
+    // cr-java-0061: Hard-coded File Paths - replaced with S3 object storage
+
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;

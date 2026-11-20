@@ -24,13 +24,22 @@ import java.io.InputStream;
 
 
 /**
- * Represents the content of a file from file system.
+ * Represents the content of a file from file system or S3 object storage.
  *
  */
 public class FileContent {
     
     // the physical java.io.File backing this resource
     private File resourceFile = null;
+    
+    // the input stream backing this resource (for S3)
+    private InputStream resourceStream = null;
+    
+    // the length of the resource (for S3)
+    private long length = -1;
+    
+    // the last modified time of the resource (for S3)
+    private long lastModified = -1;
     
     // the file Id of the resource
     private String fileId = null;
@@ -45,12 +54,23 @@ public class FileContent {
         this.resourceFile = file;
     }
     
+    public FileContent(Weblog weblog, String fileId, InputStream stream, long length, long lastModified) {
+        this.weblog = weblog;
+        this.fileId = fileId;
+        this.resourceStream = stream;
+        this.length = length;
+        this.lastModified = lastModified;
+    }
+    
     public Weblog getWeblog() {
         return weblog;
     }
     
     public String getName() {
-        return resourceFile.getName();
+        if (resourceFile != null) {
+            return resourceFile.getName();
+        }
+        return fileId;
     }
     
     public String getFileId() {
@@ -58,17 +78,26 @@ public class FileContent {
     }
     
     public long getLastModified() {
-        return resourceFile.lastModified();
+        if (resourceFile != null) {
+            return resourceFile.lastModified();
+        }
+        return lastModified;
     }
     
     public long getLength() {
-        return resourceFile.length();
+        if (resourceFile != null) {
+            return resourceFile.length();
+        }
+        return length;
     }
     
     /**
      * Returns the input stream for the underlying file.
      */
     public InputStream getInputStream() {
+        if (resourceStream != null) {
+            return resourceStream;
+        }
         try {
             return new FileInputStream(resourceFile);
         } catch (java.io.FileNotFoundException ex) {

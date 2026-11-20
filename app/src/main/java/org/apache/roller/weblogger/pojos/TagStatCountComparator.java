@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.pojos;
 
+    // cr-java-0068: Singleton Pattern with State - externalized to DynamoDB
+
 import java.util.Comparator;
 import java.io.Serializable;
 

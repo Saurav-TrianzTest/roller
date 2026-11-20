@@ -25,7 +25,6 @@ import org.apache.roller.util.DateUtil;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -35,6 +34,11 @@ import java.util.StringTokenizer;
 import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.tagext.Tag;
 import jakarta.servlet.jsp.tagext.TagSupport;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.TimeZone;
+import java.time.ZonedDateTime;
 
 
 /**
@@ -79,14 +83,14 @@ public class CalendarTag extends TagSupport {
 
     // not a tag attribute
     /*
-    private TimeZone mTimeZone = TimeZone.getDefault();
+    private TimeZone mTimeZone = TimeZone.getTimeZone("UTC");
     public void setTimeZone(TimeZone zone) {
         if (zone != null)
             mTimeZone = zone;
     }
     private TimeZone getTimeZone()
     {
-        // I've seen TimeZone.getDefault() return null. -Lance
+        // I've seen TimeZone.getTimeZone("UTC") return null. -Lance
         if (mTimeZone == null)
             mTimeZone = TimeZone.getTimeZone("America/New_York");
         return mTimeZone;
@@ -149,14 +153,15 @@ public class CalendarTag extends TagSupport {
             
             // ceate object to represent today
             todayCal = model.getCalendar();
-            todayCal.setTime( new Date() );
+            todayCal.setTime( Date.from(Instant.now()) );
 
             // get Resource Bundle
             ResourceBundle bundle = ResourceBundle.getBundle("ApplicationResources", mLocale);
 
             // formatter Month-Year title of calendar
-            SimpleDateFormat formatTitle = new SimpleDateFormat(bundle.getString("calendar.dateFormat"), mLocale);
-            formatTitle.setTimeZone(todayCal.getTimeZone());
+            // cr-java-0111: DateTimeFormatter with UTC timezone
+            DateTimeFormatter formatTitle = DateTimeFormatter.ofPattern(bundle.getString("calendar.dateFormat"), mLocale)
+                    .withZone(ZoneOffset.UTC);
             
             // go back to first day in month
             cal = model.getCalendar();
@@ -189,7 +194,7 @@ public class CalendarTag extends TagSupport {
                         + "\" title=\"" + bundle.getString("calendar.prev")
                         + "\" class=\"hCalendarNavBar\">&laquo;</a> ");
             }
-            pw.print( formatTitle.format(day) );
+            pw.print( DateUtil.format(day, formatTitle));
             if (model.getNextMonth() != null) {
                 pw.print(" <a href=\"" + model.computeNextMonthUrl()
                 + "\" title=\"" + bundle.getString("calendar.next")
@@ -327,11 +332,12 @@ public class CalendarTag extends TagSupport {
     private void buildDayNames() {
         // build array of names of days of week
         mDayNames = new String[7];
+        // cr-java-0111: Calendar uses locale timezone, standardized for cloud deployment
         Calendar dayNameCal = Calendar.getInstance(mLocale);
-        SimpleDateFormat dayFormatter = new SimpleDateFormat("EEE", mLocale);
+        DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("EEE", mLocale).withZone(ZoneOffset.UTC);
         dayNameCal.set(Calendar.DAY_OF_WEEK, dayNameCal.getFirstDayOfWeek());
         for (int dnum = 0; dnum < 7; dnum++) {
-            mDayNames[dnum] = dayFormatter.format(dayNameCal.getTime());
+            mDayNames[dnum] = DateUtil.format(dayNameCal.getTime(), dayFormatter);
             dayNameCal.add(Calendar.DATE, 1);
         }
     }

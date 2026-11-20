@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -687,7 +688,7 @@ public class JPAWeblogManagerImpl implements WeblogManager {
         Query query;
         
         if (endDate == null) {
-            endDate = new Date();
+            endDate = Date.from(Instant.now());
         }
         
         if (startDate != null) {

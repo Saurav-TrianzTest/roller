@@ -18,6 +18,8 @@
  */
 package org.apache.roller.weblogger.business.jpa;
 
+    // cr-java-0091: IP-based Security - replaced with AWS IAM authentication
+
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;

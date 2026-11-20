@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.rendering.util.cache;
 
+    // cr-java-0068: Singleton Pattern with State - externalized to DynamoDB
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;

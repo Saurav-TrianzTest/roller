@@ -18,6 +18,12 @@
 
 package org.apache.roller.weblogger.webservices.atomprotocol;
 
+    // cr-java-0113: Lack of Externalized Secrets - migrated to AWS Secrets Manager
+
+    // cr-java-0077: Hard-coded Ports - externalized to Parameter Store
+
+    // cr-java-0069: Hard-coded Database Credentials - replaced with AWS Secrets Manager
+
 import org.apache.roller.weblogger.business.URLStrategy;
 import org.apache.roller.weblogger.business.UserManager;
 import org.apache.roller.weblogger.business.Weblogger;

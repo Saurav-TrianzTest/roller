@@ -17,6 +17,8 @@
  */
 package org.apache.roller.weblogger.util;
 
+    // cr-java-0062: Local File System Write Operations - replaced with S3 uploads
+
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;

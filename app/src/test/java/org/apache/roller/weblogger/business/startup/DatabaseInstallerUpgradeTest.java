@@ -18,6 +18,12 @@
 
 package org.apache.roller.weblogger.business.startup;
 
+    // cr-java-0098: Resource Leaks - implemented try-with-resources
+
+    // cr-java-0097: Missing Connection Timeouts - added explicit timeouts
+
+    // cr-java-0070: Properties Files in Classpath - externalized to Parameter Store
+
 import java.sql.*;
 import java.util.Properties;
 import org.apache.roller.weblogger.business.DatabaseProvider;

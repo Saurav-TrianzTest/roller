@@ -17,6 +17,8 @@
  */
 package org.apache.roller.weblogger.pojos;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.io.InputStream;
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -34,6 +36,8 @@ import org.apache.roller.weblogger.WebloggerException;
 import org.apache.roller.weblogger.business.MediaFileManager;
 import org.apache.roller.weblogger.business.WebloggerFactory;
 import org.apache.roller.weblogger.util.Utilities;
+import java.time.Instant;
+import java.util.Date;
 
 /**
  * Represents a media file
@@ -58,8 +62,8 @@ public class MediaFile implements Serializable {
     private int thumbnailWidth = -1;
     private String contentType;
     private String originalPath;
-    private Timestamp dateUploaded = new Timestamp(System.currentTimeMillis());
-    private Timestamp lastUpdated = new Timestamp(System.currentTimeMillis());
+    private Timestamp dateUploaded = new Timestamp(Date.from(Instant.now()).getTime());
+    private Timestamp lastUpdated = new Timestamp(Date.from(Instant.now()).getTime());
     private String creatorUserName;
     private Weblog weblog;
 

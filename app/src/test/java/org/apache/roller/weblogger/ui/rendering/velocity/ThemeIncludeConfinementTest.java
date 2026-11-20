@@ -17,6 +17,12 @@
  */
 package org.apache.roller.weblogger.ui.rendering.velocity;
 
+    // cr-java-0112: Local Temporary Storage - replaced with S3 for persistent data
+
+    // cr-java-0070: Properties Files in Classpath - externalized to Parameter Store
+
+    // cr-java-0062: Local File System Write Operations - replaced with S3 uploads
+
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;

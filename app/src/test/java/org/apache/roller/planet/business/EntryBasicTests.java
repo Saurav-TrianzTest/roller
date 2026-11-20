@@ -16,6 +16,8 @@
 
 package org.apache.roller.planet.business;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import org.apache.roller.planet.pojos.Subscription;
 import org.apache.roller.planet.pojos.SubscriptionEntry;
 import org.apache.roller.weblogger.TestUtils;
@@ -25,6 +27,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+import java.time.Instant;
+import java.util.Date;
 
 
 /**
@@ -54,7 +58,7 @@ public class EntryBasicTests {
         SubscriptionEntry testEntry = new SubscriptionEntry();
         testEntry.setPermalink("entryBasics");
         testEntry.setTitle("entryBasics");
-        testEntry.setPubTime(new java.sql.Timestamp(System.currentTimeMillis()));
+        testEntry.setPubTime(new java.sql.Timestamp(Date.from(Instant.now()).getTime()));
         testEntry.setSubscription(sub);
         
         // add

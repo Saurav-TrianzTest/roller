@@ -37,6 +37,7 @@ import org.mockito.MockedStatic;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -77,8 +78,8 @@ public class PlanetManagerLocalTest  {
             testEntry1.setLink("testEntryLink1");
             testEntry1.setText("blah blah entry1");
             testEntry1.setAnchor("testEntryAnchor1");
-            testEntry1.setPubTime(new Timestamp(new Date().getTime()));
-            testEntry1.setUpdateTime(new Timestamp(new Date().getTime()));
+            testEntry1.setPubTime(new Timestamp(Date.from(Instant.now()).getTime()));
+            testEntry1.setUpdateTime(new Timestamp(Date.from(Instant.now()).getTime()));
             testEntry1.setWebsite(testWeblog);
             testEntry1.setCreatorUserName(testUser.getUserName());
             testEntry1.setCategory(testWeblog.getWeblogCategory("General"));
@@ -90,8 +91,8 @@ public class PlanetManagerLocalTest  {
             testEntry2.setLink("testEntryLink2");
             testEntry2.setText("blah blah entry2");
             testEntry2.setAnchor("testEntryAnchor2");
-            testEntry2.setPubTime(new Timestamp(new Date().getTime()));
-            testEntry2.setUpdateTime(new Timestamp(new Date().getTime()));
+            testEntry2.setPubTime(new Timestamp(Date.from(Instant.now()).getTime()));
+            testEntry2.setUpdateTime(new Timestamp(Date.from(Instant.now()).getTime()));
             testEntry2.setWebsite(testWeblog);
             testEntry2.setCreatorUserName(testUser.getUserName());
             testEntry2.setCategory(testWeblog.getWeblogCategory("General"));
@@ -103,8 +104,8 @@ public class PlanetManagerLocalTest  {
             testEntry3.setLink("testEntryLink3");
             testEntry3.setText("blah blah entry3");
             testEntry3.setAnchor("testEntryAnchor3");
-            testEntry3.setPubTime(new Timestamp(new Date().getTime()));
-            testEntry3.setUpdateTime(new Timestamp(new Date().getTime()));
+            testEntry3.setPubTime(new Timestamp(Date.from(Instant.now()).getTime()));
+            testEntry3.setUpdateTime(new Timestamp(Date.from(Instant.now()).getTime()));
             testEntry3.setWebsite(testWeblog);
             testEntry3.setCreatorUserName(testUser.getUserName());
             testEntry3.setCategory(testWeblog.getWeblogCategory("General"));

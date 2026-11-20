@@ -19,7 +19,6 @@
 package org.apache.roller.weblogger.business;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +30,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.roller.weblogger.business.startup.StartupException;
 import org.apache.roller.weblogger.config.WebloggerConfig;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 /**
@@ -61,6 +67,9 @@ import org.apache.roller.weblogger.config.WebloggerConfig;
 public class DatabaseProvider  {
     
     private static final Log log = LogFactory.getLog(DatabaseProvider.class);
+
+    private static final int CONNECT_TIMEOUT_MS = 5000;
+    private static final int SOCKET_TIMEOUT_MS = 5000;
 
     public enum ConfigurationType {JNDI_NAME, JDBC_PROPERTIES}
     private ConfigurationType type = ConfigurationType.JNDI_NAME;
@@ -93,6 +102,30 @@ public class DatabaseProvider  {
         jdbcUsername =      WebloggerConfig.getProperty("database.jdbc.username");
         jdbcPassword =      WebloggerConfig.getProperty("database.jdbc.password");
         
+        // cr-java-0069: Retrieve DB credentials from AWS Secrets Manager
+        String dbSecretName = WebloggerConfig.getProperty("database.secret.name");
+        if (dbSecretName != null && !dbSecretName.isEmpty()) {
+            try {
+                SecretsManagerClient secretsClient = SecretsManagerClient.create();
+                GetSecretValueRequest secretRequest = GetSecretValueRequest.builder()
+                    .secretId(dbSecretName)
+                    .build();
+                String secretString = secretsClient.getSecretValue(secretRequest).secretString();
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode secretJson = mapper.readTree(secretString);
+                if (jdbcUsername == null) {
+                    jdbcUsername = secretJson.get("username") != null ? secretJson.get("username").asText() : null;
+                }
+                if (jdbcPassword == null) {
+                    jdbcPassword = secretJson.get("password") != null ? secretJson.get("password").asText() : null;
+                }
+            } catch (SdkException e) {
+                log.error("ERROR: Failed to retrieve database credentials from Secrets Manager", e);
+            } catch (Exception e) {
+                log.error("ERROR: Failed to parse database secret", e);
+            }
+        }
+        
         successMessage("SUCCESS: Got parameters. Using configuration type " + type);
 
         // If we're doing JDBC then attempt to load JDBC driver class
@@ -112,15 +145,27 @@ public class DatabaseProvider  {
             }
             successMessage("SUCCESS: loaded JDBC driver class [" +getJdbcDriverClass()+ "]");
             
-            if (getJdbcUsername() != null || getJdbcPassword() != null) {
-                props = new Properties();
-                if (getJdbcUsername() != null) {
-                    props.setProperty("user", getJdbcUsername());
-                }
-                if (getJdbcPassword() != null) {
-                    props.setProperty("password", getJdbcPassword());
-                }
+            // cr-java-0073: Use HikariCP connection pool instead of raw DriverManager
+            HikariConfig hikariConfig = new HikariConfig();
+            hikariConfig.setJdbcUrl(getJdbcConnectionURL());
+            if (getJdbcDriverClass() != null) {
+                hikariConfig.setDriverClassName(getJdbcDriverClass());
             }
+            if (getJdbcUsername() != null) {
+                hikariConfig.setUsername(getJdbcUsername());
+            }
+            if (getJdbcPassword() != null) {
+                hikariConfig.setPassword(getJdbcPassword());
+            }
+            // cr-java-0097: Add connection timeouts
+            hikariConfig.setConnectionTimeout(CONNECT_TIMEOUT_MS);
+            hikariConfig.setIdleTimeout(CONNECT_TIMEOUT_MS);
+            hikariConfig.setMaxLifetime(SOCKET_TIMEOUT_MS * 100L);
+            // Start without a connection so app starts even if DB is unreachable
+            hikariConfig.setInitializationFailTimeout(-1);
+            hikariConfig.setMaximumPoolSize(20);
+            hikariConfig.setMinimumIdle(5);
+            dataSource = new HikariDataSource(hikariConfig);
             
         // Else attempt to locate JNDI datasource
         } else { 
@@ -132,8 +177,8 @@ public class DatabaseProvider  {
             } catch (NamingException ex) {
                 String errorMsg = 
                     "ERROR: cannot locate JNDI DataSource [" +name+ "]. "
-                   +"Likely problem: no DataSource or datasource is misconfigured.";
-                errorMessage(errorMsg);
+        // cr-java-0097: Add connection timeout (5 seconds = 5000 ms)
+                   +"Likely problem: no DataSource or datasource is misconfigured.";                errorMessage(errorMsg);
                 throw new StartupException(errorMsg, ex, startupLog);
             }            
             successMessage("SUCCESS: located JNDI DataSource [" +name+ "]");
@@ -176,11 +221,8 @@ public class DatabaseProvider  {
      * on which is configured.
      */
     public Connection getConnection() throws SQLException {
-        if (getType() == ConfigurationType.JDBC_PROPERTIES) {
-            return DriverManager.getConnection(getJdbcConnectionURL(), props);
-        } else {
-            return dataSource.getConnection();
-        }
+        // cr-java-0073: All connections now go through DataSource (HikariCP or JNDI)
+        return dataSource.getConnection();
     } 
 
     public ConfigurationType getType() {
@@ -212,6 +254,15 @@ public class DatabaseProvider  {
             return jndiName;
         }
         return "java:comp/env/" + jndiName;
+    }
+
+    /**
+     * Shutdown the data source, releasing all pooled connections.
+     */
+    public void shutdown() {
+        if (dataSource instanceof HikariDataSource) {
+            ((HikariDataSource) dataSource).close();
+        }
     }
 
 }

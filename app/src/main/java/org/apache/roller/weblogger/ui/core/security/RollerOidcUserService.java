@@ -17,6 +17,8 @@
  */
 package org.apache.roller.weblogger.ui.core.security;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,6 +47,8 @@ import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import java.time.Instant;
+import java.util.Date;
 
 /**
  * Bridges OIDC-authenticated users to Roller's user store.
@@ -190,9 +194,9 @@ public class RollerOidcUserService implements OAuth2UserService<OidcUserRequest,
 
         user.setOpenIdUrl(oidcSubject);
         user.setPassword(UUIDGenerator.generateUUID());
-        user.setDateCreated(new Timestamp(System.currentTimeMillis()));
+        user.setDateCreated(new Timestamp(Date.from(Instant.now()).getTime()));
         user.setLocale(Locale.getDefault().toString());
-        user.setTimeZone(TimeZone.getDefault().getID());
+        user.setTimeZone(TimeZone.getTimeZone("UTC").getID());
         user.setEnabled(Boolean.TRUE);
 
         boolean bootstrapAdmin = umgr.getUserCount() == 0

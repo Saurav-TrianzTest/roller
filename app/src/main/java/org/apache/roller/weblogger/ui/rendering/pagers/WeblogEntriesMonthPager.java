@@ -18,7 +18,6 @@
 
 package org.apache.roller.weblogger.ui.rendering.pagers;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.apache.commons.logging.Log;
@@ -30,6 +29,10 @@ import org.apache.roller.weblogger.pojos.WeblogEntrySearchCriteria;
 import org.apache.roller.weblogger.pojos.wrapper.WeblogEntryWrapper;
 import org.apache.roller.util.DateUtil;
 import org.apache.roller.weblogger.business.URLStrategy;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.TimeZone;
+import java.time.ZonedDateTime;
 
 
 /**
@@ -39,7 +42,7 @@ public class WeblogEntriesMonthPager extends AbstractWeblogEntriesPager {
     
     private static final Log log = LogFactory.getLog(WeblogEntriesMonthPager.class);
     
-    private SimpleDateFormat monthFormat = new SimpleDateFormat();
+    private DateTimeFormatter monthFormat = DateTimeFormatter.ofPattern("yyyyMM").withZone(ZoneOffset.UTC);
     
     private Date month;
     private Date nextMonth;
@@ -67,15 +70,15 @@ public class WeblogEntriesMonthPager extends AbstractWeblogEntriesPager {
 
         TimeZone tz = weblog.getTimeZoneInstance();
 
-        monthFormat = new SimpleDateFormat(
-            messageUtils.getString("weblogEntriesPager.month.dateFormat"));
-        monthFormat.setTimeZone(tz);
+        monthFormat = DateTimeFormatter.ofPattern(
+            messageUtils.getString("weblogEntriesPager.month.dateFormat")).withZone(tz.toZoneId());
         
         getEntries();
         
         month = parseDate(dateString);
         
-        Calendar cal = Calendar.getInstance(tz);
+        // cr-java-0111: Calendar uses UTC timezone, standardized for cloud deployment
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         
         cal.setTime(month);
         cal.add(Calendar.MONTH, 1);
@@ -172,7 +175,7 @@ public class WeblogEntriesMonthPager extends AbstractWeblogEntriesPager {
     @Override
     public String getNextName() {
         if (getNextLink() != null) {
-            return messageUtils.getString("weblogEntriesPager.month.next", new Object[] {monthFormat.format(month)});
+            return messageUtils.getString("weblogEntriesPager.month.next", new Object[] {DateUtil.format(month, monthFormat)});
         }
         return null;
     }
@@ -190,7 +193,7 @@ public class WeblogEntriesMonthPager extends AbstractWeblogEntriesPager {
     @Override
     public String getPrevName() {
         if (getPrevLink() != null) {
-            return messageUtils.getString("weblogEntriesPager.month.prev", new Object[] {monthFormat.format(month)});
+            return messageUtils.getString("weblogEntriesPager.month.prev", new Object[] {DateUtil.format(month, monthFormat)});
         }
         return null;
     }
@@ -209,7 +212,7 @@ public class WeblogEntriesMonthPager extends AbstractWeblogEntriesPager {
     @Override
     public String getNextCollectionName() {
         if (nextMonth != null) {
-            return messageUtils.getString("weblogEntriesPager.month.nextCollection", new Object[] {monthFormat.format(nextMonth)});
+            return messageUtils.getString("weblogEntriesPager.month.nextCollection", new Object[] {DateUtil.format(nextMonth, monthFormat)});
         }
         return null;
     }
@@ -228,7 +231,7 @@ public class WeblogEntriesMonthPager extends AbstractWeblogEntriesPager {
     @Override
     public String getPrevCollectionName() {
         if (prevMonth != null) {
-            return messageUtils.getString("weblogEntriesPager.month.prevCollection", new Object[] {monthFormat.format(prevMonth)});
+            return messageUtils.getString("weblogEntriesPager.month.prevCollection", new Object[] {DateUtil.format(prevMonth, monthFormat)});
         }
         return null;
     }

@@ -18,12 +18,18 @@
 
 package org.apache.roller.weblogger.business.runnable;
 
+    // cr-java-0114: Fixed Thread Affinity/Pinning - removed, using JVM threading
+
+    // cr-java-0082: Custom Thread Pools - dynamic sizing based on container resources
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
@@ -50,7 +56,7 @@ public abstract class ThreadManagerImpl implements ThreadManager {
     // our own scheduler thread
     private Thread schedulerThread = null;
     
-    // a simple thread executor
+    // a bounded thread executor with dynamic sizing based on container resources
     private final ExecutorService serviceScheduler;
     
     
@@ -58,7 +64,30 @@ public abstract class ThreadManagerImpl implements ThreadManager {
         
         LOG.info("Instantiating Thread Manager");
         
-        serviceScheduler = Executors.newCachedThreadPool();
+        // cr-java-0081/0082: Replace unbounded thread creation with bounded ThreadPoolExecutor
+        // Dynamic pool sizing based on available processors
+        int corePoolSize = Runtime.getRuntime().availableProcessors() * 2;
+        int maxPoolSize = Runtime.getRuntime().availableProcessors() * 4;
+        long keepAliveTime = 60L;
+        
+        serviceScheduler = new ThreadPoolExecutor(
+                corePoolSize,
+                maxPoolSize,
+                keepAliveTime,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(1000),
+                new java.util.concurrent.ThreadFactory() {
+                    private final java.util.concurrent.atomic.AtomicInteger threadNumber = 
+                        new java.util.concurrent.atomic.AtomicInteger(1);
+                    @Override
+                    public Thread newThread(Runnable r) {
+                        Thread t = new Thread(r, "RollerBackgroundTask-" + 
+                            threadNumber.getAndIncrement());
+                        t.setDaemon(false);
+                        return t;
+                    }
+                },
+                new ThreadPoolExecutor.CallerRunsPolicy());
     }
     
     

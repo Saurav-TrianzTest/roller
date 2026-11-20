@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
@@ -33,6 +35,13 @@ import org.apache.roller.weblogger.business.WebloggerFactory;
 import org.apache.roller.weblogger.pojos.TaskLock;
 
 import static org.apache.roller.util.RollerConstants.GRACEFUL_SHUTDOWN_WAIT_IN_SECONDS;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 
 
 /**
@@ -59,8 +68,31 @@ public class TaskScheduler implements Runnable {
         // store list of tasks available to run
         tasks = webloggerTasks;
         
-        // use an expanding thread executor pool
-        pool = Executors.newCachedThreadPool();
+        // cr-java-0082: Replace hard-coded thread pool sizes with dynamic configuration
+        // based on container resources
+        int corePoolSize = Runtime.getRuntime().availableProcessors();
+        int maxPoolSize = Runtime.getRuntime().availableProcessors() * 2;
+        long keepAliveTime = 60L;
+        
+        // use a bounded thread executor pool
+        pool = new ThreadPoolExecutor(
+                corePoolSize,
+                maxPoolSize,
+                keepAliveTime,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(500),
+                new java.util.concurrent.ThreadFactory() {
+                    private final java.util.concurrent.atomic.AtomicInteger threadNumber = 
+                        new java.util.concurrent.atomic.AtomicInteger(1);
+                    @Override
+                    public Thread newThread(Runnable r) {
+                        Thread t = new Thread(r, "RollerTask-" + 
+                            threadNumber.getAndIncrement());
+                        t.setDaemon(false);
+                        return t;
+                    }
+                },
+                new ThreadPoolExecutor.CallerRunsPolicy());
     }
     
     
@@ -73,22 +105,21 @@ public class TaskScheduler implements Runnable {
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 // get current time
-                Date now = new Date();
+                Date now = Date.from(Instant.now());
                 log.debug("Current time = "+now);
                 
                 // run tasks, skip run on first pass
                 if(firstRun) {
                     // add a slight delay to scheduler start
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTime(now);
-                    cal.add(Calendar.MINUTE, 1);
-                    cal.set(Calendar.SECOND, cal.getMinimum(Calendar.SECOND));
-                    cal.set(Calendar.MILLISECOND, cal.getMinimum(Calendar.MILLISECOND));
-                    now = cal.getTime();
+                    // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+                    ZonedDateTime zonedNow = ZonedDateTime.ofInstant(now.toInstant(), ZoneOffset.UTC);
+                    zonedNow = zonedNow.plusMinutes(1);
+                    zonedNow = zonedNow.withSecond(0).withNano(0);
+                    now = Date.from(zonedNow.toInstant());
                     log.debug("Start time = "+now);
                     
                     firstRun = false;
-                } else {
+        } else {
                     try {
                         runTasks(now);
                     } finally {
@@ -109,7 +140,7 @@ public class TaskScheduler implements Runnable {
                 } else {
                     // it's taken us more than 1 minute for the last loop
                     // so recalculate to sleep 'til the end of the current minute
-                    endOfMinute = DateUtil.getEndOfMinute(new Date());
+                    endOfMinute = DateUtil.getEndOfMinute(Date.from(Instant.now()));
                     sleepTime = (endOfMinute.getTime() + 50) - System.currentTimeMillis();
                     log.debug("sleeping - "+sleepTime);
                     Thread.sleep(sleepTime);

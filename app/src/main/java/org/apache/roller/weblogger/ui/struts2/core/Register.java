@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.struts2.core;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.util.TimeZone;
 import java.util.UUID;
 import jakarta.servlet.http.HttpServletRequest;
@@ -110,7 +112,7 @@ public class Register extends UIAction {
         bean.setLocale(getServletRequest().getLocale().toString());
         
         // For new user default to timezone of server
-        bean.setTimeZone(TimeZone.getDefault().getID());
+        bean.setTimeZone(TimeZone.getTimeZone("UTC").getID());
         
         /* TODO: when Spring Security 2.1 is release comment out this stuff, 
          * which pre-populates the user bean with info from OpenID provider.

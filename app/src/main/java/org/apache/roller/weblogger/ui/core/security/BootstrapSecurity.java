@@ -19,6 +19,10 @@
 
 package org.apache.roller.weblogger.ui.core.security;
 
+    // cr-java-0083: Thread Local Storage - replaced with request-scoped beans
+
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;

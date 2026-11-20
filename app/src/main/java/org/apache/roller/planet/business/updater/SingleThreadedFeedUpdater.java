@@ -18,6 +18,8 @@
 
 package org.apache.roller.planet.business.updater;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.util.Collection;
 import java.util.Set;
 import org.apache.commons.logging.Log;

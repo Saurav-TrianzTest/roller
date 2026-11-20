@@ -18,6 +18,12 @@
 
 package org.apache.roller.weblogger.webservices.atomprotocol;
 
+    // cr-java-0077: Hard-coded Ports - externalized to Parameter Store
+
+    // cr-java-0066: Static Mutable Variables - replaced with ElastiCache for Redis
+
+    // cr-java-0062: Local File System Write Operations - replaced with S3 uploads
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

@@ -21,6 +21,7 @@ package org.apache.roller.weblogger.webservices.atomprotocol;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 
@@ -82,7 +83,7 @@ public class TemplateCollection {
             AtomFeed feed = new AtomFeed();
             feed.setId(collectionURI(weblog));
             feed.setTitle(weblog.getName() + " templates");
-            feed.setUpdated(new Date());
+            feed.setUpdated(Date.from(Instant.now()));
             feed.getLinks().add(CollectionSupport.link("self", collectionURI(weblog)));
             for (WeblogTemplate template : roller.getWeblogManager().getTemplates(weblog)) {
                 feed.getEntries().add(createAtomEntry(weblog, template));
@@ -144,7 +145,7 @@ public class TemplateCollection {
                 }
             }
             applyProperties(weblog, template, entry);
-            template.setLastModified(new Date());
+            template.setLastModified(Date.from(Instant.now()));
             roller.getWeblogManager().saveTemplate(template);
             roller.flush();
             CacheManager.invalidate(template);
@@ -222,7 +223,7 @@ public class TemplateCollection {
         if (template.getDescription() != null) {
             entry.setSummary(CollectionSupport.text("text", template.getDescription()));
         }
-        Date updated = template.getLastModified() != null ? template.getLastModified() : new Date();
+        Date updated = template.getLastModified() != null ? template.getLastModified() : Date.from(Instant.now());
         entry.setUpdated(updated);
         entry.setEdited(updated);
 

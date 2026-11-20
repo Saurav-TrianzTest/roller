@@ -16,9 +16,15 @@
 
 package org.apache.roller.util;
 
-import java.text.SimpleDateFormat;
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.TimeZone;
+import java.text.ParseException;
 
 
 /**
@@ -79,7 +85,7 @@ public class ISO8601DateParser {
 
         //NOTE: SimpleDateFormat uses GMT[-+]hh:mm for the TZ which breaks
         //things a bit.  Before we go on we have to repair this.
-        SimpleDateFormat df = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ssz" );
+        DateTimeFormatter df = DateTimeFormatter.ofPattern( "yyyy-MM-dd'T'HH:mm:ssz" ).withZone(ZoneOffset.UTC);
         
         //this is zero time so we need to add that TZ indicator for 
         if ( input.endsWith( "Z" ) ) {
@@ -93,19 +99,20 @@ public class ISO8601DateParser {
             input = s0 + "GMT" + s1;
         }
         
-        return df.parse( input );
+        try {
+            TemporalAccessor parsed = df.parse(input);
+            return Date.from(Instant.from(parsed));
+        } catch (Exception e) {
+            throw new java.text.ParseException("Failed to parse: " + input, 0);
+        }
         
     }
 
     public static String toString( Date date ) {
         
-        SimpleDateFormat df = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ssz" );
-        
-        TimeZone tz = TimeZone.getTimeZone( "UTC" );
-        
-        df.setTimeZone( tz );
+        DateTimeFormatter df = DateTimeFormatter.ofPattern( "yyyy-MM-dd'T'HH:mm:ssz" ).withZone(ZoneOffset.UTC);
 
-        String output = df.format( date );
+        String output = DateUtil.format(date, df);
 
         int inset0 = 9;
         int inset1 = 6;

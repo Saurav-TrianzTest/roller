@@ -18,8 +18,8 @@
 
 package org.apache.roller.weblogger.ui.struts2.admin;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +28,8 @@ import org.apache.roller.util.DateUtil;
 import org.apache.roller.weblogger.pojos.WeblogEntryComment;
 import org.apache.roller.weblogger.pojos.WeblogEntryComment.ApprovalStatus;
 import org.apache.roller.weblogger.util.Utilities;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 
 /**
@@ -85,8 +87,8 @@ public class GlobalCommentManagementBean {
     public Date getStartDate() {
         if(!StringUtils.isEmpty(getStartDateString())) {
             try {
-                DateFormat df = new SimpleDateFormat("MM/dd/yy");
-                return df.parse(getStartDateString());
+                DateTimeFormatter df = DateTimeFormatter.ofPattern("MM/dd/yy").withZone(ZoneOffset.UTC);
+                return DateUtil.parse(getStartDateString(), df);
             } catch(Exception e) { }
         }
         return null;
@@ -95,8 +97,8 @@ public class GlobalCommentManagementBean {
     public Date getEndDate() {
         if (!StringUtils.isEmpty(getEndDateString())) {
             try {
-                DateFormat df = new SimpleDateFormat("MM/dd/yy");
-                Date day = df.parse(getEndDateString());
+                DateTimeFormatter df = DateTimeFormatter.ofPattern("MM/dd/yy").withZone(ZoneOffset.UTC);
+                Date day = DateUtil.parse(getEndDateString(), df);
                 return DateUtil.getEndOfDay(day);
             } catch (Exception e) {}
         }

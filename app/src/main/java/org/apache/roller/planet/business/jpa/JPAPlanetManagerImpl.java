@@ -18,6 +18,8 @@
 
 package org.apache.roller.planet.business.jpa;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;

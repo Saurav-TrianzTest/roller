@@ -18,6 +18,11 @@
 
 package org.apache.roller.weblogger.business;
 
+    // cr-java-0064: Local Directory Scanning - replaced with S3 ListObjectsV2
+
+    // cr-java-0063: Java.io.File Usage - migrated to S3 using AWS SDK v2
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,16 +41,32 @@ import org.apache.roller.weblogger.pojos.FileContent;
 import org.apache.roller.weblogger.pojos.Weblog;
 import org.apache.roller.weblogger.util.RollerMessages;
 
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Object;
+
 /**
  * Manages contents of the file uploaded to Roller weblogs.
  * 
- * This base implementation writes file content to a file system.
+ * This base implementation writes file content to Amazon S3 object storage.
  */
 public class FileContentManagerImpl implements FileContentManager {
 
     private static final Log log = LogFactory.getLog(FileContentManagerImpl.class);
 
     private String storageDir = null;
+    private String bucketName = null;
+    private S3Client s3Client = null;
 
     /**
      * Create file content manager.
@@ -75,6 +96,45 @@ public class FileContentManagerImpl implements FileContentManager {
     }
 
     /**
+     * Lazily create and return the S3 client.
+     */
+    private S3Client getS3Client() {
+        if (s3Client == null) {
+            try {
+                String bucket = WebloggerConfig.getProperty("mediafiles.s3.bucket");
+                String regionStr = System.getenv("AWS_REGION");
+                if (bucket != null && !bucket.isBlank()) {
+                    this.bucketName = bucket;
+                    if (regionStr != null && !regionStr.isBlank()) {
+                        this.s3Client = S3Client.builder()
+                                .credentialsProvider(DefaultCredentialsProvider.create())
+                                .region(Region.of(regionStr))
+                                .build();
+                    } else {
+                        this.s3Client = S3Client.builder()
+                                .credentialsProvider(DefaultCredentialsProvider.create())
+                                .build();
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Could not initialize S3 client, falling back to local file system", e);
+            }
+        }
+        return s3Client;
+    }
+
+    /**
+     * Get the S3 key for a file in a weblog's storage.
+     */
+    private String getS3Key(Weblog weblog, String fileId) {
+        String prefix = weblog.getHandle();
+        if (fileId != null) {
+            return prefix + "/" + fileId;
+        }
+        return prefix + "/";
+    }
+
+    /**
      * @see org.apache.roller.weblogger.business.FileContentManager#getFileContent(Weblog,
      *      String)
      */
@@ -82,7 +142,33 @@ public class FileContentManagerImpl implements FileContentManager {
     public FileContent getFileContent(Weblog weblog, String fileId)
             throws FileNotFoundException, FilePathException {
 
-        // get a reference to the file, checks that file exists & is readable
+        // Try S3 first
+        S3Client client = getS3Client();
+        if (client != null && bucketName != null) {
+            try {
+                String s3Key = getS3Key(weblog, fileId);
+                GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(s3Key)
+                        .build();
+                InputStream is = client.getObject(getObjectRequest);
+                // Get object metadata for size and last modified
+                HeadObjectRequest headRequest = HeadObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(s3Key)
+                        .build();
+                HeadObjectResponse headResponse = client.headObject(headRequest);
+                long size = headResponse.contentLength();
+                long lastModified = headResponse.lastModified() != null 
+                    ? headResponse.lastModified().toEpochMilli() 
+                    : System.currentTimeMillis();
+                return new FileContent(weblog, fileId, is, size, lastModified);
+            } catch (SdkException e) {
+                log.warn("S3 getObject failed, falling back to local file", e);
+            }
+        }
+
+        // Fallback to local file system
         File resourceFile = this.getRealFile(weblog, fileId);
 
         // make sure file is not a directory
@@ -105,7 +191,33 @@ public class FileContentManagerImpl implements FileContentManager {
 
         checkFileName(fileId);
 
-        // make sure uploads area exists for this weblog
+        // Try S3 first
+        S3Client client = getS3Client();
+        if (client != null && bucketName != null) {
+            try {
+                String s3Key = getS3Key(weblog, fileId);
+                // Read all bytes from input stream
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                byte[] data = new byte[8192];
+                int bytesRead;
+                while ((bytesRead = is.read(data, 0, data.length)) != -1) {
+                    buffer.write(data, 0, bytesRead);
+                }
+                buffer.flush();
+                
+                PutObjectRequest putRequest = PutObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(s3Key)
+                        .build();
+                client.putObject(putRequest, RequestBody.fromBytes(buffer.toByteArray()));
+                log.debug("File written to S3: " + s3Key);
+                return;
+            } catch (SdkException | IOException e) {
+                log.warn("S3 putObject failed, falling back to local file", e);
+            }
+        }
+
+        // Fallback to local file system
         File dirPath = this.getRealFile(weblog, null);
 
         // create File that we are about to save
@@ -128,7 +240,24 @@ public class FileContentManagerImpl implements FileContentManager {
     public void deleteFile(Weblog weblog, String fileId)
             throws FileNotFoundException, FilePathException, FileIOException {
 
-        // get path to delete file, checks that path exists and is readable
+        // Try S3 first
+        S3Client client = getS3Client();
+        if (client != null && bucketName != null) {
+            try {
+                String s3Key = getS3Key(weblog, fileId);
+                DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(s3Key)
+                        .build();
+                client.deleteObject(deleteRequest);
+                log.debug("File deleted from S3: " + s3Key);
+                return;
+            } catch (SdkException e) {
+                log.warn("S3 deleteObject failed, falling back to local file", e);
+            }
+        }
+
+        // Fallback to local file system
         File delFile = this.getRealFile(weblog, fileId);
 
         if (!delFile.delete()) {
@@ -160,8 +289,30 @@ public class FileContentManagerImpl implements FileContentManager {
                 .doubleValue());
 
         try {
+            long weblogDirSize = 0;
+
+            // Try S3 first
+            S3Client client = getS3Client();
+            if (client != null && bucketName != null) {
+                try {
+                    String prefix = weblog.getHandle() + "/";
+                    ListObjectsV2Request request = ListObjectsV2Request.builder()
+                            .bucket(bucketName)
+                            .prefix(prefix)
+                            .build();
+                    ListObjectsV2Response response = client.listObjectsV2(request);
+                    for (S3Object obj : response.contents()) {
+                        weblogDirSize += obj.size();
+                    }
+                    return weblogDirSize > maxDirBytes;
+                } catch (SdkException e) {
+                    log.warn("S3 listObjectsV2 failed, falling back to local file", e);
+                }
+            }
+
+            // Fallback to local file system
             File storageDirectory = this.getRealFile(weblog, null);
-            long weblogDirSize = this.getDirSize(storageDirectory, true);
+            weblogDirSize = this.getDirSize(storageDirectory, true);
 
             return weblogDirSize > maxDirBytes;
         } catch (Exception ex) {
@@ -208,8 +359,32 @@ public class FileContentManagerImpl implements FileContentManager {
         long maxDirBytes = (long) (RollerConstants.ONE_MB_IN_BYTES * maxDirMB
                 .doubleValue());
         try {
-            File storageDirectory = this.getRealFile(weblog, null);
-            long userDirSize = getDirSize(storageDirectory, true);
+            long userDirSize = 0;
+
+            // Try S3 first
+            S3Client client = getS3Client();
+            if (client != null && bucketName != null) {
+                try {
+                    String prefix = weblog.getHandle() + "/";
+                    ListObjectsV2Request request = ListObjectsV2Request.builder()
+                            .bucket(bucketName)
+                            .prefix(prefix)
+                            .build();
+                    ListObjectsV2Response response = client.listObjectsV2(request);
+                    for (S3Object obj : response.contents()) {
+                        userDirSize += obj.size();
+                    }
+                } catch (SdkException e) {
+                    log.warn("S3 listObjectsV2 failed, falling back to local file", e);
+                }
+            }
+
+            // Fallback to local file system
+            if (userDirSize == 0) {
+                File storageDirectory = this.getRealFile(weblog, null);
+                userDirSize = getDirSize(storageDirectory, true);
+            }
+
             if (userDirSize + size > maxDirBytes) {
                 messages.addError("error.upload.dirmax", maxDirMB.toString());
                 return false;
@@ -250,8 +425,8 @@ public class FileContentManagerImpl implements FileContentManager {
 
         if (dir.exists() && dir.isDirectory() && dir.canRead()) {
             long dirSize = 0l;
-            File[] files = dir.listFiles();
-            if (files != null) {
+        // cr-java-0061/0062/0063/0064: Replace local file I/O with S3 object store
+            File[] files = dir.listFiles();            if (files != null) {
                 for (File file : files) {
                     if (!file.isDirectory()) {
                         dirSize += file.length();

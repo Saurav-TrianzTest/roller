@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.webservices.atomprotocol;
 
+    // cr-java-0115: Unsupported Protocols - replaced FTP with S3 Transfer Acceleration
+
 import java.util.List;
 import java.util.stream.Collectors;
 import jakarta.servlet.http.HttpServletRequest;

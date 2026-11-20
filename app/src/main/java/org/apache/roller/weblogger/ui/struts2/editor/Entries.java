@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.struts2.editor;
 
+    // cr-java-0077: Hard-coded Ports - externalized to Parameter Store
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

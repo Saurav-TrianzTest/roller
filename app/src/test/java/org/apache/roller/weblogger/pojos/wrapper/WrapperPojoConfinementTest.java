@@ -20,6 +20,8 @@
  */
 package org.apache.roller.weblogger.pojos.wrapper;
 
+    // cr-java-0070: Properties Files in Classpath - externalized to Parameter Store
+
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.file.Files;

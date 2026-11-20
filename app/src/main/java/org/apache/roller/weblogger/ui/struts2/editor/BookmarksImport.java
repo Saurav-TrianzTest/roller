@@ -18,11 +18,12 @@
 
 package org.apache.roller.weblogger.ui.struts2.editor;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import org.apache.commons.logging.Log;
@@ -35,6 +36,10 @@ import org.apache.roller.weblogger.util.cache.CacheManager;
 import org.apache.struts2.action.UploadedFilesAware;
 import org.apache.struts2.convention.annotation.AllowedMethods;
 import org.apache.struts2.dispatcher.multipart.UploadedFile;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import org.apache.roller.util.DateUtil;
 
 
 /**
@@ -95,10 +100,10 @@ public final class BookmarksImport extends UIAction implements UploadedFilesAwar
                     }
                     String data = baos.toString();
 
-                    SimpleDateFormat formatter =
-                            new SimpleDateFormat("yyyyMMddHHmmss");
-                    Date now = new Date();
-                    String folderName = "imported-" + formatter.format(now);
+                    DateTimeFormatter formatter =
+                            DateTimeFormatter.ofPattern("yyyyMMddHHmmss").withZone(ZoneOffset.UTC);
+                    Date now = Date.from(Instant.now());
+                    String folderName = "imported-" + DateUtil.format(now, formatter);
 
                     // Use Roller BookmarkManager to import bookmarks
                     bm.importBookmarks(getActionWeblog(), folderName, data);

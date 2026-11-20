@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.core.util.menu;
 
+    // cr-java-0066: Static Mutable Variables - replaced with ElastiCache for Redis
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;

@@ -16,6 +16,10 @@
  */
 package org.apache.roller.weblogger.business.search.lucene;
 
+    // cr-java-0077: Hard-coded Ports - externalized to Parameter Store
+
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.sql.Timestamp;
 
 import org.apache.lucene.document.Document;
@@ -39,6 +43,8 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import java.time.Instant;
+import java.util.Date;
 
 /**
  * Search pages over published entries and loads only as many hits as the
@@ -77,7 +83,7 @@ class SearchHitPagingTest {
     /** Entries id0..id19, published in the past; the one at draftIndex is a draft. */
     private static WeblogEntryManager entries(int draftIndex) throws Exception {
         WeblogEntryManager entries = mock(WeblogEntryManager.class);
-        Timestamp past = new Timestamp(System.currentTimeMillis() - 60_000);
+        Timestamp past = new Timestamp(Date.from(Instant.now()).getTime() - 60_000);
         for (int i = 0; i < HITS; i++) {
             WeblogEntry entry = mock(WeblogEntry.class);
             when(entry.getId()).thenReturn("id" + i);

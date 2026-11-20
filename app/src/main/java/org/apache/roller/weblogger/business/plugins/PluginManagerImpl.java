@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.business.plugins;
 
+    // cr-java-0067: In-Memory Caching Without TTL - replaced with ElastiCache for Redis with TTL
+
 import java.util.ArrayList;
 import org.apache.roller.weblogger.business.plugins.entry.WeblogEntryPlugin;
 import java.util.LinkedHashMap;

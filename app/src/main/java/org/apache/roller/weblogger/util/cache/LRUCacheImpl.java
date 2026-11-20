@@ -19,6 +19,7 @@
 package org.apache.roller.weblogger.util.cache;
 
 import java.util.Date;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -38,7 +39,7 @@ public class LRUCacheImpl implements Cache {
     protected double misses = 0;
     protected double puts = 0;
     protected double removes = 0;
-    protected Date startTime = new Date();
+    protected Date startTime = Date.from(Instant.now());
     
     
     protected LRUCacheImpl(String id) {
@@ -108,7 +109,7 @@ public class LRUCacheImpl implements Cache {
         misses = 0;
         puts = 0;
         removes = 0;
-        startTime = new Date();
+        startTime = Date.from(Instant.now());
     }
     
     

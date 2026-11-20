@@ -19,6 +19,7 @@
 package org.apache.roller.weblogger.pojos;
 
 import java.util.Date;
+import java.time.Instant;
 import org.apache.roller.util.UUIDGenerator;
 
 
@@ -31,7 +32,7 @@ public abstract class ObjectPermission extends RollerPermission {
     protected String  objectType;
     protected String  objectId;
     protected boolean pending = false;
-    protected Date    dateCreated = new Date();
+    protected Date    dateCreated = Date.from(Instant.now());
     protected String  actions;
     
     

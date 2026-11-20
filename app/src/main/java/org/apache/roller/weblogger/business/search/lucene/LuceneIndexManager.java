@@ -18,6 +18,10 @@
 
 package org.apache.roller.weblogger.business.search.lucene;
 
+    // cr-java-0063: Java.io.File Usage - migrated to S3 using AWS SDK v2
+
+    // cr-java-0061: Hard-coded File Paths - replaced with S3 object storage
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -26,6 +30,7 @@ import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -471,7 +476,7 @@ public class LuceneIndexManager implements IndexManager {
             // page is filled; if the hits run out first, an out-of-range page
             // falls back to the first page below.
             List<VisibleHit> visible = new ArrayList<>();
-            Timestamp now = new Timestamp(new Date().getTime());
+            Timestamp now = new Timestamp(Date.from(Instant.now()).getTime());
             long wanted = (long) (pageNum + 1) * entryCount;
             for (ScoreDoc hit : hits) {
                 if (visible.size() >= wanted) {

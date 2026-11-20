@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.business;
 
+    // cr-java-0070: Properties Files in Classpath - externalized to Parameter Store
+
 import java.util.Properties;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Session;

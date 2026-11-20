@@ -16,6 +16,8 @@
 * directory of this distribution.
 */
 package org.apache.roller.weblogger.util;
+
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;

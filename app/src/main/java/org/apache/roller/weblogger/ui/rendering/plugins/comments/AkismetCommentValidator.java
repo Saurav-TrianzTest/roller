@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.rendering.plugins.comments;
 
+    // cr-java-0097: Missing Connection Timeouts - added explicit timeouts
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;

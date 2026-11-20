@@ -18,7 +18,8 @@
 
 package org.apache.roller.weblogger.ui.rendering.util;
 
-import java.text.SimpleDateFormat;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -79,8 +80,9 @@ public final class ModDateHeaderUtil {
 		lastModifiedTimeMillis -= (lastModifiedTimeMillis % RollerConstants.SEC_IN_MS);
 
 		if (log.isDebugEnabled()) {
-			SimpleDateFormat dateFormat = new SimpleDateFormat(
-					"EEE MMM dd 'at' h:mm:ss a");
+			// cr-java-0111: DateTimeFormatter with UTC timezone
+			DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern(
+					"EEE MMM dd 'at' h:mm:ss a").withZone(ZoneOffset.UTC);
 			log.debug("since date = "
 					+ DateUtil.format(new Date(sinceDate), dateFormat));
 			log.debug("last mod date (trucated to seconds) = "

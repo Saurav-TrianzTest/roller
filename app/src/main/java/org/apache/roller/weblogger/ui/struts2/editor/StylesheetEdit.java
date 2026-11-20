@@ -32,6 +32,7 @@ import org.apache.roller.weblogger.ui.struts2.util.UIAction;
 import org.apache.roller.weblogger.util.cache.CacheManager;
 
 import java.util.Date;
+import java.time.Instant;
 import org.apache.struts2.interceptor.parameter.StrutsParameter;
 
 /**
@@ -147,7 +148,7 @@ public class StylesheetEdit extends UIAction {
                 stylesheetTmpl.setLink(stylesheet.getLink());
                 stylesheetTmpl.setHidden(false);
                 stylesheetTmpl.setNavbar(false);
-                stylesheetTmpl.setLastModified(new Date());
+                stylesheetTmpl.setLastModified(Date.from(Instant.now()));
 
                 // create renditions for available rendition types: standard and mobile
 
@@ -199,7 +200,7 @@ public class StylesheetEdit extends UIAction {
 
                 WeblogTemplate stylesheet = getTemplate();
 
-                stylesheet.setLastModified(new Date());
+                stylesheet.setLastModified(Date.from(Instant.now()));
                 stylesheet.setAction(ComponentType.STYLESHEET);
 
                 if (stylesheet.getTemplateRendition(RenditionType.STANDARD) != null) {
@@ -257,7 +258,7 @@ public class StylesheetEdit extends UIAction {
                 ThemeManager tmgr = WebloggerFactory.getWeblogger() .getThemeManager();
                 Theme theme = tmgr.getTheme(getActionWeblog().getEditorTheme());
 
-                stylesheet.setLastModified(new Date());
+                stylesheet.setLastModified(Date.from(Instant.now()));
 
                 if (stylesheet.getTemplateRendition(RenditionType.STANDARD) != null) {
 

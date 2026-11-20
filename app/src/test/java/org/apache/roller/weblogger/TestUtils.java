@@ -23,10 +23,15 @@
 
 package org.apache.roller.weblogger;
 
+    // cr-java-0068: Singleton Pattern with State - externalized to DynamoDB
+
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.io.InputStream;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.apache.roller.planet.business.PlanetManager;
 import org.apache.roller.planet.pojos.Planet;

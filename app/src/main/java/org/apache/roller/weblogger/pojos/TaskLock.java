@@ -19,8 +19,12 @@
 package org.apache.roller.weblogger.pojos;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import org.apache.roller.util.UUIDGenerator;
 
 
@@ -51,12 +55,11 @@ public class TaskLock implements Serializable {
             return new Date(0);
         }
         
-        // calculate next run time
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(previousRun);
-        cal.add(Calendar.MINUTE, interval);
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime cal = ZonedDateTime.ofInstant(previousRun.toInstant(), ZoneOffset.UTC);
+        cal = cal.plusMinutes(interval);
         
-        return cal.getTime();
+        return Date.from(cal.toInstant());
     }
     
     
@@ -73,12 +76,11 @@ public class TaskLock implements Serializable {
             leaseAcquisitionTime = getTimeAcquired();
         }
         
-        // calculate lease expiration time
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(leaseAcquisitionTime);
-        cal.add(Calendar.MINUTE, getTimeLeased());
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime cal = ZonedDateTime.ofInstant(leaseAcquisitionTime.toInstant(), ZoneOffset.UTC);
+        cal = cal.plusMinutes(getTimeLeased());
         
-        return cal.getTime();
+        return Date.from(cal.toInstant());
     }
 
     //------------------------------------------------------- Good citizenship

@@ -18,6 +18,7 @@
 
 package org.apache.roller.weblogger.business.runnable;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -140,7 +141,8 @@ public class ScheduledEntriesTask extends RollerTaskWithLeasing {
             WeblogEntryManager wMgr = WebloggerFactory.getWeblogger().getWeblogEntryManager();
             IndexManager searchMgr = WebloggerFactory.getWeblogger().getIndexManager();
 
-            Date now = new Date();
+            // cr-java-0111: Use Date.from(Instant.now()) instead of new Date()
+            Date now = Date.from(Instant.now());
 
             log.debug("looking up scheduled entries older than " + now);
 
@@ -187,6 +189,10 @@ public class ScheduledEntriesTask extends RollerTaskWithLeasing {
      * Main method so that this task may be run from outside the webapp.
      */
     public static void main(String[] args) throws Exception {
+        // cr-java-0117: Add graceful shutdown hook for cloud deployment
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("ScheduledEntriesTask shutting down gracefully");
+        }));
         try {
             ScheduledEntriesTask task = new ScheduledEntriesTask();
             task.init();

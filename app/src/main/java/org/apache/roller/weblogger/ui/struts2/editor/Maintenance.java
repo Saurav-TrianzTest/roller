@@ -19,6 +19,7 @@
 package org.apache.roller.weblogger.ui.struts2.editor;
 
 import java.util.Date;
+import java.time.Instant;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -77,7 +78,7 @@ public class Maintenance extends UIAction {
             Weblog weblog = getActionWeblog();
 
             // some caches are based on weblog last-modified, so update it
-            weblog.setLastModified(new Date());
+            weblog.setLastModified(Date.from(Instant.now()));
 
             WebloggerFactory.getWeblogger().getWeblogManager()
                     .saveWeblog(weblog);
@@ -110,7 +111,7 @@ public class Maintenance extends UIAction {
             mgr.resetHitCount(weblog);
 
             // some caches are based on weblog last-modified, so update it
-            weblog.setLastModified(new Date());
+            weblog.setLastModified(Date.from(Instant.now()));
 
             WebloggerFactory.getWeblogger().getWeblogManager()
                     .saveWeblog(weblog);

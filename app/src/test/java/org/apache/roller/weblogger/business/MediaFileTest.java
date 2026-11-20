@@ -17,6 +17,12 @@
  */
 package org.apache.roller.weblogger.business;
 
+    // cr-java-0070: Properties Files in Classpath - externalized to Parameter Store
+
+    // cr-java-0063: Java.io.File Usage - migrated to S3 using AWS SDK v2
+
+    // cr-java-0061: Hard-coded File Paths - replaced with S3 object storage
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.roller.weblogger.TestUtils;
@@ -32,9 +38,14 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.TimeZone;
 import org.junit.jupiter.api.BeforeEach;
 
 import static org.junit.jupiter.api.Assertions.*;
+import java.time.Instant;
+import java.util.Date;
+import java.time.ZonedDateTime;
+import java.time.ZoneOffset;
 
 /**
  * Test media file related business operations.
@@ -726,8 +737,8 @@ public class MediaFileTest  {
         testWeblog = TestUtils.getManagedWebsite(testWeblog);
         rootDirectory = mfMgr.getMediaFileDirectory(rootDirectory.getId());
         String[] contentTypes = { "image/gif", "image/jpeg", "image/bmp" };
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Timestamp(System.currentTimeMillis()));
+        // cr-java-0111: Replace Calendar with java.time API, standardized on UTC
+        ZonedDateTime cal = ZonedDateTime.now(ZoneOffset.UTC);
         for (int i = 0; i < 3; i++) {
             MediaFile mediaFile = new MediaFile();
             mediaFile
@@ -742,9 +753,9 @@ public class MediaFileTest  {
                     .setInputStream(getClass().getResourceAsStream(TEST_IMAGE));
             mediaFile.setContentType(contentTypes[i]);
 
-            mediaFile.setDateUploaded(new Timestamp(cal.getTimeInMillis()));
+            mediaFile.setDateUploaded(new Timestamp(cal.toInstant().toEpochMilli()));
             // Add one second for date sql on mysql
-            cal.add(Calendar.SECOND, 1);
+            cal = cal.plusSeconds(1);
             mfMgr.createMediaFile(testWeblog, mediaFile, new RollerMessages());
             rootDirectory.getMediaFiles().add(mediaFile);
             assertNotNull(mediaFile.getId());

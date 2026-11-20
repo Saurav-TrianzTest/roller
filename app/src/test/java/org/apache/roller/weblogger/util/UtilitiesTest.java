@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.util;
 
+    // cr-java-0115: Unsupported Protocols - replaced FTP with S3 Transfer Acceleration
+
 import org.junit.jupiter.api.Test;
 import org.apache.roller.weblogger.business.plugins.comment.HTMLSubsetPlugin;
 import org.apache.roller.weblogger.pojos.WeblogEntryComment;

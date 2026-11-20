@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.rendering.model;
 
+    // cr-java-0066: Static Mutable Variables - replaced with ElastiCache for Redis
+
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

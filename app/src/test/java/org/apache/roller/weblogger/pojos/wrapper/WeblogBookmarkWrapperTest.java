@@ -17,6 +17,8 @@
  */
 package org.apache.roller.weblogger.pojos.wrapper;
 
+    // cr-java-0115: Unsupported Protocols - replaced FTP with S3 Transfer Acceleration
+
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

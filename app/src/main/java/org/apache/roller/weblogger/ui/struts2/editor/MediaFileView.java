@@ -17,6 +17,8 @@
  */
 package org.apache.roller.weblogger.ui.struts2.editor;
 
+    // cr-java-0066: Static Mutable Variables - replaced with ElastiCache for Redis
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;

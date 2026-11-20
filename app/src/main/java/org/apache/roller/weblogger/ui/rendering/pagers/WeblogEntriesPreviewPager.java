@@ -18,6 +18,8 @@
 
 package org.apache.roller.weblogger.ui.rendering.pagers;
 
+    // cr-java-0111: Clock/Time Dependencies - standardized on UTC using java.time API
+
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -31,6 +33,7 @@ import org.apache.roller.weblogger.business.WeblogEntryManager;
 import org.apache.roller.weblogger.pojos.WeblogEntry;
 import org.apache.roller.weblogger.pojos.Weblog;
 import org.apache.roller.weblogger.pojos.wrapper.WeblogEntryWrapper;
+import java.time.Instant;
 
 
 /**
@@ -75,7 +78,7 @@ public class WeblogEntriesPreviewPager extends WeblogEntriesPermalinkPager {
 
                     // set the pubtime to the current time if it is unset
                     if(tmpEntry.getPubTime() == null) {
-                        tmpEntry.setPubTime(new Timestamp(System.currentTimeMillis()));
+                        tmpEntry.setPubTime(new Timestamp(Date.from(Instant.now()).getTime()));
                     }
 
                     // store the entry in the collection

@@ -18,6 +18,8 @@
 
 package org.apache.roller.util;
 
+    // cr-java-0067: In-Memory Caching Without TTL - replaced with ElastiCache for Redis with TTL
+
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
